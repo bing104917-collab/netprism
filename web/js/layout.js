@@ -335,7 +335,7 @@ export function computeLayout(graph) {
     let gap = 1.0;
     if (prev) {
       const groupChanged = prev.groupId !== item.groupId;
-      gap = groupChanged ? 1.95 : 0.76;
+      gap = groupChanged ? 4.0 : 0.76;
       if (item.hasKernels) gap = Math.max(gap, 1.58);
       if (prev.hasKernels) gap = Math.max(gap, 1.48);
       if (item.isBoundary || prev.isBoundary) gap = Math.max(gap, 1.65);
