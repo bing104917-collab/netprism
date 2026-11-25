@@ -95,6 +95,10 @@ python -m netprism explain .\model.onnx --json
 
 ![NetPrism 原生 GUI](docs/screenshots/gui.png)
 
+VoronoiCNN 的通道厚度示例（4→32→64→3）：
+
+![VoronoiCNN 3D](docs/screenshots/gui_voronoi.png)
+
 | 形态 | 路径 | 大小 | 说明 |
 |---|---|---|---|
 | **单文件 GUI** | [`dist/gui/NetPrismGUI.exe`](dist/gui/NetPrismGUI.exe) | 231 MB | 复制这一个 exe 即可分发；首次启动解压约 7 秒 |
@@ -106,6 +110,8 @@ python -m netprism explain .\model.onnx --json
 - **打开文件夹 / 打开模型文件** → 在 GUI 内解析；支持 `.py/.onnx/.pt/.pth/.keras`。
 - **静态解析（安全）** 复选框：勾选后只读 AST，不执行模型代码；默认 trace。
 - **层表格**：排序、搜索、导出 CSV；**算法理解**：家族/模式公式/伪代码；**报告/摘要**：导出 Markdown/HTML。
+- **导出图片**：自动选择适合 16:9 的视角，导出 1920×1080 PNG（`Ctrl+Shift+E`）。
+- 3D 盒子的**厚度 = 通道数**（按全图最大通道线性归一化）；4→32→64→3 会显示为明显的薄→厚→薄，而不是统一厚度。
 - 拖模型文件夹/文件到 exe 上也可以直接打开。
 - CLI 仍保留：`.\netprism.cmd scan ...`、`report`、`compare`、`explain`；旧的 `dist\NetPrism-Portable.exe` 是 CLI/浏览器版，不是 GUI。
 
