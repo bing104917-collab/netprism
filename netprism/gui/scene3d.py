@@ -42,7 +42,7 @@ from .theme import (
 SCALE = 42.0
 DEFAULT_YAW = -1.0
 DEFAULT_PITCH = 0.48
-GROUP_GAP = 4.2
+GROUP_GAP = 2.6
 #: Candidate presentation angles; export picks the one closest to 16:9.
 EXPORT_ANGLES = (
     (-1.00, 0.48),
@@ -265,6 +265,8 @@ class Graph3DView(QGraphicsView):
         self.setScene(QGraphicsScene(self))
         self.setRenderHints(QPainter.RenderHint.Antialiasing | QPainter.RenderHint.TextAntialiasing)
         self.setViewportUpdateMode(QGraphicsView.ViewportUpdateMode.BoundingRectViewportUpdate)
+        self.setOptimizationFlag(QGraphicsView.OptimizationFlag.DontSavePainterState, True)
+        self.setCacheMode(QGraphicsView.CacheModeFlag.CacheBackground)
         self.setTransformationAnchor(QGraphicsView.ViewportAnchor.AnchorUnderMouse)
         self.setResizeAnchor(QGraphicsView.ViewportAnchor.AnchorViewCenter)
         self.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)

@@ -126,8 +126,8 @@ export function buildEdgeContent(layout, graph, options = {}) {
       materials.push(lineMaterial);
     } else if (isSpecial) {
       // Special connections deserve to read as real arcs, not 1px hairlines.
-      opacity = 0.96;
-      const radius = kind === "skip" ? 0.115 : 0.065;
+      opacity = 0.86;
+      const radius = kind === "skip" ? 0.085 : 0.052;
       const tubeGeometry = new THREE.TubeGeometry(curve, Math.max(segments, 36), radius, 7, false);
       const tubeMaterial = new THREE.MeshBasicMaterial({
         color,
@@ -169,7 +169,7 @@ export function buildEdgeContent(layout, graph, options = {}) {
 
     let glow = null;
     if (isSpecial && !big) {
-      const glowGeometry = new THREE.TubeGeometry(curve, Math.max(segments, 32), kind === "skip" ? 0.24 : 0.15, 7, false);
+      const glowGeometry = new THREE.TubeGeometry(curve, Math.max(segments, 32), kind === "skip" ? 0.17 : 0.11, 7, false);
       const glowMaterial = new THREE.MeshBasicMaterial({
         color,
         transparent: true,

@@ -67,7 +67,7 @@ export class SceneManager {
       powerPreference: "high-performance",
       preserveDrawingBuffer: false,
     });
-    this.renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+    this.renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.5));
     this.renderer.setClearColor(0x000000, 0);
     this.renderer.outputColorSpace = THREE.SRGBColorSpace;
     this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
@@ -308,7 +308,7 @@ export class SceneManager {
     shadowCam.near = 0.5;
     shadowCam.far = 280;
     shadowCam.updateProjectionMatrix();
-    const mapSize = layout.nodeCount <= 180 ? 2048 : 1024;
+    const mapSize = layout.nodeCount <= 220 ? 1024 : 768;
     if (this.keyLight.shadow.mapSize.x !== mapSize) {
       this.keyLight.shadow.mapSize.set(mapSize, mapSize);
       if (this.keyLight.shadow.map) {
@@ -541,7 +541,7 @@ export class SceneManager {
     if (!width || !height) return;
     this.camera.aspect = width / height;
     this.camera.updateProjectionMatrix();
-    this.renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+    this.renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.5));
     this.renderer.setSize(width, height, false);
     this.renderer.domElement.style.width = "100%";
     this.renderer.domElement.style.height = "100%";
