@@ -1,0 +1,915 @@
+{
+  "schemaVersion": "1.0",
+  "generator": {
+    "name": "netprism",
+    "version": "0.1.0"
+  },
+  "model": {
+    "name": "DemoCNN",
+    "framework": "pytorch",
+    "className": "DemoCNN",
+    "mode": "trace",
+    "source": {
+      "file": "examples/demo/cnn_demo.py",
+      "relPath": "cnn_demo.py"
+    },
+    "inputSpec": [
+      {
+        "name": "input",
+        "shape": [
+          1,
+          3,
+          32,
+          32
+        ],
+        "dtype": "float32"
+      }
+    ],
+    "outputSpec": [
+      {
+        "name": "logits",
+        "shape": [
+          1,
+          10
+        ],
+        "dtype": "float32"
+      }
+    ],
+    "totalParams": 10602,
+    "trainableParams": 10602,
+    "totalFlops": 21103252,
+    "flopsApprox": false,
+    "numLayers": 12,
+    "warnings": []
+  },
+  "nodes": [
+    {
+      "id": "n0",
+      "name": "input",
+      "op": "Input",
+      "kind": "input",
+      "modulePath": "",
+      "depth": 0,
+      "inShapes": [],
+      "outShapes": [
+        [
+          1,
+          3,
+          32,
+          32
+        ]
+      ],
+      "params": {},
+      "numParams": 0,
+      "flops": 0,
+      "tags": [
+        "boundary"
+      ],
+      "groupId": null,
+      "source": null,
+      "notes": []
+    },
+    {
+      "id": "n1",
+      "name": "stem.0",
+      "op": "Conv2d",
+      "kind": "conv",
+      "modulePath": "stem.0",
+      "depth": 1,
+      "inShapes": [
+        [
+          1,
+          3,
+          32,
+          32
+        ]
+      ],
+      "outShapes": [
+        [
+          1,
+          32,
+          32,
+          32
+        ]
+      ],
+      "params": {
+        "inChannels": 3,
+        "outChannels": 32,
+        "kernelSize": [
+          3,
+          3
+        ],
+        "stride": [
+          1,
+          1
+        ],
+        "padding": [
+          1,
+          1
+        ],
+        "dilation": [
+          1,
+          1
+        ],
+        "groups": 1,
+        "bias": true
+      },
+      "numParams": 896,
+      "flops": 1802240,
+      "tags": [
+        "spatial",
+        "weighted"
+      ],
+      "groupId": "g2",
+      "source": {
+        "file": "examples/demo/cnn_demo.py",
+        "line": 18,
+        "code": "nn.Conv2d(3, 32, 3, padding=1)"
+      },
+      "notes": []
+    },
+    {
+      "id": "n2",
+      "name": "stem.1",
+      "op": "BatchNorm2d",
+      "kind": "norm",
+      "modulePath": "stem.1",
+      "depth": 1,
+      "inShapes": [
+        [
+          1,
+          32,
+          32,
+          32
+        ]
+      ],
+      "outShapes": [
+        [
+          1,
+          32,
+          32,
+          32
+        ]
+      ],
+      "params": {
+        "numFeatures": 32,
+        "eps": 1e-05,
+        "affine": true
+      },
+      "numParams": 64,
+      "flops": 131072,
+      "tags": [
+        "normalized"
+      ],
+      "groupId": "g2",
+      "source": {
+        "file": "examples/demo/cnn_demo.py",
+        "line": 19,
+        "code": "nn.BatchNorm2d(32)"
+      },
+      "notes": []
+    },
+    {
+      "id": "n3",
+      "name": "stem.2",
+      "op": "ReLU",
+      "kind": "activation",
+      "modulePath": "stem.2",
+      "depth": 1,
+      "inShapes": [
+        [
+          1,
+          32,
+          32,
+          32
+        ]
+      ],
+      "outShapes": [
+        [
+          1,
+          32,
+          32,
+          32
+        ]
+      ],
+      "params": {
+        "inplace": true
+      },
+      "numParams": 0,
+      "flops": 32768,
+      "tags": [
+        "elementwise"
+      ],
+      "groupId": "g2",
+      "source": {
+        "file": "examples/demo/cnn_demo.py",
+        "line": 20,
+        "code": "nn.ReLU(inplace=True)"
+      },
+      "notes": []
+    },
+    {
+      "id": "n4",
+      "name": "block1.conv1",
+      "op": "Conv2d",
+      "kind": "conv",
+      "modulePath": "block1.conv1",
+      "depth": 1,
+      "inShapes": [
+        [
+          1,
+          32,
+          32,
+          32
+        ]
+      ],
+      "outShapes": [
+        [
+          1,
+          32,
+          32,
+          32
+        ]
+      ],
+      "params": {
+        "inChannels": 32,
+        "outChannels": 32,
+        "kernelSize": [
+          3,
+          3
+        ],
+        "stride": [
+          1,
+          1
+        ],
+        "padding": [
+          1,
+          1
+        ],
+        "dilation": [
+          1,
+          1
+        ],
+        "groups": 1,
+        "bias": true
+      },
+      "numParams": 9248,
+      "flops": 18907136,
+      "tags": [
+        "spatial",
+        "weighted"
+      ],
+      "groupId": "g3",
+      "source": {
+        "file": "examples/demo/cnn_demo.py",
+        "line": 27,
+        "code": "nn.Conv2d(32, 32, 3, padding=1)"
+      },
+      "notes": []
+    },
+    {
+      "id": "n5",
+      "name": "block1.bn1",
+      "op": "BatchNorm2d",
+      "kind": "norm",
+      "modulePath": "block1.bn1",
+      "depth": 1,
+      "inShapes": [
+        [
+          1,
+          32,
+          32,
+          32
+        ]
+      ],
+      "outShapes": [
+        [
+          1,
+          32,
+          32,
+          32
+        ]
+      ],
+      "params": {
+        "numFeatures": 32,
+        "eps": 1e-05,
+        "affine": true
+      },
+      "numParams": 64,
+      "flops": 131072,
+      "tags": [
+        "normalized"
+      ],
+      "groupId": "g3",
+      "source": {
+        "file": "examples/demo/cnn_demo.py",
+        "line": 28,
+        "code": "nn.BatchNorm2d(32)"
+      },
+      "notes": []
+    },
+    {
+      "id": "n6",
+      "name": "block1.add",
+      "op": "add",
+      "kind": "add",
+      "modulePath": "block1.add",
+      "depth": 1,
+      "inShapes": [
+        [
+          1,
+          32,
+          32,
+          32
+        ],
+        [
+          1,
+          32,
+          32,
+          32
+        ]
+      ],
+      "outShapes": [
+        [
+          1,
+          32,
+          32,
+          32
+        ]
+      ],
+      "params": {},
+      "numParams": 0,
+      "flops": 32768,
+      "tags": [
+        "residual",
+        "merge"
+      ],
+      "groupId": "g3",
+      "source": {
+        "file": "examples/demo/cnn_demo.py",
+        "line": 29,
+        "code": "out = self.bn1(...) + identity"
+      },
+      "notes": [
+        "Residual add"
+      ]
+    },
+    {
+      "id": "n7",
+      "name": "head.pool",
+      "op": "MaxPool2d",
+      "kind": "pool",
+      "modulePath": "head.pool",
+      "depth": 1,
+      "inShapes": [
+        [
+          1,
+          32,
+          32,
+          32
+        ]
+      ],
+      "outShapes": [
+        [
+          1,
+          32,
+          16,
+          16
+        ]
+      ],
+      "params": {
+        "kernelSize": [
+          2,
+          2
+        ],
+        "stride": [
+          2,
+          2
+        ],
+        "padding": [
+          0,
+          0
+        ],
+        "type": "max"
+      },
+      "numParams": 0,
+      "flops": 32768,
+      "tags": [
+        "downsample"
+      ],
+      "groupId": "g4",
+      "source": {
+        "file": "examples/demo/cnn_demo.py",
+        "line": 35,
+        "code": "nn.MaxPool2d(2)"
+      },
+      "notes": []
+    },
+    {
+      "id": "n8",
+      "name": "head.gap",
+      "op": "AdaptiveAvgPool2d",
+      "kind": "pool",
+      "modulePath": "head.gap",
+      "depth": 1,
+      "inShapes": [
+        [
+          1,
+          32,
+          16,
+          16
+        ]
+      ],
+      "outShapes": [
+        [
+          1,
+          32,
+          1,
+          1
+        ]
+      ],
+      "params": {
+        "outputSize": [
+          1,
+          1
+        ],
+        "type": "adaptive_avg"
+      },
+      "numParams": 0,
+      "flops": 32768,
+      "tags": [
+        "global",
+        "downsample"
+      ],
+      "groupId": "g4",
+      "source": {
+        "file": "examples/demo/cnn_demo.py",
+        "line": 36,
+        "code": "nn.AdaptiveAvgPool2d(1)"
+      },
+      "notes": []
+    },
+    {
+      "id": "n9",
+      "name": "head.flatten",
+      "op": "Flatten",
+      "kind": "flatten",
+      "modulePath": "head.flatten",
+      "depth": 1,
+      "inShapes": [
+        [
+          1,
+          32,
+          1,
+          1
+        ]
+      ],
+      "outShapes": [
+        [
+          1,
+          32
+        ]
+      ],
+      "params": {
+        "startDim": 1
+      },
+      "numParams": 0,
+      "flops": 0,
+      "tags": [
+        "reshape"
+      ],
+      "groupId": "g4",
+      "source": {
+        "file": "examples/demo/cnn_demo.py",
+        "line": 37,
+        "code": "nn.Flatten()"
+      },
+      "notes": []
+    },
+    {
+      "id": "n10",
+      "name": "head.fc",
+      "op": "Linear",
+      "kind": "linear",
+      "modulePath": "head.fc",
+      "depth": 1,
+      "inShapes": [
+        [
+          1,
+          32
+        ]
+      ],
+      "outShapes": [
+        [
+          1,
+          10
+        ]
+      ],
+      "params": {
+        "inFeatures": 32,
+        "outFeatures": 10,
+        "bias": true
+      },
+      "numParams": 330,
+      "flops": 650,
+      "tags": [
+        "weighted"
+      ],
+      "groupId": "g4",
+      "source": {
+        "file": "examples/demo/cnn_demo.py",
+        "line": 38,
+        "code": "nn.Linear(32, 10)"
+      },
+      "notes": []
+    },
+    {
+      "id": "n11",
+      "name": "head.relu",
+      "op": "ReLU",
+      "kind": "activation",
+      "modulePath": "head.relu",
+      "depth": 1,
+      "inShapes": [
+        [
+          1,
+          10
+        ]
+      ],
+      "outShapes": [
+        [
+          1,
+          10
+        ]
+      ],
+      "params": {
+        "inplace": true
+      },
+      "numParams": 0,
+      "flops": 10,
+      "tags": [
+        "elementwise"
+      ],
+      "groupId": "g4",
+      "source": {
+        "file": "examples/demo/cnn_demo.py",
+        "line": 39,
+        "code": "nn.ReLU(inplace=True)"
+      },
+      "notes": []
+    },
+    {
+      "id": "n12",
+      "name": "head.dropout",
+      "op": "Dropout",
+      "kind": "dropout",
+      "modulePath": "head.dropout",
+      "depth": 1,
+      "inShapes": [
+        [
+          1,
+          10
+        ]
+      ],
+      "outShapes": [
+        [
+          1,
+          10
+        ]
+      ],
+      "params": {
+        "p": 0.2
+      },
+      "numParams": 0,
+      "flops": 0,
+      "tags": [
+        "regularization"
+      ],
+      "groupId": "g4",
+      "source": {
+        "file": "examples/demo/cnn_demo.py",
+        "line": 40,
+        "code": "nn.Dropout(0.2)"
+      },
+      "notes": []
+    },
+    {
+      "id": "n13",
+      "name": "logits",
+      "op": "Output",
+      "kind": "output",
+      "modulePath": "",
+      "depth": 0,
+      "inShapes": [
+        [
+          1,
+          10
+        ]
+      ],
+      "outShapes": [
+        [
+          1,
+          10
+        ]
+      ],
+      "params": {},
+      "numParams": 0,
+      "flops": 0,
+      "tags": [
+        "boundary"
+      ],
+      "groupId": null,
+      "source": null,
+      "notes": []
+    }
+  ],
+  "edges": [
+    {
+      "id": "e1",
+      "source": "n0",
+      "target": "n1",
+      "kind": "data",
+      "shapes": [
+        [
+          1,
+          3,
+          32,
+          32
+        ]
+      ],
+      "label": ""
+    },
+    {
+      "id": "e2",
+      "source": "n1",
+      "target": "n2",
+      "kind": "data",
+      "shapes": [
+        [
+          1,
+          32,
+          32,
+          32
+        ]
+      ],
+      "label": ""
+    },
+    {
+      "id": "e3",
+      "source": "n2",
+      "target": "n3",
+      "kind": "data",
+      "shapes": [
+        [
+          1,
+          32,
+          32,
+          32
+        ]
+      ],
+      "label": ""
+    },
+    {
+      "id": "e4",
+      "source": "n3",
+      "target": "n4",
+      "kind": "data",
+      "shapes": [
+        [
+          1,
+          32,
+          32,
+          32
+        ]
+      ],
+      "label": ""
+    },
+    {
+      "id": "e5",
+      "source": "n4",
+      "target": "n5",
+      "kind": "data",
+      "shapes": [
+        [
+          1,
+          32,
+          32,
+          32
+        ]
+      ],
+      "label": ""
+    },
+    {
+      "id": "e6",
+      "source": "n5",
+      "target": "n6",
+      "kind": "data",
+      "shapes": [
+        [
+          1,
+          32,
+          32,
+          32
+        ]
+      ],
+      "label": ""
+    },
+    {
+      "id": "e7",
+      "source": "n3",
+      "target": "n6",
+      "kind": "residual",
+      "shapes": [
+        [
+          1,
+          32,
+          32,
+          32
+        ]
+      ],
+      "label": "identity"
+    },
+    {
+      "id": "e8",
+      "source": "n6",
+      "target": "n7",
+      "kind": "data",
+      "shapes": [
+        [
+          1,
+          32,
+          32,
+          32
+        ]
+      ],
+      "label": ""
+    },
+    {
+      "id": "e9",
+      "source": "n7",
+      "target": "n8",
+      "kind": "data",
+      "shapes": [
+        [
+          1,
+          32,
+          16,
+          16
+        ]
+      ],
+      "label": ""
+    },
+    {
+      "id": "e10",
+      "source": "n8",
+      "target": "n9",
+      "kind": "data",
+      "shapes": [
+        [
+          1,
+          32,
+          1,
+          1
+        ]
+      ],
+      "label": ""
+    },
+    {
+      "id": "e11",
+      "source": "n9",
+      "target": "n10",
+      "kind": "data",
+      "shapes": [
+        [
+          1,
+          32
+        ]
+      ],
+      "label": ""
+    },
+    {
+      "id": "e12",
+      "source": "n10",
+      "target": "n11",
+      "kind": "data",
+      "shapes": [
+        [
+          1,
+          10
+        ]
+      ],
+      "label": ""
+    },
+    {
+      "id": "e13",
+      "source": "n11",
+      "target": "n12",
+      "kind": "data",
+      "shapes": [
+        [
+          1,
+          10
+        ]
+      ],
+      "label": ""
+    },
+    {
+      "id": "e14",
+      "source": "n12",
+      "target": "n13",
+      "kind": "data",
+      "shapes": [
+        [
+          1,
+          10
+        ]
+      ],
+      "label": ""
+    }
+  ],
+  "groups": [
+    {
+      "id": "g1",
+      "name": "DemoCNN",
+      "label": "Demo CNN",
+      "kind": "model",
+      "parentId": null,
+      "depth": 0,
+      "nodeIds": [],
+      "childGroupIds": [
+        "g2",
+        "g3",
+        "g4"
+      ],
+      "numParams": 10602,
+      "flops": 21103252,
+      "source": {
+        "file": "examples/demo/cnn_demo.py",
+        "line": 15
+      }
+    },
+    {
+      "id": "g2",
+      "name": "stem",
+      "label": "Stem",
+      "kind": "conv_block",
+      "parentId": "g1",
+      "depth": 1,
+      "nodeIds": [
+        "n1",
+        "n2",
+        "n3"
+      ],
+      "childGroupIds": [],
+      "numParams": 960,
+      "flops": 1966080,
+      "source": {
+        "file": "examples/demo/cnn_demo.py",
+        "line": 17
+      }
+    },
+    {
+      "id": "g3",
+      "name": "block1",
+      "label": "Residual Block 1",
+      "kind": "residual_block",
+      "parentId": "g1",
+      "depth": 1,
+      "nodeIds": [
+        "n4",
+        "n5",
+        "n6"
+      ],
+      "childGroupIds": [],
+      "numParams": 9312,
+      "flops": 19070976,
+      "source": {
+        "file": "examples/demo/cnn_demo.py",
+        "line": 25
+      }
+    },
+    {
+      "id": "g4",
+      "name": "head",
+      "label": "Classifier Head",
+      "kind": "sequential",
+      "parentId": "g1",
+      "depth": 1,
+      "nodeIds": [
+        "n7",
+        "n8",
+        "n9",
+        "n10",
+        "n11",
+        "n12"
+      ],
+      "childGroupIds": [],
+      "numParams": 330,
+      "flops": 66196,
+      "source": {
+        "file": "examples/demo/cnn_demo.py",
+        "line": 34
+      }
+    }
+  ]
+}

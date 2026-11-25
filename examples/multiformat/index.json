@@ -1,0 +1,56 @@
+{
+  "schemaVersion": "1.0",
+  "generatedAt": "2026-11-24T15:47:34+08:00",
+  "root": "examples/multiformat/models",
+  "models": [
+    {
+      "id": "resnetmini__onnx",
+      "name": "resnetmini",
+      "className": null,
+      "file": "resnetmini__onnx.json",
+      "source": "resnetmini.onnx",
+      "mode": "onnx",
+      "numLayers": 42,
+      "totalParams": 44890,
+      "totalFlops": 38937226,
+      "warnings": 0
+    },
+    {
+      "id": "resnetmini_traced__torchscript",
+      "name": "ResNetMini",
+      "className": "ResNetMini",
+      "file": "resnetmini_traced__torchscript.json",
+      "source": "resnetmini_traced.pt",
+      "mode": "torchscript",
+      "numLayers": 42,
+      "totalParams": 44890,
+      "totalFlops": 38937226,
+      "warnings": 1
+    },
+    {
+      "id": "tiny_attention__keras",
+      "name": "tiny_attention",
+      "className": "Functional",
+      "file": "tiny_attention__keras.json",
+      "source": "tiny_attention.keras",
+      "mode": "keras",
+      "numLayers": 6,
+      "totalParams": 1666,
+      "totalFlops": 11074,
+      "warnings": 0
+    },
+    {
+      "id": "tiny_cnn__keras",
+      "name": "tiny_cnn",
+      "className": "Sequential",
+      "file": "tiny_cnn__keras.json",
+      "source": "tiny_cnn.keras",
+      "mode": "keras",
+      "numLayers": 8,
+      "totalParams": 7194,
+      "totalFlops": 220554,
+      "warnings": 0
+    }
+  ],
+  "errors": []
+}

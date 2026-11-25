@@ -1,0 +1,28 @@
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.venv/
+venv/
+netprism_out/
+.netprism_out/
+netprism_gui_runtime/
+dist/
+build/
+*.egg-info/
+node_modules/
+.DS_Store
+*.log
+scratch/
+
+# Third-party benchmark sources are kept locally for testing only; they are
+# not part of the MIT-licensed project and must not be committed.
+benchmarks/external/
+tests/fixtures/benchmark/
+
+# Signing material must never be committed.
+*.pfx
+*.pvk
+*.key
+*.pem
+*.cer
+

@@ -1,0 +1,279 @@
+[
+  {
+    "repo": "BlinkDL__RWKV-LM",
+    "returncode": 0,
+    "models": 1,
+    "trace": 0,
+    "static": 1,
+    "errors": 0,
+    "warnings": 8,
+    "layers": 13,
+    "params": 2,
+    "first_warnings": [
+      "GPT: emb: embedding: unknown embedding_dim",
+      "GPT: static forward: unresolved branch, analyzing the body only"
+    ]
+  },
+  {
+    "repo": "facebookresearch__detr",
+    "returncode": 0,
+    "models": 3,
+    "trace": 0,
+    "static": 3,
+    "errors": 0,
+    "warnings": 11,
+    "layers": 94,
+    "params": 18915328,
+    "first_warnings": [
+      "SetCriterion: shape unknown for 'Tensor.values'",
+      "SetCriterion: shape unknown for 'iter'",
+      "PostProcess: shape unknown for 'box_ops.box_cxcywh_to_xyxy'",
+      "PostProcess: shape unknown for 'Tensor.unbind'"
+    ]
+  },
+  {
+    "repo": "facebookresearch__segment-anything",
+    "returncode": 0,
+    "models": 4,
+    "trace": 0,
+    "static": 4,
+    "errors": 0,
+    "warnings": 42,
+    "layers": 504,
+    "params": 32871178,
+    "first_warnings": [
+      "ImageEncoderViT: static forward: unresolved branch, analyzing the body only",
+      "ImageEncoderViT: shape unknown for 'Tensor.permute'",
+      "PromptEncoder: required constructor argument(s) ['embed_dim', 'image_embedding_size', 'input_image_size', 'mask_in_chans'] have no default; shapes use -1 where they cannot be derived and parameter/FLOP totals are partial.",
+      "PromptEncoder: some tensor dimensions are unknown (-1); parameter/FLOP totals are partial",
+      "Sam: shape unknown for 'zip'",
+      "Sam: static forward: unknown for-loop iterable, loop body analyzed once"
+    ]
+  },
+  {
+    "repo": "karpathy__minGPT",
+    "returncode": 0,
+    "models": 1,
+    "trace": 0,
+    "static": 1,
+    "errors": 0,
+    "warnings": 4,
+    "layers": 2,
+    "params": 0,
+    "first_warnings": [
+      "GPT: static forward: unknown for-loop iterable, loop body analyzed once",
+      "GPT: lm_head: no input shape available"
+    ]
+  },
+  {
+    "repo": "karpathy__nanoGPT",
+    "returncode": 0,
+    "models": 1,
+    "trace": 0,
+    "static": 1,
+    "errors": 0,
+    "warnings": 4,
+    "layers": 1,
+    "params": 0,
+    "first_warnings": [
+      "GPT: static forward: unknown for-loop iterable, loop body analyzed once",
+      "GPT: lm_head: no input shape available"
+    ]
+  },
+  {
+    "repo": "KindXiaoming__pykan",
+    "returncode": 0,
+    "models": 2,
+    "trace": 0,
+    "static": 2,
+    "errors": 0,
+    "warnings": 4,
+    "layers": 8,
+    "params": 0,
+    "first_warnings": [
+      "KANLayer: shape unknown for 'coef2curve'",
+      "KANLayer: shape unknown for 'Tensor.permute'",
+      "MLP: required constructor argument(s) ['width'] have no default; shapes use -1 where they cannot be derived and parameter/FLOP totals are partial."
+    ]
+  },
+  {
+    "repo": "kuangliu__pytorch-cifar",
+    "returncode": 0,
+    "models": 10,
+    "trace": 0,
+    "static": 10,
+    "errors": 0,
+    "warnings": 19,
+    "layers": 310,
+    "params": 6667112,
+    "first_warnings": [
+      "DenseNet121: linear: linear: unknown inFeatures (constructor argument unresolved)",
+      "DenseNet121: required constructor argument(s) ['block', 'nblocks'] have no default; shapes use -1 where they cannot be derived and parameter/FLOP totals are partial.",
+      "EfficientNetB0: linear: linear: unknown inFeatures (constructor argument unresolved)",
+      "EfficientNetB0: required constructor argument(s) ['cfg'] have no default; shapes use -1 where they cannot be derived and parameter/FLOP totals are partial.",
+      "PreActResNet18: linear: linear: unknown inFeatures (constructor argument unresolved)",
+      "PreActResNet18: required constructor argument(s) ['block', 'num_blocks'] have no default; shapes use -1 where they cannot be derived and parameter/FLOP totals are partial."
+    ]
+  },
+  {
+    "repo": "lucidrains__denoising-diffusion-pytorch",
+    "returncode": 0,
+    "models": 2,
+    "trace": 0,
+    "static": 2,
+    "errors": 0,
+    "warnings": 10,
+    "layers": 99,
+    "params": 1040,
+    "first_warnings": [
+      "Unet: shape unknown for 'rearrange'",
+      "Unet: time_mlp.1: linear: unknown outFeatures (constructor argument unresolved)",
+      "KarrasUnet: shape unknown for 'rearrange'",
+      "KarrasUnet: static forward: unresolved branch, analyzing the body only"
+    ]
+  },
+  {
+    "repo": "lucidrains__vit-pytorch",
+    "returncode": 0,
+    "models": 5,
+    "trace": 0,
+    "static": 5,
+    "errors": 0,
+    "warnings": 51,
+    "layers": 121,
+    "params": 513306,
+    "first_warnings": [
+      "CaiT: to_patch_embedding.2: linear: unknown outFeatures (constructor argument unresolved)",
+      "CaiT: shape unknown for 'repeat'",
+      "CrossFormer: shape unknown for 'torch.var'",
+      "CrossFormer: shape unknown for 'rearrange'",
+      "NaViT: shape unknown for 'torch.is_tensor'",
+      "NaViT: static forward: unresolved branch, analyzing the body only"
+    ]
+  },
+  {
+    "repo": "microsoft__Swin-Transformer",
+    "returncode": 0,
+    "models": 1,
+    "trace": 0,
+    "static": 1,
+    "errors": 0,
+    "warnings": 0,
+    "layers": 10,
+    "params": 384,
+    "first_warnings": []
+  },
+  {
+    "repo": "milesial__Pytorch-UNet",
+    "returncode": 0,
+    "models": 1,
+    "trace": 0,
+    "static": 1,
+    "errors": 0,
+    "warnings": 1,
+    "layers": 10,
+    "params": 64,
+    "first_warnings": [
+      "UNet: required constructor argument(s) ['n_channels', 'n_classes'] have no default; shapes use -1 where they cannot be derived and parameter/FLOP totals are partial."
+    ]
+  },
+  {
+    "repo": "openai__CLIP",
+    "returncode": 0,
+    "models": 1,
+    "trace": 0,
+    "static": 1,
+    "errors": 0,
+    "warnings": 7,
+    "layers": 21,
+    "params": 8,
+    "first_warnings": [
+      "CLIP: shape unknown for 'stem'",
+      "CLIP: shape unknown for 'F.multi_head_attention_forward'"
+    ]
+  },
+  {
+    "repo": "state-spaces__mamba",
+    "returncode": 0,
+    "models": 2,
+    "trace": 0,
+    "static": 2,
+    "errors": 0,
+    "warnings": 7,
+    "layers": 3,
+    "params": 0,
+    "first_warnings": [
+      "Mamba2: in_proj: linear: unknown outFeatures (constructor argument unresolved)",
+      "Mamba2: shape unknown for 'mamba_split_conv1d_scan_combined'",
+      "Mamba: shape unknown for 'rearrange'",
+      "Mamba: required constructor argument(s) ['d_model'] have no default; shapes use -1 where they cannot be derived and parameter/FLOP totals are partial."
+    ]
+  },
+  {
+    "repo": "tkipf__pygcn",
+    "returncode": 0,
+    "models": 1,
+    "trace": 0,
+    "static": 1,
+    "errors": 0,
+    "warnings": 1,
+    "layers": 5,
+    "params": 0,
+    "first_warnings": [
+      "GCN: required constructor argument(s) ['nfeat', 'nhid', 'nclass', 'dropout'] have no default; shapes use -1 where they cannot be derived and parameter/FLOP totals are partial."
+    ]
+  },
+  {
+    "repo": "ultralytics__yolov5",
+    "returncode": 0,
+    "models": 8,
+    "trace": 0,
+    "static": 8,
+    "errors": 0,
+    "warnings": 9,
+    "layers": 40,
+    "params": 601676,
+    "first_warnings": [
+      "BottleneckCSP: required constructor argument(s) ['c1', 'c2'] have no default; shapes use -1 where they cannot be derived and parameter/FLOP totals are partial.",
+      "SPPF: required constructor argument(s) ['c1', 'c2'] have no default; shapes use -1 where they cannot be derived and parameter/FLOP totals are partial.",
+      "Focus: required constructor argument(s) ['c1', 'c2'] have no default; shapes use -1 where they cannot be derived and parameter/FLOP totals are partial.",
+      "Proto: required constructor argument(s) ['c1'] have no default; shapes use -1 where they cannot be derived and parameter/FLOP totals are partial.",
+      "Classify: static forward: unresolved branch, analyzing the body only",
+      "Classify: conv.conv: no input shape available"
+    ]
+  },
+  {
+    "repo": "yanx27__Pointnet_Pointnet2_pytorch",
+    "returncode": 0,
+    "models": 3,
+    "trace": 0,
+    "static": 3,
+    "errors": 0,
+    "warnings": 11,
+    "layers": 71,
+    "params": 657666,
+    "first_warnings": [
+      "get_model: fc1: no input shape available",
+      "get_model: fc3: linear: unknown outFeatures (constructor argument unresolved)",
+      "PointNetSetAbstractionMsg: static forward: unknown for-loop iterable, loop body analyzed once",
+      "PointNetSetAbstractionMsg: shape unknown for 'Tensor.permute'",
+      "PointNetFeaturePropagation: static forward: unknown for-loop iterable, loop body analyzed once",
+      "PointNetFeaturePropagation: required constructor argument(s) ['in_channel', 'mlp'] have no default; shapes use -1 where they cannot be derived and parameter/FLOP totals are partial."
+    ]
+  },
+  {
+    "repo": "yenchenlin__nerf-pytorch",
+    "returncode": 0,
+    "models": 1,
+    "trace": 0,
+    "static": 1,
+    "errors": 0,
+    "warnings": 2,
+    "layers": 3,
+    "params": 34308,
+    "first_warnings": [
+      "NeRF: static forward: unknown for-loop iterable, loop body analyzed once",
+      "NeRF: static forward: unresolved branch, analyzing the body only"
+    ]
+  }
+]

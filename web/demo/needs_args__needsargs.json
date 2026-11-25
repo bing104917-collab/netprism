@@ -1,0 +1,591 @@
+{
+  "schemaVersion": "1.0",
+  "generator": {
+    "name": "netprism",
+    "version": "0.1.0"
+  },
+  "model": {
+    "name": "NeedsArgs",
+    "framework": "pytorch",
+    "className": "NeedsArgs",
+    "mode": "static",
+    "source": {
+      "file": "samples/needs_args.py",
+      "relPath": "needs_args.py"
+    },
+    "inputSpec": [
+      {
+        "name": "input",
+        "shape": [
+          1,
+          64
+        ],
+        "dtype": "float32"
+      }
+    ],
+    "outputSpec": [
+      {
+        "name": "output",
+        "shape": [
+          -1,
+          10
+        ],
+        "dtype": "float32"
+      }
+    ],
+    "totalParams": 10,
+    "trainableParams": 10,
+    "totalFlops": 0,
+    "flopsApprox": true,
+    "numLayers": 5,
+    "warnings": [
+      "could not instantiate NeedsArgs (cannot confidently synthesize required constructor argument 'width' for NeedsArgs; static analysis used); used static AST analysis.",
+      "layers.0: linear: unknown outFeatures (constructor argument unresolved)",
+      "layers.2: linear: unknown outFeatures (constructor argument unresolved)",
+      "layers.4: linear: unknown inFeatures (constructor argument unresolved)",
+      "required constructor argument(s) ['width'] have no default; shapes use -1 where they cannot be derived and parameter/FLOP totals are partial.",
+      "some tensor dimensions are unknown (-1); parameter/FLOP totals are partial"
+    ],
+    "metrics": {
+      "paramBytes": 40,
+      "activationBytes": 352,
+      "peakActivationBytes": 260,
+      "maxReceptiveField": 1,
+      "macs": 0
+    },
+    "meta": {
+      "family": "lenet",
+      "familyLabel": "LeNet-5",
+      "familyConfidence": 0.4,
+      "confidence": 0.4,
+      "algorithmTags": [
+        "lenet",
+        "classifier_head",
+        "linear"
+      ],
+      "families": [
+        {
+          "id": "lenet",
+          "label": "LeNet-5",
+          "confidence": 0.4,
+          "evidence": [
+            "必需组件 classification_head: Classifier Head",
+            "签名算子匹配 2/4"
+          ]
+        },
+        {
+          "id": "alexnet",
+          "label": "AlexNet",
+          "confidence": 0.37,
+          "evidence": [
+            "必需组件 classification_head: Classifier Head",
+            "签名算子匹配 2/5"
+          ]
+        },
+        {
+          "id": "gru",
+          "label": "GRU",
+          "confidence": 0.29,
+          "evidence": [
+            "可选组件 classification_head: Classifier Head",
+            "签名算子匹配 2/5",
+            "缺必需组件: rnn_block, gru_gate"
+          ]
+        }
+      ],
+      "patterns": [
+        {
+          "kind": "classifier_head",
+          "label": "Classifier Head",
+          "formula": "logits = W·x + b",
+          "nodeIds": [
+            "n5"
+          ],
+          "groupIds": [
+            "g1"
+          ],
+          "confidence": 0.85,
+          "evidence": [
+            "末端 Linear 输出 10 维 logits"
+          ],
+          "tags": [
+            "classifier_head",
+            "linear"
+          ],
+          "id": "p1"
+        }
+      ],
+      "pseudocode": [
+        "x = Input(1, 64)",
+        "x = Linear(?)(x)   # -> (?)",
+        "x = ReLU()(x)   # -> (?)",
+        "x = Linear(?)(x)   # -> (?)",
+        "x = ReLU()(x)   # -> (?)",
+        "logits = Linear(10)(x)   # -> (?, 10)",
+        "return logits"
+      ],
+      "familyEvidence": [
+        "必需组件 classification_head: Classifier Head",
+        "签名算子匹配 2/4"
+      ]
+    }
+  },
+  "nodes": [
+    {
+      "id": "n0",
+      "name": "input",
+      "op": "Input",
+      "kind": "input",
+      "modulePath": "",
+      "depth": 0,
+      "inShapes": [],
+      "outShapes": [
+        [
+          1,
+          64
+        ]
+      ],
+      "params": {},
+      "numParams": 0,
+      "flops": 0,
+      "tags": [
+        "boundary"
+      ],
+      "groupId": null,
+      "source": null,
+      "notes": [],
+      "metrics": {
+        "activationBytes": 256,
+        "receptiveField": 1,
+        "macs": 0
+      },
+      "meta": {
+        "formula": "x = Input(1, 64)",
+        "semantic": "网络输入张量",
+        "axes": "N×F",
+        "tags": [
+          "boundary",
+          "input"
+        ]
+      }
+    },
+    {
+      "id": "n1",
+      "name": "layers.0",
+      "op": "Linear",
+      "kind": "linear",
+      "modulePath": "layers.0",
+      "depth": 1,
+      "inShapes": [
+        [
+          1,
+          64
+        ]
+      ],
+      "outShapes": [
+        [
+          -1
+        ]
+      ],
+      "params": {
+        "inFeatures": 64,
+        "outFeatures": 0,
+        "bias": true
+      },
+      "numParams": 0,
+      "flops": 0,
+      "tags": [
+        "weighted"
+      ],
+      "groupId": "g1",
+      "source": {
+        "file": "samples/needs_args.py",
+        "line": 22,
+        "code": "nn.Linear(64, width)"
+      },
+      "notes": [],
+      "metrics": {
+        "activationBytes": 4,
+        "receptiveField": 1,
+        "macs": 0
+      },
+      "meta": {
+        "formula": "y[..., o] = Σ_i x[..., i]·W[o, i] + b[o]  (in=64→out=?)",
+        "semantic": "全连接通道混合（特征维线性变换）",
+        "axes": "N×F / NLC",
+        "tags": [
+          "linear",
+          "channel_mix"
+        ]
+      }
+    },
+    {
+      "id": "n2",
+      "name": "layers.1",
+      "op": "ReLU",
+      "kind": "activation",
+      "modulePath": "layers.1",
+      "depth": 1,
+      "inShapes": [
+        [
+          -1
+        ]
+      ],
+      "outShapes": [
+        [
+          -1
+        ]
+      ],
+      "params": {
+        "inplace": true
+      },
+      "numParams": 0,
+      "flops": 0,
+      "tags": [
+        "elementwise"
+      ],
+      "groupId": "g1",
+      "source": {
+        "file": "samples/needs_args.py",
+        "line": 23,
+        "code": "nn.ReLU(inplace=True)"
+      },
+      "notes": [],
+      "metrics": {
+        "activationBytes": 4,
+        "receptiveField": 1,
+        "macs": 0
+      },
+      "meta": {
+        "formula": "y = max(x, 0)",
+        "semantic": "逐元素 ReLU 非线性（负值截断）",
+        "axes": "逐元素（任意轴）",
+        "tags": [
+          "activation",
+          "relu"
+        ]
+      }
+    },
+    {
+      "id": "n3",
+      "name": "layers.2",
+      "op": "Linear",
+      "kind": "linear",
+      "modulePath": "layers.2",
+      "depth": 1,
+      "inShapes": [
+        [
+          -1
+        ]
+      ],
+      "outShapes": [
+        [
+          -1
+        ]
+      ],
+      "params": {
+        "inFeatures": 0,
+        "outFeatures": 0,
+        "bias": true
+      },
+      "numParams": 0,
+      "flops": 0,
+      "tags": [
+        "weighted"
+      ],
+      "groupId": "g1",
+      "source": {
+        "file": "samples/needs_args.py",
+        "line": 24,
+        "code": "nn.Linear(width, width)"
+      },
+      "notes": [],
+      "metrics": {
+        "activationBytes": 4,
+        "receptiveField": 1,
+        "macs": 0
+      },
+      "meta": {
+        "formula": "y[..., o] = Σ_i x[..., i]·W[o, i] + b[o]  (in=?→out=?)",
+        "semantic": "全连接通道混合（特征维线性变换）",
+        "axes": "N×F / NLC",
+        "tags": [
+          "linear",
+          "channel_mix"
+        ]
+      }
+    },
+    {
+      "id": "n4",
+      "name": "layers.3",
+      "op": "ReLU",
+      "kind": "activation",
+      "modulePath": "layers.3",
+      "depth": 1,
+      "inShapes": [
+        [
+          -1
+        ]
+      ],
+      "outShapes": [
+        [
+          -1
+        ]
+      ],
+      "params": {
+        "inplace": true
+      },
+      "numParams": 0,
+      "flops": 0,
+      "tags": [
+        "elementwise"
+      ],
+      "groupId": "g1",
+      "source": {
+        "file": "samples/needs_args.py",
+        "line": 25,
+        "code": "nn.ReLU(inplace=True)"
+      },
+      "notes": [],
+      "metrics": {
+        "activationBytes": 4,
+        "receptiveField": 1,
+        "macs": 0
+      },
+      "meta": {
+        "formula": "y = max(x, 0)",
+        "semantic": "逐元素 ReLU 非线性（负值截断）",
+        "axes": "逐元素（任意轴）",
+        "tags": [
+          "activation",
+          "relu"
+        ]
+      }
+    },
+    {
+      "id": "n5",
+      "name": "layers.4",
+      "op": "Linear",
+      "kind": "linear",
+      "modulePath": "layers.4",
+      "depth": 1,
+      "inShapes": [
+        [
+          -1
+        ]
+      ],
+      "outShapes": [
+        [
+          -1,
+          10
+        ]
+      ],
+      "params": {
+        "inFeatures": 0,
+        "outFeatures": 10,
+        "bias": true
+      },
+      "numParams": 10,
+      "flops": 0,
+      "tags": [
+        "weighted"
+      ],
+      "groupId": "g1",
+      "source": {
+        "file": "samples/needs_args.py",
+        "line": 26,
+        "code": "nn.Linear(width, num_classes)"
+      },
+      "notes": [],
+      "metrics": {
+        "activationBytes": 40,
+        "receptiveField": 1,
+        "macs": 0
+      },
+      "meta": {
+        "formula": "y[..., o] = Σ_i x[..., i]·W[o, i] + b[o]  (in=?→out=10)",
+        "semantic": "全连接通道混合（特征维线性变换）",
+        "axes": "N×F / NLC",
+        "tags": [
+          "linear",
+          "channel_mix"
+        ]
+      }
+    },
+    {
+      "id": "n6",
+      "name": "output",
+      "op": "Output",
+      "kind": "output",
+      "modulePath": "",
+      "depth": 0,
+      "inShapes": [
+        [
+          -1,
+          10
+        ]
+      ],
+      "outShapes": [
+        [
+          -1,
+          10
+        ]
+      ],
+      "params": {},
+      "numParams": 0,
+      "flops": 0,
+      "tags": [
+        "boundary"
+      ],
+      "groupId": null,
+      "source": null,
+      "notes": [],
+      "metrics": {
+        "activationBytes": 40,
+        "receptiveField": 1,
+        "macs": 0
+      },
+      "meta": {
+        "formula": "y = Output((?, 10))",
+        "semantic": "网络输出张量",
+        "axes": "N×F",
+        "tags": [
+          "boundary",
+          "output"
+        ]
+      }
+    }
+  ],
+  "edges": [
+    {
+      "id": "e0",
+      "source": "n0",
+      "target": "n1",
+      "kind": "data",
+      "shapes": [
+        [
+          1,
+          64
+        ]
+      ],
+      "label": ""
+    },
+    {
+      "id": "e1",
+      "source": "n1",
+      "target": "n2",
+      "kind": "data",
+      "shapes": [
+        [
+          -1
+        ]
+      ],
+      "label": ""
+    },
+    {
+      "id": "e2",
+      "source": "n2",
+      "target": "n3",
+      "kind": "data",
+      "shapes": [
+        [
+          -1
+        ]
+      ],
+      "label": ""
+    },
+    {
+      "id": "e3",
+      "source": "n3",
+      "target": "n4",
+      "kind": "data",
+      "shapes": [
+        [
+          -1
+        ]
+      ],
+      "label": ""
+    },
+    {
+      "id": "e4",
+      "source": "n4",
+      "target": "n5",
+      "kind": "data",
+      "shapes": [
+        [
+          -1
+        ]
+      ],
+      "label": ""
+    },
+    {
+      "id": "e5",
+      "source": "n5",
+      "target": "n6",
+      "kind": "data",
+      "shapes": [
+        [
+          -1,
+          10
+        ]
+      ],
+      "label": ""
+    }
+  ],
+  "groups": [
+    {
+      "id": "g0",
+      "name": "NeedsArgs",
+      "label": "Needs Args",
+      "kind": "model",
+      "parentId": null,
+      "depth": 0,
+      "nodeIds": [],
+      "childGroupIds": [
+        "g1"
+      ],
+      "numParams": 10,
+      "flops": 0,
+      "source": {
+        "line": 16,
+        "code": "class NeedsArgs(nn.Module): \"\"\"MLP whose hidden width is a required constructor argument.\"\"\" def __init__(self, width: int, num_classes: int = 10) -> None: super().__init__() self.layers = nn.Sequenti",
+        "file": "samples/needs_args.py"
+      }
+    },
+    {
+      "id": "g1",
+      "name": "layers",
+      "label": "Layers",
+      "kind": "mlp",
+      "parentId": "g0",
+      "depth": 1,
+      "nodeIds": [
+        "n1",
+        "n2",
+        "n3",
+        "n4",
+        "n5"
+      ],
+      "childGroupIds": [],
+      "numParams": 10,
+      "flops": 0,
+      "source": {
+        "line": 21,
+        "code": "nn.Sequential( nn.Linear(64, width), nn.ReLU(inplace=True), nn.Linear(width, width), nn.ReLU(inplace=True), nn.Linear(width, num_classes), )",
+        "file": "samples/needs_args.py"
+      },
+      "meta": {
+        "pattern": {
+          "kind": "classifier_head",
+          "label": "Classifier Head",
+          "formula": "logits = W·x + b",
+          "confidence": 0.85,
+          "tags": [
+            "classifier_head",
+            "linear"
+          ]
+        }
+      }
+    }
+  ]
+}

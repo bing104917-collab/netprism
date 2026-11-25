@@ -1,0 +1,856 @@
+{
+  "schemaVersion": "1.0",
+  "generator": {
+    "name": "netprism",
+    "version": "0.1.0"
+  },
+  "model": {
+    "name": "tiny_cnn",
+    "framework": "keras",
+    "className": "Sequential",
+    "mode": "keras",
+    "source": {
+      "file": "examples/multiformat/models/tiny_cnn.keras",
+      "relPath": "tiny_cnn.keras"
+    },
+    "inputSpec": [
+      {
+        "name": "input",
+        "shape": [
+          -1,
+          16,
+          16,
+          3
+        ],
+        "dtype": "float32"
+      }
+    ],
+    "outputSpec": [
+      {
+        "name": "output",
+        "shape": [
+          -1,
+          10
+        ],
+        "dtype": "float32"
+      }
+    ],
+    "totalParams": 7194,
+    "trainableParams": 7194,
+    "totalFlops": 220554,
+    "flopsApprox": true,
+    "numLayers": 8,
+    "warnings": [],
+    "meta": {
+      "format": "keras",
+      "kerasVersion": "3.12.0",
+      "backend": "torch",
+      "modelClass": "Sequential",
+      "layerCount": 8,
+      "family": "cnn",
+      "familyLabel": "CNN",
+      "familyConfidence": 0.71,
+      "confidence": 0.71,
+      "algorithmTags": [
+        "cnn",
+        "conv",
+        "conv_bn_act",
+        "normalization",
+        "activation",
+        "classifier_head",
+        "linear"
+      ],
+      "families": [
+        {
+          "id": "cnn",
+          "label": "CNN",
+          "confidence": 0.71,
+          "evidence": [
+            "名称/类名命中别名 'cnn'",
+            "必需组件 conv_bn_act: Conv-BN-Act",
+            "必需组件全部满足",
+            "可选组件 plain_conv: 卷积层×2",
+            "可选组件 normalization: 归一化层"
+          ]
+        },
+        {
+          "id": "vgg",
+          "label": "VGG",
+          "confidence": 0.48,
+          "evidence": [
+            "必需组件 plain_conv: 卷积层×2",
+            "必需组件全部满足",
+            "可选组件 normalization: 归一化层",
+            "可选组件 classification_head: Classifier Head",
+            "签名算子匹配 5/5"
+          ]
+        },
+        {
+          "id": "lenet",
+          "label": "LeNet-5",
+          "confidence": 0.44,
+          "evidence": [
+            "必需组件 plain_conv: 卷积层×2",
+            "必需组件 classification_head: Classifier Head",
+            "必需组件全部满足",
+            "签名算子匹配 4/4"
+          ]
+        }
+      ],
+      "patterns": [
+        {
+          "kind": "conv_bn_act",
+          "label": "Conv-BN-Act",
+          "formula": "y = Act(BN(Conv(x)))",
+          "nodeIds": [
+            "n1",
+            "n2",
+            "n3"
+          ],
+          "groupIds": [
+            "g0"
+          ],
+          "confidence": 0.9,
+          "evidence": [
+            "1 条 Conv→Norm→Act 链",
+            "例如 n1→n2→n3"
+          ],
+          "tags": [
+            "conv",
+            "conv_bn_act",
+            "normalization",
+            "activation"
+          ],
+          "id": "p1"
+        },
+        {
+          "kind": "classifier_head",
+          "label": "Classifier Head",
+          "formula": "logits = W·x + b",
+          "nodeIds": [
+            "n8"
+          ],
+          "groupIds": [
+            "g0"
+          ],
+          "confidence": 0.85,
+          "evidence": [
+            "末端 Linear 输出 10 维 logits"
+          ],
+          "tags": [
+            "classifier_head",
+            "linear"
+          ],
+          "id": "p2"
+        }
+      ],
+      "pseudocode": [
+        "x = Input(-1, 16, 16, 3)",
+        "x = Conv2d(8,3x3)(x)   # -> (?, 16, 16, 8)",
+        "x = BatchNorm(8)(x)   # -> (?, 16, 16, 8)",
+        "x = ReLU()(x)   # -> (?, 16, 16, 8)",
+        "x = MaxPool(2x2,s2x2)(x)   # -> (?, 8, 8, 8)",
+        "x = Conv2d(16,3x3)(x)   # -> (?, 6, 6, 16)",
+        "x = ReLU()(x)   # -> (?, 6, 6, 16)",
+        "x = Flatten()(x)   # -> (?, 576)",
+        "logits = Linear(10)(x)   # -> (?, 10)",
+        "return logits"
+      ],
+      "familyEvidence": [
+        "名称/类名命中别名 'cnn'",
+        "必需组件 conv_bn_act: Conv-BN-Act",
+        "必需组件全部满足",
+        "可选组件 plain_conv: 卷积层×2",
+        "可选组件 normalization: 归一化层"
+      ]
+    },
+    "metrics": {
+      "paramBytes": 28776,
+      "activationBytes": 36688,
+      "peakActivationBytes": 16384,
+      "maxReceptiveField": 8,
+      "macs": 110277
+    }
+  },
+  "nodes": [
+    {
+      "name": "input",
+      "op": "Input",
+      "kind": "input",
+      "modulePath": "",
+      "depth": 0,
+      "inShapes": [],
+      "outShapes": [
+        [
+          -1,
+          16,
+          16,
+          3
+        ]
+      ],
+      "params": {},
+      "numParams": 0,
+      "flops": 0,
+      "tags": [
+        "boundary"
+      ],
+      "groupId": null,
+      "source": null,
+      "notes": [],
+      "id": "n0",
+      "metrics": {
+        "activationBytes": 3072,
+        "receptiveField": 1,
+        "macs": 0
+      },
+      "meta": {
+        "formula": "x = Input(-1, 16, 16, 3)",
+        "semantic": "网络输入张量",
+        "axes": "NCHW",
+        "tags": [
+          "boundary",
+          "input"
+        ]
+      }
+    },
+    {
+      "name": "conv1",
+      "op": "Conv2D",
+      "kind": "conv",
+      "modulePath": "",
+      "depth": 0,
+      "inShapes": [
+        [
+          -1,
+          16,
+          16,
+          3
+        ]
+      ],
+      "outShapes": [
+        [
+          -1,
+          16,
+          16,
+          8
+        ]
+      ],
+      "params": {
+        "outChannels": 8,
+        "kernelSize": [
+          3,
+          3
+        ],
+        "stride": [
+          1,
+          1
+        ],
+        "padding": "same",
+        "dilation": [
+          1,
+          1
+        ],
+        "groups": 1,
+        "bias": true,
+        "inChannels": 3
+      },
+      "numParams": 224,
+      "flops": 112640,
+      "tags": [],
+      "groupId": "g0",
+      "source": null,
+      "notes": [],
+      "meta": {
+        "keras_layer": "Conv2D",
+        "formula": "y[n,o,h',w'] = Σ_{c,kh,kw} W[o,c,kh,kw]·x[n,c,h·s+kh-p,w·s+kw-p] + b[o]  (Cin=3→Cout=8, k=3x3, s=1x1, p=?)",
+        "semantic": "3x3 空间卷积（通道 3→8）",
+        "axes": "NCHW",
+        "tags": [
+          "conv",
+          "spatial"
+        ]
+      },
+      "id": "n1",
+      "metrics": {
+        "activationBytes": 8192,
+        "receptiveField": 3,
+        "macs": 56320
+      }
+    },
+    {
+      "name": "bn1",
+      "op": "BatchNormalization",
+      "kind": "norm",
+      "modulePath": "",
+      "depth": 0,
+      "inShapes": [
+        [
+          -1,
+          16,
+          16,
+          8
+        ]
+      ],
+      "outShapes": [
+        [
+          -1,
+          16,
+          16,
+          8
+        ]
+      ],
+      "params": {
+        "eps": 0.001,
+        "normalizedShape": [
+          8
+        ],
+        "affine": true,
+        "center": true,
+        "scale": true
+      },
+      "numParams": 32,
+      "flops": 8192,
+      "tags": [],
+      "groupId": "g0",
+      "source": null,
+      "notes": [],
+      "meta": {
+        "keras_layer": "BatchNormalization",
+        "formula": "y[n,c,:] = γ[c]·(x[n,c,:]-μ_B[c])/√(σ²_B[c]+ε) + β[c]  (C=8, ε=0.001)",
+        "semantic": "批归一化：按通道统计量标准化并仿射",
+        "axes": "NCHW（逐通道）",
+        "tags": [
+          "norm",
+          "batchnorm"
+        ]
+      },
+      "id": "n2",
+      "metrics": {
+        "activationBytes": 8192,
+        "receptiveField": 3,
+        "macs": 4096
+      }
+    },
+    {
+      "name": "relu1",
+      "op": "ReLU",
+      "kind": "activation",
+      "modulePath": "",
+      "depth": 0,
+      "inShapes": [
+        [
+          -1,
+          16,
+          16,
+          8
+        ]
+      ],
+      "outShapes": [
+        [
+          -1,
+          16,
+          16,
+          8
+        ]
+      ],
+      "params": {
+        "activation": "ReLU"
+      },
+      "numParams": 0,
+      "flops": 2048,
+      "tags": [],
+      "groupId": "g0",
+      "source": null,
+      "notes": [],
+      "meta": {
+        "keras_layer": "ReLU",
+        "formula": "y = max(x, 0)",
+        "semantic": "逐元素 ReLU 非线性（负值截断）",
+        "axes": "逐元素（任意轴）",
+        "tags": [
+          "activation",
+          "relu"
+        ]
+      },
+      "id": "n3",
+      "metrics": {
+        "activationBytes": 8192,
+        "receptiveField": 3,
+        "macs": 1024
+      }
+    },
+    {
+      "name": "pool1",
+      "op": "MaxPooling2D",
+      "kind": "pool",
+      "modulePath": "",
+      "depth": 0,
+      "inShapes": [
+        [
+          -1,
+          16,
+          16,
+          8
+        ]
+      ],
+      "outShapes": [
+        [
+          -1,
+          8,
+          8,
+          8
+        ]
+      ],
+      "params": {
+        "type": "max",
+        "kernelSize": [
+          2,
+          2
+        ],
+        "stride": [
+          2,
+          2
+        ],
+        "padding": "valid"
+      },
+      "numParams": 0,
+      "flops": 2048,
+      "tags": [],
+      "groupId": "g0",
+      "source": null,
+      "notes": [],
+      "meta": {
+        "keras_layer": "MaxPooling2D",
+        "formula": "y[n,c,oh,ow] = max_{kh,kw} x[n,c,oh·s+kh-p, ow·s+kw-p]  (k=2x2, s=2x2)",
+        "semantic": "局部最大池化（k=2x2）下采样",
+        "axes": "NCHW",
+        "tags": [
+          "pool",
+          "max"
+        ]
+      },
+      "id": "n4",
+      "metrics": {
+        "activationBytes": 2048,
+        "receptiveField": 4,
+        "macs": 1024
+      }
+    },
+    {
+      "name": "conv2",
+      "op": "Conv2D",
+      "kind": "conv",
+      "modulePath": "",
+      "depth": 0,
+      "inShapes": [
+        [
+          -1,
+          8,
+          8,
+          8
+        ]
+      ],
+      "outShapes": [
+        [
+          -1,
+          6,
+          6,
+          16
+        ]
+      ],
+      "params": {
+        "outChannels": 16,
+        "kernelSize": [
+          3,
+          3
+        ],
+        "stride": [
+          1,
+          1
+        ],
+        "padding": "valid",
+        "dilation": [
+          1,
+          1
+        ],
+        "groups": 1,
+        "bias": true,
+        "inChannels": 8
+      },
+      "numParams": 1168,
+      "flops": 83520,
+      "tags": [],
+      "groupId": "g0",
+      "source": null,
+      "notes": [],
+      "meta": {
+        "keras_layer": "Conv2D",
+        "formula": "y[n,o,h',w'] = Σ_{c,kh,kw} W[o,c,kh,kw]·x[n,c,h·s+kh-p,w·s+kw-p] + b[o]  (Cin=8→Cout=16, k=3x3, s=1x1, p=?)",
+        "semantic": "3x3 空间卷积（通道 8→16）",
+        "axes": "NCHW",
+        "tags": [
+          "conv",
+          "spatial"
+        ]
+      },
+      "id": "n5",
+      "metrics": {
+        "activationBytes": 2304,
+        "receptiveField": 8,
+        "macs": 41760
+      }
+    },
+    {
+      "name": "relu2",
+      "op": "ReLU",
+      "kind": "activation",
+      "modulePath": "",
+      "depth": 0,
+      "inShapes": [
+        [
+          -1,
+          6,
+          6,
+          16
+        ]
+      ],
+      "outShapes": [
+        [
+          -1,
+          6,
+          6,
+          16
+        ]
+      ],
+      "params": {
+        "activation": "ReLU"
+      },
+      "numParams": 0,
+      "flops": 576,
+      "tags": [],
+      "groupId": "g0",
+      "source": null,
+      "notes": [],
+      "meta": {
+        "keras_layer": "ReLU",
+        "formula": "y = max(x, 0)",
+        "semantic": "逐元素 ReLU 非线性（负值截断）",
+        "axes": "逐元素（任意轴）",
+        "tags": [
+          "activation",
+          "relu"
+        ]
+      },
+      "id": "n6",
+      "metrics": {
+        "activationBytes": 2304,
+        "receptiveField": 8,
+        "macs": 288
+      }
+    },
+    {
+      "name": "flatten",
+      "op": "Flatten",
+      "kind": "flatten",
+      "modulePath": "",
+      "depth": 0,
+      "inShapes": [
+        [
+          -1,
+          6,
+          6,
+          16
+        ]
+      ],
+      "outShapes": [
+        [
+          -1,
+          576
+        ]
+      ],
+      "params": {},
+      "numParams": 0,
+      "flops": 0,
+      "tags": [],
+      "groupId": "g0",
+      "source": null,
+      "notes": [],
+      "meta": {
+        "keras_layer": "Flatten",
+        "formula": "y = reshape(x, (N, -1))",
+        "semantic": "展平空间/通道维为特征向量",
+        "axes": "N×… → N×F",
+        "tags": [
+          "flatten",
+          "reshape"
+        ]
+      },
+      "id": "n7",
+      "metrics": {
+        "activationBytes": 2304,
+        "receptiveField": 8,
+        "macs": 0
+      }
+    },
+    {
+      "name": "head",
+      "op": "Dense",
+      "kind": "linear",
+      "modulePath": "",
+      "depth": 0,
+      "inShapes": [
+        [
+          -1,
+          576
+        ]
+      ],
+      "outShapes": [
+        [
+          -1,
+          10
+        ]
+      ],
+      "params": {
+        "inFeatures": 576,
+        "outFeatures": 10,
+        "bias": true
+      },
+      "numParams": 5770,
+      "flops": 11530,
+      "tags": [],
+      "groupId": "g0",
+      "source": null,
+      "notes": [],
+      "meta": {
+        "keras_layer": "Dense",
+        "formula": "y[..., o] = Σ_i x[..., i]·W[o, i] + b[o]  (in=576→out=10)",
+        "semantic": "全连接通道混合（特征维线性变换）",
+        "axes": "N×F / NLC",
+        "tags": [
+          "linear",
+          "channel_mix"
+        ]
+      },
+      "id": "n8",
+      "metrics": {
+        "activationBytes": 40,
+        "receptiveField": 8,
+        "macs": 5765
+      }
+    },
+    {
+      "name": "output",
+      "op": "Output",
+      "kind": "output",
+      "modulePath": "",
+      "depth": 0,
+      "inShapes": [
+        [
+          -1,
+          10
+        ]
+      ],
+      "outShapes": [
+        [
+          -1,
+          10
+        ]
+      ],
+      "params": {},
+      "numParams": 0,
+      "flops": 0,
+      "tags": [
+        "boundary"
+      ],
+      "groupId": null,
+      "source": null,
+      "notes": [],
+      "id": "n9",
+      "metrics": {
+        "activationBytes": 40,
+        "receptiveField": 8,
+        "macs": 0
+      },
+      "meta": {
+        "formula": "y = Output((?, 10))",
+        "semantic": "网络输出张量",
+        "axes": "N×F",
+        "tags": [
+          "boundary",
+          "output"
+        ]
+      }
+    }
+  ],
+  "edges": [
+    {
+      "source": "n0",
+      "target": "n1",
+      "kind": "data",
+      "shapes": [
+        [
+          -1,
+          16,
+          16,
+          3
+        ]
+      ],
+      "label": "",
+      "id": "e0"
+    },
+    {
+      "source": "n1",
+      "target": "n2",
+      "kind": "data",
+      "shapes": [
+        [
+          -1,
+          16,
+          16,
+          8
+        ]
+      ],
+      "label": "",
+      "id": "e1"
+    },
+    {
+      "source": "n2",
+      "target": "n3",
+      "kind": "data",
+      "shapes": [
+        [
+          -1,
+          16,
+          16,
+          8
+        ]
+      ],
+      "label": "",
+      "id": "e2"
+    },
+    {
+      "source": "n3",
+      "target": "n4",
+      "kind": "data",
+      "shapes": [
+        [
+          -1,
+          16,
+          16,
+          8
+        ]
+      ],
+      "label": "",
+      "id": "e3"
+    },
+    {
+      "source": "n4",
+      "target": "n5",
+      "kind": "data",
+      "shapes": [
+        [
+          -1,
+          8,
+          8,
+          8
+        ]
+      ],
+      "label": "",
+      "id": "e4"
+    },
+    {
+      "source": "n5",
+      "target": "n6",
+      "kind": "data",
+      "shapes": [
+        [
+          -1,
+          6,
+          6,
+          16
+        ]
+      ],
+      "label": "",
+      "id": "e5"
+    },
+    {
+      "source": "n6",
+      "target": "n7",
+      "kind": "data",
+      "shapes": [
+        [
+          -1,
+          6,
+          6,
+          16
+        ]
+      ],
+      "label": "",
+      "id": "e6"
+    },
+    {
+      "source": "n7",
+      "target": "n8",
+      "kind": "data",
+      "shapes": [
+        [
+          -1,
+          576
+        ]
+      ],
+      "label": "",
+      "id": "e7"
+    },
+    {
+      "source": "n8",
+      "target": "n9",
+      "kind": "data",
+      "shapes": [
+        [
+          -1,
+          10
+        ]
+      ],
+      "label": "",
+      "id": "e8"
+    }
+  ],
+  "groups": [
+    {
+      "id": "g0",
+      "name": "tiny_cnn",
+      "label": "Tiny Cnn",
+      "kind": "model",
+      "parentId": null,
+      "depth": 0,
+      "nodeIds": [
+        "n1",
+        "n2",
+        "n3",
+        "n4",
+        "n5",
+        "n6",
+        "n7",
+        "n8"
+      ],
+      "childGroupIds": [],
+      "numParams": 7194,
+      "flops": 220554,
+      "source": null,
+      "meta": {
+        "pattern": {
+          "kind": "conv_bn_act",
+          "label": "Conv-BN-Act",
+          "formula": "y = Act(BN(Conv(x)))",
+          "confidence": 0.9,
+          "tags": [
+            "conv",
+            "conv_bn_act",
+            "normalization",
+            "activation"
+          ]
+        }
+      }
+    }
+  ]
+}

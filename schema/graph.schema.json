@@ -1,0 +1,166 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://netprism.dev/schema/graph-1.0.json",
+  "title": "NetPrism Model Graph",
+  "description": "A fully-parsed neural network graph produced by NetPrism.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "generator", "model", "nodes", "edges", "groups"],
+  "properties": {
+    "schemaVersion": {"const": "1.0"},
+    "generator": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "version"],
+      "properties": {
+        "name": {"type": "string"},
+        "version": {"type": "string"}
+      }
+    },
+    "model": {"$ref": "#/$defs/model"},
+    "nodes": {"type": "array", "items": {"$ref": "#/$defs/node"}},
+    "edges": {"type": "array", "items": {"$ref": "#/$defs/edge"}},
+    "groups": {"type": "array", "items": {"$ref": "#/$defs/group"}}
+  },
+  "$defs": {
+    "shape": {
+      "type": "array",
+      "minItems": 1,
+      "items": {"type": "integer", "minimum": -1}
+    },
+    "shapes": {
+      "type": "array",
+      "items": {"$ref": "#/$defs/shape"}
+    },
+    "tensorSpec": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "shape", "dtype"],
+      "properties": {
+        "name": {"type": "string"},
+        "shape": {"$ref": "#/$defs/shape"},
+        "dtype": {"type": "string"}
+      }
+    },
+    "source": {
+      "type": ["object", "null"],
+      "additionalProperties": false,
+      "properties": {
+        "file": {"type": "string"},
+        "relPath": {"type": "string"},
+        "line": {"type": "integer", "minimum": 1},
+        "code": {"type": "string"}
+      }
+    },
+    "model": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name", "framework", "className", "mode", "source",
+        "inputSpec", "outputSpec", "totalParams", "trainableParams",
+        "totalFlops", "flopsApprox", "numLayers", "warnings"
+      ],
+      "properties": {
+        "name": {"type": "string"},
+        "framework": {"enum": ["pytorch", "onnx", "keras", "torchscript", "unknown"]},
+        "className": {"type": ["string", "null"]},
+        "mode": {"enum": ["trace", "hybrid", "static", "onnx", "keras", "torchscript"]},
+        "source": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["file", "relPath"],
+          "properties": {
+            "file": {"type": "string"},
+            "relPath": {"type": "string"}
+          }
+        },
+        "inputSpec": {"type": "array", "items": {"$ref": "#/$defs/tensorSpec"}},
+        "outputSpec": {"type": "array", "items": {"$ref": "#/$defs/tensorSpec"}},
+        "totalParams": {"type": "integer", "minimum": 0},
+        "trainableParams": {"type": "integer", "minimum": 0},
+        "totalFlops": {"type": "integer", "minimum": 0},
+        "flopsApprox": {"type": "boolean"},
+        "numLayers": {"type": "integer", "minimum": 0},
+        "warnings": {"type": "array", "items": {"type": "string"}},
+        "meta": {"type": "object"},
+        "metrics": {"type": "object"}
+      }
+    },
+    "node": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id", "name", "op", "kind", "modulePath", "depth",
+        "inShapes", "outShapes", "params", "numParams", "flops",
+        "tags", "groupId", "source", "notes"
+      ],
+      "properties": {
+        "id": {"type": "string", "pattern": "^n[0-9]+$"},
+        "name": {"type": "string"},
+        "op": {"type": "string"},
+        "kind": {
+          "enum": [
+            "input", "output", "conv", "deconv", "linear", "mlp", "norm",
+            "activation", "pool", "dropout", "flatten", "reshape", "attention",
+            "ffn", "embedding", "positional", "add", "concat", "upsample",
+            "rnn", "softmax", "block", "container", "custom", "unknown"
+          ]
+        },
+        "modulePath": {"type": "string"},
+        "depth": {"type": "integer", "minimum": 0},
+        "inShapes": {"$ref": "#/$defs/shapes"},
+        "outShapes": {"$ref": "#/$defs/shapes"},
+        "params": {"type": "object"},
+        "numParams": {"type": "integer", "minimum": 0},
+        "flops": {"type": "integer", "minimum": 0},
+        "tags": {"type": "array", "items": {"type": "string"}},
+        "groupId": {"type": ["string", "null"]},
+        "source": {"$ref": "#/$defs/source"},
+        "notes": {"type": "array", "items": {"type": "string"}},
+        "meta": {"type": "object"},
+        "metrics": {"type": "object"}
+      }
+    },
+    "edge": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "source", "target", "kind", "shapes", "label"],
+      "properties": {
+        "id": {"type": "string", "pattern": "^e[0-9]+$"},
+        "source": {"type": "string"},
+        "target": {"type": "string"},
+        "kind": {"enum": ["data", "skip", "residual", "attention", "control"]},
+        "shapes": {"$ref": "#/$defs/shapes"},
+        "label": {"type": "string"}
+      }
+    },
+    "group": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id", "name", "label", "kind", "parentId", "depth",
+        "nodeIds", "childGroupIds", "numParams", "flops", "source"
+      ],
+      "properties": {
+        "id": {"type": "string", "pattern": "^g[0-9]+$"},
+        "name": {"type": "string"},
+        "label": {"type": "string"},
+        "kind": {
+          "enum": [
+            "model", "sequential", "module", "conv_block", "residual_block",
+            "attention_block", "transformer_block", "ffn_block", "mlp",
+            "encoder", "decoder", "unet_block", "custom"
+          ]
+        },
+        "parentId": {"type": ["string", "null"]},
+        "depth": {"type": "integer", "minimum": 0},
+        "nodeIds": {"type": "array", "items": {"type": "string"}},
+        "childGroupIds": {"type": "array", "items": {"type": "string"}},
+        "numParams": {"type": "integer", "minimum": 0},
+        "flops": {"type": "integer", "minimum": 0},
+        "source": {"$ref": "#/$defs/source"},
+        "meta": {"type": "object"}
+      }
+    }
+  }
+}

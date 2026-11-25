@@ -1,0 +1,31 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "netprism"
+version = "0.1.0"
+description = "One-click parser and interactive 3D visualizer for PyTorch model folders"
+readme = "README.md"
+requires-python = ">=3.10"
+license = {text = "MIT"}
+authors = [{name = "NetPrism"}]
+dependencies = []
+
+[project.optional-dependencies]
+trace = ["torch>=2.0"]
+formats = ["onnx>=1.16"]
+dev = ["pytest>=8", "jsonschema>=4"]
+
+[project.scripts]
+netprism = "netprism.cli:main"
+
+[tool.setuptools.packages.find]
+include = ["netprism*"]
+
+[tool.setuptools.package-data]
+netprism = ["data/*.json"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-ra"

@@ -1,0 +1,706 @@
+{
+  "schemaVersion": "1.0",
+  "generator": {
+    "name": "netprism",
+    "version": "0.1.0"
+  },
+  "model": {
+    "name": "tiny_attention",
+    "framework": "keras",
+    "className": "Functional",
+    "mode": "keras",
+    "source": {
+      "file": "examples/multiformat/models/tiny_attention.keras",
+      "relPath": "tiny_attention.keras"
+    },
+    "inputSpec": [
+      {
+        "name": "tokens",
+        "shape": [
+          -1,
+          8
+        ],
+        "dtype": "int32"
+      }
+    ],
+    "outputSpec": [
+      {
+        "name": "output",
+        "shape": [
+          -1,
+          2
+        ],
+        "dtype": "float32"
+      }
+    ],
+    "totalParams": 1666,
+    "trainableParams": 1666,
+    "totalFlops": 11074,
+    "flopsApprox": true,
+    "numLayers": 6,
+    "warnings": [],
+    "meta": {
+      "format": "keras",
+      "kerasVersion": "3.12.0",
+      "backend": "torch",
+      "modelClass": "Functional",
+      "layerCount": 7,
+      "family": "wide_resnet",
+      "familyLabel": "WideResNet",
+      "familyConfidence": 0.49,
+      "confidence": 0.49,
+      "algorithmTags": [
+        "wide_resnet",
+        "residual",
+        "skip_connection",
+        "attention",
+        "self_attention",
+        "classifier_head",
+        "linear"
+      ],
+      "families": [
+        {
+          "id": "wide_resnet",
+          "label": "WideResNet",
+          "confidence": 0.49,
+          "evidence": [
+            "必需组件 residual: 残差结构×1",
+            "必需组件全部满足",
+            "可选组件 normalization: 归一化层",
+            "可选组件 classification_head: Classifier Head",
+            "签名算子匹配 4/6"
+          ]
+        },
+        {
+          "id": "tabnet",
+          "label": "TabNet",
+          "confidence": 0.48,
+          "evidence": [
+            "必需组件 self_attention: Self Attention",
+            "必需组件全部满足",
+            "可选组件 normalization: 归一化层",
+            "签名算子匹配 4/7"
+          ]
+        },
+        {
+          "id": "regnet",
+          "label": "RegNet",
+          "confidence": 0.47,
+          "evidence": [
+            "必需组件 residual: 残差结构×1",
+            "必需组件全部满足",
+            "可选组件 classification_head: Classifier Head",
+            "签名算子匹配 4/6"
+          ]
+        }
+      ],
+      "patterns": [
+        {
+          "kind": "residual_block",
+          "label": "Residual Block",
+          "formula": "y = F(x) + x",
+          "nodeIds": [
+            "n2",
+            "n3",
+            "n4",
+            "n6"
+          ],
+          "groupIds": [
+            "g0"
+          ],
+          "confidence": 0.95,
+          "evidence": [
+            "Add n4 汇聚跨层分支（跨度 2 层）",
+            "1 个残差合并点",
+            "1 条 kind=residual 跳连边"
+          ],
+          "tags": [
+            "residual",
+            "skip_connection"
+          ],
+          "id": "p1"
+        },
+        {
+          "kind": "self_attention",
+          "label": "Self Attention",
+          "formula": "softmax(Q·Kᵀ/√d)·V, Q/K/V 同源",
+          "nodeIds": [
+            "n2",
+            "n3"
+          ],
+          "groupIds": [
+            "g0"
+          ],
+          "confidence": 0.9,
+          "evidence": [
+            "Q/K/V 同源（共享同一输入投影）",
+            "numHeads=2"
+          ],
+          "tags": [
+            "attention",
+            "self_attention"
+          ],
+          "id": "p2"
+        },
+        {
+          "kind": "classifier_head",
+          "label": "Classifier Head",
+          "formula": "logits = W·x + b",
+          "nodeIds": [
+            "n6"
+          ],
+          "groupIds": [
+            "g0"
+          ],
+          "confidence": 0.85,
+          "evidence": [
+            "末端 Linear 输出 2 维 logits"
+          ],
+          "tags": [
+            "classifier_head",
+            "linear"
+          ],
+          "id": "p3"
+        }
+      ],
+      "pseudocode": [
+        "x = Input(-1, 8)",
+        "v1 = Embedding(32,16)(x)   # -> (?, 8, 16)",
+        "x = LayerNorm(16)(v1)   # -> (?, 8, 16)",
+        "x = MultiHeadAttention(2h)(x)   # -> (?, 8, 16)",
+        "x = x + v1   # -> (?, 8, 16)",
+        "x = AvgPool(?)(x)   # -> (?, 16)",
+        "logits = Linear(2)(x)   # -> (?, 2)",
+        "return logits"
+      ],
+      "familyEvidence": [
+        "必需组件 residual: 残差结构×1",
+        "必需组件全部满足",
+        "可选组件 normalization: 归一化层",
+        "可选组件 classification_head: Classifier Head",
+        "签名算子匹配 4/6"
+      ]
+    },
+    "metrics": {
+      "paramBytes": 6664,
+      "activationBytes": 2160,
+      "peakActivationBytes": 1536,
+      "maxReceptiveField": 1,
+      "macs": 5537
+    }
+  },
+  "nodes": [
+    {
+      "name": "tokens",
+      "op": "Input",
+      "kind": "input",
+      "modulePath": "",
+      "depth": 0,
+      "inShapes": [],
+      "outShapes": [
+        [
+          -1,
+          8
+        ]
+      ],
+      "params": {},
+      "numParams": 0,
+      "flops": 0,
+      "tags": [
+        "boundary"
+      ],
+      "groupId": null,
+      "source": null,
+      "notes": [],
+      "id": "n0",
+      "metrics": {
+        "activationBytes": 32,
+        "receptiveField": 1,
+        "macs": 0
+      },
+      "meta": {
+        "formula": "x = Input(-1, 8)",
+        "semantic": "网络输入张量",
+        "axes": "N×F",
+        "tags": [
+          "boundary",
+          "input"
+        ]
+      }
+    },
+    {
+      "name": "emb",
+      "op": "Embedding",
+      "kind": "embedding",
+      "modulePath": "",
+      "depth": 0,
+      "inShapes": [
+        [
+          -1,
+          8
+        ]
+      ],
+      "outShapes": [
+        [
+          -1,
+          8,
+          16
+        ]
+      ],
+      "params": {
+        "numEmbeddings": 32,
+        "embeddingDim": 16
+      },
+      "numParams": 512,
+      "flops": 0,
+      "tags": [],
+      "groupId": "g0",
+      "source": null,
+      "notes": [],
+      "meta": {
+        "keras_layer": "Embedding",
+        "formula": "y[..., d] = E[token, d]  (vocab=32, dim=16)",
+        "semantic": "词表查表获取嵌入向量",
+        "axes": "NLC (B,L,E)",
+        "tags": [
+          "embedding",
+          "token"
+        ]
+      },
+      "id": "n1",
+      "metrics": {
+        "activationBytes": 512,
+        "receptiveField": 1,
+        "macs": 0
+      }
+    },
+    {
+      "name": "ln",
+      "op": "LayerNormalization",
+      "kind": "norm",
+      "modulePath": "",
+      "depth": 0,
+      "inShapes": [
+        [
+          -1,
+          8,
+          16
+        ]
+      ],
+      "outShapes": [
+        [
+          -1,
+          8,
+          16
+        ]
+      ],
+      "params": {
+        "eps": 1e-05,
+        "normalizedShape": [
+          16
+        ],
+        "affine": true
+      },
+      "numParams": 32,
+      "flops": 512,
+      "tags": [],
+      "groupId": "g0",
+      "source": null,
+      "notes": [],
+      "meta": {
+        "keras_layer": "LayerNormalization",
+        "formula": "y[..., d] = γ[d]·(x[..., d]-μ)/√(σ²+ε) + β[d]  (E=16, ε=1e-05)",
+        "semantic": "层归一化：对每个样本最后一维标准化",
+        "axes": "最后一维 E",
+        "tags": [
+          "norm",
+          "layernorm"
+        ]
+      },
+      "id": "n2",
+      "metrics": {
+        "activationBytes": 512,
+        "receptiveField": 1,
+        "macs": 256
+      }
+    },
+    {
+      "name": "mha",
+      "op": "MultiHeadAttention",
+      "kind": "attention",
+      "modulePath": "",
+      "depth": 0,
+      "inShapes": [
+        [
+          -1,
+          8,
+          16
+        ]
+      ],
+      "outShapes": [
+        [
+          -1,
+          8,
+          16
+        ]
+      ],
+      "params": {
+        "embedDim": 16,
+        "numHeads": 2,
+        "keyDim": 8,
+        "valueDim": 8,
+        "bias": true
+      },
+      "numParams": 1088,
+      "flops": 10240,
+      "tags": [],
+      "groupId": "g0",
+      "source": null,
+      "notes": [],
+      "meta": {
+        "keras_layer": "MultiHeadAttention",
+        "formula": "y = W_o·cat_{h}(softmax(Q_h·K_hᵀ/√d_k)·V_h)  (h=2)",
+        "semantic": "多头注意力：Q/K/V 线性投影后按头缩放点积并拼接",
+        "axes": "NLC (B,L,E)",
+        "tags": [
+          "attention",
+          "multi_head"
+        ]
+      },
+      "id": "n3",
+      "metrics": {
+        "activationBytes": 512,
+        "receptiveField": 1,
+        "macs": 5120
+      }
+    },
+    {
+      "name": "add",
+      "op": "Add",
+      "kind": "add",
+      "modulePath": "",
+      "depth": 0,
+      "inShapes": [
+        [
+          -1,
+          8,
+          16
+        ],
+        [
+          -1,
+          8,
+          16
+        ]
+      ],
+      "outShapes": [
+        [
+          -1,
+          8,
+          16
+        ]
+      ],
+      "params": {},
+      "numParams": 0,
+      "flops": 128,
+      "tags": [],
+      "groupId": "g0",
+      "source": null,
+      "notes": [],
+      "meta": {
+        "keras_layer": "Add",
+        "formula": "y = x_1 + x_2",
+        "semantic": "逐元素相加（残差/分支融合）",
+        "axes": "NCW",
+        "tags": [
+          "merge",
+          "add"
+        ]
+      },
+      "id": "n4",
+      "metrics": {
+        "activationBytes": 512,
+        "receptiveField": 1,
+        "macs": 64
+      }
+    },
+    {
+      "name": "gap",
+      "op": "GlobalAveragePooling1D",
+      "kind": "pool",
+      "modulePath": "",
+      "depth": 0,
+      "inShapes": [
+        [
+          -1,
+          8,
+          16
+        ]
+      ],
+      "outShapes": [
+        [
+          -1,
+          16
+        ]
+      ],
+      "params": {
+        "type": "global"
+      },
+      "numParams": 0,
+      "flops": 128,
+      "tags": [],
+      "groupId": "g0",
+      "source": null,
+      "notes": [],
+      "meta": {
+        "keras_layer": "GlobalAveragePooling1D",
+        "formula": "y[n,c,oh,ow] = mean_{kh,kw} x[n,c,oh·s+kh-p, ow·s+kw-p]  (k=?, s=?)",
+        "semantic": "局部平均池化（k=?）下采样",
+        "axes": "N×F",
+        "tags": [
+          "pool",
+          "avg"
+        ]
+      },
+      "id": "n5",
+      "metrics": {
+        "activationBytes": 64,
+        "receptiveField": 1,
+        "macs": 64
+      }
+    },
+    {
+      "name": "head",
+      "op": "Dense",
+      "kind": "linear",
+      "modulePath": "",
+      "depth": 0,
+      "inShapes": [
+        [
+          -1,
+          16
+        ]
+      ],
+      "outShapes": [
+        [
+          -1,
+          2
+        ]
+      ],
+      "params": {
+        "inFeatures": 16,
+        "outFeatures": 2,
+        "bias": true
+      },
+      "numParams": 34,
+      "flops": 66,
+      "tags": [],
+      "groupId": "g0",
+      "source": null,
+      "notes": [],
+      "meta": {
+        "keras_layer": "Dense",
+        "formula": "y[..., o] = Σ_i x[..., i]·W[o, i] + b[o]  (in=16→out=2)",
+        "semantic": "全连接通道混合（特征维线性变换）",
+        "axes": "N×F / NLC",
+        "tags": [
+          "linear",
+          "channel_mix"
+        ]
+      },
+      "id": "n6",
+      "metrics": {
+        "activationBytes": 8,
+        "receptiveField": 1,
+        "macs": 33
+      }
+    },
+    {
+      "name": "output",
+      "op": "Output",
+      "kind": "output",
+      "modulePath": "",
+      "depth": 0,
+      "inShapes": [
+        [
+          -1,
+          2
+        ]
+      ],
+      "outShapes": [
+        [
+          -1,
+          2
+        ]
+      ],
+      "params": {},
+      "numParams": 0,
+      "flops": 0,
+      "tags": [
+        "boundary"
+      ],
+      "groupId": null,
+      "source": null,
+      "notes": [],
+      "id": "n7",
+      "metrics": {
+        "activationBytes": 8,
+        "receptiveField": 1,
+        "macs": 0
+      },
+      "meta": {
+        "formula": "y = Output((?, 2))",
+        "semantic": "网络输出张量",
+        "axes": "N×F",
+        "tags": [
+          "boundary",
+          "output"
+        ]
+      }
+    }
+  ],
+  "edges": [
+    {
+      "source": "n0",
+      "target": "n1",
+      "kind": "data",
+      "shapes": [
+        [
+          -1,
+          8
+        ]
+      ],
+      "label": "",
+      "id": "e0"
+    },
+    {
+      "source": "n1",
+      "target": "n2",
+      "kind": "data",
+      "shapes": [
+        [
+          -1,
+          8,
+          16
+        ]
+      ],
+      "label": "",
+      "id": "e1"
+    },
+    {
+      "source": "n2",
+      "target": "n3",
+      "kind": "data",
+      "shapes": [
+        [
+          -1,
+          8,
+          16
+        ]
+      ],
+      "label": "",
+      "id": "e2"
+    },
+    {
+      "source": "n3",
+      "target": "n4",
+      "kind": "data",
+      "shapes": [
+        [
+          -1,
+          8,
+          16
+        ]
+      ],
+      "label": "",
+      "id": "e3"
+    },
+    {
+      "source": "n1",
+      "target": "n4",
+      "kind": "residual",
+      "shapes": [
+        [
+          -1,
+          8,
+          16
+        ]
+      ],
+      "label": "",
+      "id": "e4"
+    },
+    {
+      "source": "n4",
+      "target": "n5",
+      "kind": "data",
+      "shapes": [
+        [
+          -1,
+          8,
+          16
+        ]
+      ],
+      "label": "",
+      "id": "e5"
+    },
+    {
+      "source": "n5",
+      "target": "n6",
+      "kind": "data",
+      "shapes": [
+        [
+          -1,
+          16
+        ]
+      ],
+      "label": "",
+      "id": "e6"
+    },
+    {
+      "source": "n6",
+      "target": "n7",
+      "kind": "data",
+      "shapes": [
+        [
+          -1,
+          2
+        ]
+      ],
+      "label": "",
+      "id": "e7"
+    }
+  ],
+  "groups": [
+    {
+      "id": "g0",
+      "name": "tiny_attention",
+      "label": "Tiny Attention",
+      "kind": "model",
+      "parentId": null,
+      "depth": 0,
+      "nodeIds": [
+        "n1",
+        "n2",
+        "n3",
+        "n4",
+        "n5",
+        "n6"
+      ],
+      "childGroupIds": [],
+      "numParams": 1666,
+      "flops": 11074,
+      "source": null,
+      "meta": {
+        "pattern": {
+          "kind": "residual_block",
+          "label": "Residual Block",
+          "formula": "y = F(x) + x",
+          "confidence": 0.95,
+          "tags": [
+            "residual",
+            "skip_connection"
+          ]
+        }
+      }
+    }
+  ]
+}

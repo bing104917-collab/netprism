@@ -1,0 +1,104 @@
+{
+  "schemaVersion": "1.0",
+  "generatedAt": "2026-11-24T15:47:33+08:00",
+  "root": "samples",
+  "models": [
+    {
+      "id": "cnn_vgg__vggmini",
+      "name": "VGGMini",
+      "className": "VGGMini",
+      "file": "cnn_vgg__vggmini.json",
+      "source": "cnn_vgg.py",
+      "mode": "trace",
+      "numLayers": 24,
+      "totalParams": 66474,
+      "totalFlops": 63230666,
+      "warnings": 0
+    },
+    {
+      "id": "custom_attention__tinygpt",
+      "name": "TinyGPT",
+      "className": "TinyGPT",
+      "file": "custom_attention__tinygpt.json",
+      "source": "custom_attention.py",
+      "mode": "trace",
+      "numLayers": 60,
+      "totalParams": 33920,
+      "totalFlops": 1017344,
+      "warnings": 0
+    },
+    {
+      "id": "dynamic_control__dynamicnet",
+      "name": "DynamicNet",
+      "className": "DynamicNet",
+      "file": "dynamic_control__dynamicnet.json",
+      "source": "dynamic_control.py",
+      "mode": "trace",
+      "numLayers": 9,
+      "totalParams": 7562,
+      "totalFlops": 13535914,
+      "warnings": 2
+    },
+    {
+      "id": "mlp__mlp",
+      "name": "MLP",
+      "className": "MLP",
+      "file": "mlp__mlp.json",
+      "source": "mlp.py",
+      "mode": "trace",
+      "numLayers": 6,
+      "totalParams": 17226,
+      "totalFlops": 34442,
+      "warnings": 0
+    },
+    {
+      "id": "needs_args__needsargs",
+      "name": "NeedsArgs",
+      "className": "NeedsArgs",
+      "file": "needs_args__needsargs.json",
+      "source": "needs_args.py",
+      "mode": "static",
+      "numLayers": 5,
+      "totalParams": 10,
+      "totalFlops": 0,
+      "warnings": 6
+    },
+    {
+      "id": "resnet_mini__resnetmini",
+      "name": "ResNetMini",
+      "className": "ResNetMini",
+      "file": "resnet_mini__resnetmini.json",
+      "source": "resnet_mini.py",
+      "mode": "trace",
+      "numLayers": 42,
+      "totalParams": 44890,
+      "totalFlops": 155746954,
+      "warnings": 0
+    },
+    {
+      "id": "transformer_classifier__tinytransformerclassifier",
+      "name": "TinyTransformerClassifier",
+      "className": "TinyTransformerClassifier",
+      "file": "transformer_classifier__tinytransformerclassifier.json",
+      "source": "transformer_classifier.py",
+      "mode": "trace",
+      "numLayers": 28,
+      "totalParams": 29898,
+      "totalFlops": 709898,
+      "warnings": 0
+    },
+    {
+      "id": "unet_mini__unetmini",
+      "name": "UNetMini",
+      "className": "UNetMini",
+      "file": "unet_mini__unetmini.json",
+      "source": "unet_mini.py",
+      "mode": "trace",
+      "numLayers": 37,
+      "totalParams": 117361,
+      "totalFlops": 228298752,
+      "warnings": 0
+    }
+  ],
+  "errors": []
+}

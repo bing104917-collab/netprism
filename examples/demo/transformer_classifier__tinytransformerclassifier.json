@@ -1,0 +1,2601 @@
+{
+  "schemaVersion": "1.0",
+  "generator": {
+    "name": "netprism",
+    "version": "0.1.0"
+  },
+  "model": {
+    "name": "TinyTransformerClassifier",
+    "framework": "pytorch",
+    "className": "TinyTransformerClassifier",
+    "mode": "trace",
+    "source": {
+      "file": "samples/transformer_classifier.py",
+      "relPath": "transformer_classifier.py"
+    },
+    "inputSpec": [
+      {
+        "name": "tokens",
+        "shape": [
+          1,
+          16
+        ],
+        "dtype": "int64"
+      }
+    ],
+    "outputSpec": [
+      {
+        "name": "output",
+        "shape": [
+          1,
+          10
+        ],
+        "dtype": "float32"
+      }
+    ],
+    "totalParams": 29898,
+    "trainableParams": 29898,
+    "totalFlops": 709898,
+    "flopsApprox": true,
+    "numLayers": 28,
+    "warnings": [],
+    "metrics": {
+      "paramBytes": 119592,
+      "activationBytes": 88464,
+      "peakActivationBytes": 18432,
+      "maxReceptiveField": 1,
+      "macs": 354949
+    },
+    "meta": {
+      "family": "transformer_encoder",
+      "familyLabel": "Transformer Encoder",
+      "familyConfidence": 0.78,
+      "confidence": 0.78,
+      "algorithmTags": [
+        "transformer",
+        "encoder",
+        "attention",
+        "transformer_encoder",
+        "positional_encoding",
+        "sequence",
+        "self_attention",
+        "residual",
+        "norm",
+        "post_norm",
+        "ffn",
+        "expansion",
+        "global_pool",
+        "pool",
+        "classifier_head",
+        "linear"
+      ],
+      "families": [
+        {
+          "id": "transformer_encoder",
+          "label": "Transformer Encoder",
+          "confidence": 0.78,
+          "evidence": [
+            "名称/类名命中别名 'tinytransformerclassifier'",
+            "必需组件 transformer_block: Transformer Block×2",
+            "必需组件 self_attention: Self Attention×2",
+            "必需组件 ffn: Feed-Forward Network×2",
+            "必需组件全部满足"
+          ]
+        },
+        {
+          "id": "tabnet",
+          "label": "TabNet",
+          "confidence": 0.46,
+          "evidence": [
+            "必需组件 self_attention: Self Attention×2",
+            "必需组件全部满足",
+            "可选组件 ffn: Feed-Forward Network×2",
+            "可选组件 normalization: 归一化层×5",
+            "签名算子匹配 6/7"
+          ]
+        },
+        {
+          "id": "hybrid",
+          "label": "Hybrid",
+          "confidence": 0.46,
+          "evidence": [
+            "必需组件 transformer_block: Transformer Block×2",
+            "必需组件全部满足",
+            "可选组件 self_attention: Self Attention×2",
+            "可选组件 ffn: Feed-Forward Network×2",
+            "签名算子匹配 6/8"
+          ]
+        }
+      ],
+      "patterns": [
+        {
+          "kind": "positional_encoding",
+          "label": "Positional Encoding",
+          "formula": "y = x + PE(pos, d)",
+          "nodeIds": [
+            "n2",
+            "n3"
+          ],
+          "groupIds": [
+            "g0"
+          ],
+          "confidence": 0.85,
+          "evidence": [
+            "嵌入缩放 + 位置编码相加（PE）",
+            "向 token 表示注入顺序信息"
+          ],
+          "tags": [
+            "positional_encoding",
+            "sequence"
+          ],
+          "id": "p1"
+        },
+        {
+          "kind": "self_attention",
+          "label": "Self Attention",
+          "formula": "softmax(Q·Kᵀ/√d)·V, Q/K/V 同源",
+          "nodeIds": [
+            "n3",
+            "n4"
+          ],
+          "groupIds": [
+            "g3"
+          ],
+          "confidence": 0.9,
+          "evidence": [
+            "Q/K/V 同源（共享同一输入投影）",
+            "numHeads=4"
+          ],
+          "tags": [
+            "attention",
+            "self_attention"
+          ],
+          "id": "p2"
+        },
+        {
+          "kind": "transformer_block",
+          "label": "Transformer Block",
+          "formula": "x = x + MHA(LN(x)); x = x + FFN(LN(x))",
+          "nodeIds": [
+            "n4",
+            "n5",
+            "n6",
+            "n7",
+            "n8",
+            "n9",
+            "n10",
+            "n11",
+            "n12",
+            "n13",
+            "n14"
+          ],
+          "groupIds": [
+            "g3"
+          ],
+          "confidence": 0.95,
+          "evidence": [
+            "组内 1 个注意力节点",
+            "2 个残差 Add",
+            "2 个归一化层"
+          ],
+          "tags": [
+            "transformer",
+            "attention",
+            "residual"
+          ],
+          "id": "p3"
+        },
+        {
+          "kind": "post_norm",
+          "label": "Post-Norm",
+          "formula": "x = LN(x + F(x))",
+          "nodeIds": [
+            "n6",
+            "n13",
+            "n14"
+          ],
+          "groupIds": [
+            "g3"
+          ],
+          "confidence": 0.9,
+          "evidence": [
+            "归一化层位于残差相加之后（Post-LN）",
+            "Add n13 → LayerNorm n14"
+          ],
+          "tags": [
+            "norm",
+            "post_norm"
+          ],
+          "id": "p4"
+        },
+        {
+          "kind": "ffn",
+          "label": "Feed-Forward Network",
+          "formula": "y = W2·Act(W1·x)",
+          "nodeIds": [
+            "n8",
+            "n9",
+            "n10",
+            "n11"
+          ],
+          "groupIds": [
+            "g3"
+          ],
+          "confidence": 0.9,
+          "evidence": [
+            "Linear 32→128 → 激活 → Linear 128→32",
+            "隐藏维扩张 4.0×"
+          ],
+          "tags": [
+            "ffn",
+            "expansion"
+          ],
+          "id": "p5"
+        },
+        {
+          "kind": "self_attention",
+          "label": "Self Attention",
+          "formula": "softmax(Q·Kᵀ/√d)·V, Q/K/V 同源",
+          "nodeIds": [
+            "n14",
+            "n15"
+          ],
+          "groupIds": [
+            "g4"
+          ],
+          "confidence": 0.9,
+          "evidence": [
+            "Q/K/V 同源（共享同一输入投影）",
+            "numHeads=4"
+          ],
+          "tags": [
+            "attention",
+            "self_attention"
+          ],
+          "id": "p6"
+        },
+        {
+          "kind": "transformer_block",
+          "label": "Transformer Block",
+          "formula": "x = x + MHA(LN(x)); x = x + FFN(LN(x))",
+          "nodeIds": [
+            "n15",
+            "n16",
+            "n17",
+            "n18",
+            "n19",
+            "n20",
+            "n21",
+            "n22",
+            "n23",
+            "n24",
+            "n25"
+          ],
+          "groupIds": [
+            "g4"
+          ],
+          "confidence": 0.95,
+          "evidence": [
+            "组内 1 个注意力节点",
+            "2 个残差 Add",
+            "2 个归一化层"
+          ],
+          "tags": [
+            "transformer",
+            "attention",
+            "residual"
+          ],
+          "id": "p7"
+        },
+        {
+          "kind": "post_norm",
+          "label": "Post-Norm",
+          "formula": "x = LN(x + F(x))",
+          "nodeIds": [
+            "n17",
+            "n24",
+            "n25"
+          ],
+          "groupIds": [
+            "g4"
+          ],
+          "confidence": 0.9,
+          "evidence": [
+            "归一化层位于残差相加之后（Post-LN）",
+            "Add n24 → LayerNorm n25"
+          ],
+          "tags": [
+            "norm",
+            "post_norm"
+          ],
+          "id": "p8"
+        },
+        {
+          "kind": "ffn",
+          "label": "Feed-Forward Network",
+          "formula": "y = W2·Act(W1·x)",
+          "nodeIds": [
+            "n19",
+            "n20",
+            "n21",
+            "n22"
+          ],
+          "groupIds": [
+            "g4"
+          ],
+          "confidence": 0.9,
+          "evidence": [
+            "Linear 32→128 → 激活 → Linear 128→32",
+            "隐藏维扩张 4.0×"
+          ],
+          "tags": [
+            "ffn",
+            "expansion"
+          ],
+          "id": "p9"
+        },
+        {
+          "kind": "global_pool",
+          "label": "Global Pool",
+          "formula": "y = mean_{h,w}(x)",
+          "nodeIds": [
+            "n26"
+          ],
+          "groupIds": [
+            "g0"
+          ],
+          "confidence": 0.9,
+          "evidence": [
+            "全局池化 ×1",
+            "空间维压缩为 1×1 后进入分类头"
+          ],
+          "tags": [
+            "global_pool",
+            "pool"
+          ],
+          "id": "p10"
+        },
+        {
+          "kind": "classifier_head",
+          "label": "Classifier Head",
+          "formula": "logits = W·x + b",
+          "nodeIds": [
+            "n28"
+          ],
+          "groupIds": [
+            "g0"
+          ],
+          "confidence": 0.85,
+          "evidence": [
+            "末端 Linear 输出 10 维 logits"
+          ],
+          "tags": [
+            "classifier_head",
+            "linear"
+          ],
+          "id": "p11"
+        }
+      ],
+      "pseudocode": [
+        "x = Input(1, 16)",
+        "x = Embedding(128,32)(x)   # -> (1, 16, 32)",
+        "x = PositionalEncoding(32)(x)   # -> (1, 16, 32)",
+        "x = TransformerBlock(32)(x)   # -> (1, 16, 32)",
+        "x = TransformerBlock(32)(x)   # -> (1, 16, 32)",
+        "x = GlobalAvgPool()(x)   # -> (1, 32)",
+        "x = LayerNorm(32)(x)   # -> (1, 32)",
+        "logits = Linear(10)(x)   # -> (1, 10)",
+        "return logits"
+      ],
+      "familyEvidence": [
+        "名称/类名命中别名 'tinytransformerclassifier'",
+        "必需组件 transformer_block: Transformer Block×2",
+        "必需组件 self_attention: Self Attention×2",
+        "必需组件 ffn: Feed-Forward Network×2",
+        "必需组件全部满足"
+      ]
+    }
+  },
+  "nodes": [
+    {
+      "id": "n0",
+      "name": "tokens",
+      "op": "Input",
+      "kind": "input",
+      "modulePath": "",
+      "depth": 0,
+      "inShapes": [],
+      "outShapes": [
+        [
+          1,
+          16
+        ]
+      ],
+      "params": {},
+      "numParams": 0,
+      "flops": 0,
+      "tags": [
+        "boundary"
+      ],
+      "groupId": null,
+      "source": null,
+      "notes": [],
+      "metrics": {
+        "activationBytes": 64,
+        "receptiveField": 1,
+        "macs": 0
+      },
+      "meta": {
+        "formula": "x = Input(1, 16)",
+        "semantic": "网络输入张量",
+        "axes": "N×F",
+        "tags": [
+          "boundary",
+          "input"
+        ]
+      }
+    },
+    {
+      "id": "n1",
+      "name": "token_embed",
+      "op": "Embedding",
+      "kind": "embedding",
+      "modulePath": "token_embed",
+      "depth": 1,
+      "inShapes": [
+        [
+          1,
+          16
+        ]
+      ],
+      "outShapes": [
+        [
+          1,
+          16,
+          32
+        ]
+      ],
+      "params": {
+        "numEmbeddings": 128,
+        "embeddingDim": 32,
+        "paddingIdx": 0
+      },
+      "numParams": 4096,
+      "flops": 0,
+      "tags": [
+        "token",
+        "weighted"
+      ],
+      "groupId": "g0",
+      "source": {
+        "file": "samples/transformer_classifier.py",
+        "line": 33,
+        "code": "nn.Embedding(vocab_size, d_model, padding_idx=0)"
+      },
+      "notes": [],
+      "metrics": {
+        "activationBytes": 2048,
+        "receptiveField": 1,
+        "macs": 0
+      },
+      "meta": {
+        "formula": "y[..., d] = E[token, d]  (vocab=128, dim=32)",
+        "semantic": "词表查表获取嵌入向量",
+        "axes": "NLC (B,L,E)",
+        "tags": [
+          "embedding",
+          "token"
+        ]
+      }
+    },
+    {
+      "id": "n2",
+      "name": "mul",
+      "op": "mul",
+      "kind": "custom",
+      "modulePath": "mul",
+      "depth": 1,
+      "inShapes": [
+        [
+          1,
+          16,
+          32
+        ]
+      ],
+      "outShapes": [
+        [
+          1,
+          16,
+          32
+        ]
+      ],
+      "params": {},
+      "numParams": 0,
+      "flops": 512,
+      "tags": [
+        "custom"
+      ],
+      "groupId": "g0",
+      "source": {
+        "file": "samples/transformer_classifier.py",
+        "line": 54,
+        "code": "def forward(self, tokens):"
+      },
+      "notes": [],
+      "metrics": {
+        "activationBytes": 2048,
+        "receptiveField": 1,
+        "macs": 256
+      },
+      "meta": {
+        "formula": "y = x_1 ⊙ x_2",
+        "semantic": "逐元素相乘（门控/缩放）",
+        "axes": "NCW",
+        "tags": [
+          "custom",
+          "mul"
+        ]
+      }
+    },
+    {
+      "id": "n3",
+      "name": "add",
+      "op": "add",
+      "kind": "add",
+      "modulePath": "add",
+      "depth": 1,
+      "inShapes": [
+        [
+          1,
+          16,
+          32
+        ],
+        [
+          1,
+          16,
+          32
+        ]
+      ],
+      "outShapes": [
+        [
+          1,
+          16,
+          32
+        ]
+      ],
+      "params": {},
+      "numParams": 0,
+      "flops": 512,
+      "tags": [
+        "merge"
+      ],
+      "groupId": "g0",
+      "source": {
+        "file": "samples/transformer_classifier.py",
+        "line": 56,
+        "code": "x + self.pos_encoding"
+      },
+      "notes": [],
+      "metrics": {
+        "activationBytes": 2048,
+        "receptiveField": 1,
+        "macs": 256
+      },
+      "meta": {
+        "formula": "y = x_1 + x_2",
+        "semantic": "逐元素相加（残差/分支融合）",
+        "axes": "NCW",
+        "tags": [
+          "merge",
+          "add"
+        ]
+      }
+    },
+    {
+      "id": "n4",
+      "name": "encoder.layers.0.self_attn",
+      "op": "MultiheadAttention",
+      "kind": "attention",
+      "modulePath": "encoder.layers.0.self_attn",
+      "depth": 3,
+      "inShapes": [
+        [
+          1,
+          16,
+          32
+        ],
+        [
+          1,
+          16,
+          32
+        ],
+        [
+          1,
+          16,
+          32
+        ]
+      ],
+      "outShapes": [
+        [
+          1,
+          16,
+          32
+        ]
+      ],
+      "params": {
+        "embedDim": 32,
+        "numHeads": 4,
+        "headDim": 8,
+        "kdim": 32,
+        "vdim": 32,
+        "batchFirst": true,
+        "dropout": 0.1
+      },
+      "numParams": 4224,
+      "flops": 81920,
+      "tags": [
+        "attention",
+        "weighted",
+        "head"
+      ],
+      "groupId": "g3",
+      "source": {
+        "file": "samples/transformer_classifier.py",
+        "line": 18,
+        "code": "class TinyTransformerClassifier(nn.Module): \"\"\"Token embedding -> sinusoidal positions -> TransformerEncoder -> mean pool -> head.\"\"\" def __init__( self, vocab_size: int = 128, d_model: int = 32, nhea"
+      },
+      "notes": [
+        "FLOPs estimated"
+      ],
+      "metrics": {
+        "activationBytes": 2048,
+        "receptiveField": 1,
+        "macs": 40960
+      },
+      "meta": {
+        "formula": "y = W_o·cat_{h}(softmax(Q_h·K_hᵀ/√d_k)·V_h)  (h=4, d_k=8)",
+        "semantic": "多头注意力：Q/K/V 线性投影后按头缩放点积并拼接",
+        "axes": "NLC (B,L,E)",
+        "tags": [
+          "attention",
+          "multi_head"
+        ]
+      }
+    },
+    {
+      "id": "n5",
+      "name": "encoder.layers.0.dropout1",
+      "op": "Dropout",
+      "kind": "dropout",
+      "modulePath": "encoder.layers.0.dropout1",
+      "depth": 3,
+      "inShapes": [
+        [
+          1,
+          16,
+          32
+        ]
+      ],
+      "outShapes": [
+        [
+          1,
+          16,
+          32
+        ]
+      ],
+      "params": {
+        "p": 0.1
+      },
+      "numParams": 0,
+      "flops": 0,
+      "tags": [
+        "regularization"
+      ],
+      "groupId": "g3",
+      "source": {
+        "file": "samples/transformer_classifier.py",
+        "line": 18,
+        "code": "class TinyTransformerClassifier(nn.Module): \"\"\"Token embedding -> sinusoidal positions -> TransformerEncoder -> mean pool -> head.\"\"\" def __init__( self, vocab_size: int = 128, d_model: int = 32, nhea"
+      },
+      "notes": [],
+      "metrics": {
+        "activationBytes": 2048,
+        "receptiveField": 1,
+        "macs": 0
+      },
+      "meta": {
+        "formula": "y = x ⊙ mask/(1-p),  p=0.1",
+        "semantic": "训练期随机失活（推理期恒等）",
+        "axes": null,
+        "tags": [
+          "dropout",
+          "regularization"
+        ]
+      }
+    },
+    {
+      "id": "n6",
+      "name": "encoder.layers.0.add",
+      "op": "add",
+      "kind": "add",
+      "modulePath": "encoder.layers.0.add",
+      "depth": 3,
+      "inShapes": [
+        [
+          1,
+          16,
+          32
+        ],
+        [
+          1,
+          16,
+          32
+        ]
+      ],
+      "outShapes": [
+        [
+          1,
+          16,
+          32
+        ]
+      ],
+      "params": {},
+      "numParams": 0,
+      "flops": 512,
+      "tags": [
+        "merge",
+        "residual"
+      ],
+      "groupId": "g3",
+      "source": null,
+      "notes": [
+        "Residual add"
+      ],
+      "metrics": {
+        "activationBytes": 2048,
+        "receptiveField": 1,
+        "macs": 256
+      },
+      "meta": {
+        "formula": "y = x_1 + x_2",
+        "semantic": "逐元素相加（残差/分支融合）",
+        "axes": "NCW",
+        "tags": [
+          "merge",
+          "add",
+          "residual"
+        ]
+      }
+    },
+    {
+      "id": "n7",
+      "name": "encoder.layers.0.norm1",
+      "op": "LayerNorm",
+      "kind": "norm",
+      "modulePath": "encoder.layers.0.norm1",
+      "depth": 3,
+      "inShapes": [
+        [
+          1,
+          16,
+          32
+        ]
+      ],
+      "outShapes": [
+        [
+          1,
+          16,
+          32
+        ]
+      ],
+      "params": {
+        "normalizedShape": [
+          32
+        ],
+        "eps": 1e-05,
+        "affine": true
+      },
+      "numParams": 64,
+      "flops": 2048,
+      "tags": [
+        "normalized"
+      ],
+      "groupId": "g3",
+      "source": {
+        "file": "samples/transformer_classifier.py",
+        "line": 18,
+        "code": "class TinyTransformerClassifier(nn.Module): \"\"\"Token embedding -> sinusoidal positions -> TransformerEncoder -> mean pool -> head.\"\"\" def __init__( self, vocab_size: int = 128, d_model: int = 32, nhea"
+      },
+      "notes": [],
+      "metrics": {
+        "activationBytes": 2048,
+        "receptiveField": 1,
+        "macs": 1024
+      },
+      "meta": {
+        "formula": "y[..., d] = γ[d]·(x[..., d]-μ)/√(σ²+ε) + β[d]  (E=32, ε=1e-05)",
+        "semantic": "层归一化：对每个样本最后一维标准化",
+        "axes": "最后一维 E",
+        "tags": [
+          "norm",
+          "layernorm"
+        ]
+      }
+    },
+    {
+      "id": "n8",
+      "name": "encoder.layers.0.linear1",
+      "op": "Linear",
+      "kind": "linear",
+      "modulePath": "encoder.layers.0.linear1",
+      "depth": 3,
+      "inShapes": [
+        [
+          1,
+          16,
+          32
+        ]
+      ],
+      "outShapes": [
+        [
+          1,
+          16,
+          128
+        ]
+      ],
+      "params": {
+        "inFeatures": 32,
+        "outFeatures": 128,
+        "bias": true
+      },
+      "numParams": 4224,
+      "flops": 133120,
+      "tags": [
+        "weighted"
+      ],
+      "groupId": "g3",
+      "source": {
+        "file": "samples/transformer_classifier.py",
+        "line": 18,
+        "code": "class TinyTransformerClassifier(nn.Module): \"\"\"Token embedding -> sinusoidal positions -> TransformerEncoder -> mean pool -> head.\"\"\" def __init__( self, vocab_size: int = 128, d_model: int = 32, nhea"
+      },
+      "notes": [],
+      "metrics": {
+        "activationBytes": 8192,
+        "receptiveField": 1,
+        "macs": 66560
+      },
+      "meta": {
+        "formula": "y[..., o] = Σ_i x[..., i]·W[o, i] + b[o]  (in=32→out=128)",
+        "semantic": "全连接通道混合（特征维线性变换）",
+        "axes": "N×F / NLC",
+        "tags": [
+          "linear",
+          "channel_mix"
+        ]
+      }
+    },
+    {
+      "id": "n9",
+      "name": "encoder.layers.0.gelu",
+      "op": "torch.gelu",
+      "kind": "activation",
+      "modulePath": "encoder.layers.0.gelu",
+      "depth": 3,
+      "inShapes": [
+        [
+          1,
+          16,
+          128
+        ]
+      ],
+      "outShapes": [
+        [
+          1,
+          16,
+          128
+        ]
+      ],
+      "params": {},
+      "numParams": 0,
+      "flops": 2048,
+      "tags": [
+        "elementwise"
+      ],
+      "groupId": "g3",
+      "source": null,
+      "notes": [],
+      "metrics": {
+        "activationBytes": 8192,
+        "receptiveField": 1,
+        "macs": 1024
+      },
+      "meta": {
+        "formula": "y = x·Φ(x)",
+        "semantic": "GELU：高斯误差线性单元",
+        "axes": "逐元素（任意轴）",
+        "tags": [
+          "activation",
+          "gelu"
+        ]
+      }
+    },
+    {
+      "id": "n10",
+      "name": "encoder.layers.0.dropout",
+      "op": "Dropout",
+      "kind": "dropout",
+      "modulePath": "encoder.layers.0.dropout",
+      "depth": 3,
+      "inShapes": [
+        [
+          1,
+          16,
+          128
+        ]
+      ],
+      "outShapes": [
+        [
+          1,
+          16,
+          128
+        ]
+      ],
+      "params": {
+        "p": 0.1
+      },
+      "numParams": 0,
+      "flops": 0,
+      "tags": [
+        "regularization"
+      ],
+      "groupId": "g3",
+      "source": {
+        "file": "samples/transformer_classifier.py",
+        "line": 18,
+        "code": "class TinyTransformerClassifier(nn.Module): \"\"\"Token embedding -> sinusoidal positions -> TransformerEncoder -> mean pool -> head.\"\"\" def __init__( self, vocab_size: int = 128, d_model: int = 32, nhea"
+      },
+      "notes": [],
+      "metrics": {
+        "activationBytes": 8192,
+        "receptiveField": 1,
+        "macs": 0
+      },
+      "meta": {
+        "formula": "y = x ⊙ mask/(1-p),  p=0.1",
+        "semantic": "训练期随机失活（推理期恒等）",
+        "axes": null,
+        "tags": [
+          "dropout",
+          "regularization"
+        ]
+      }
+    },
+    {
+      "id": "n11",
+      "name": "encoder.layers.0.linear2",
+      "op": "Linear",
+      "kind": "linear",
+      "modulePath": "encoder.layers.0.linear2",
+      "depth": 3,
+      "inShapes": [
+        [
+          1,
+          16,
+          128
+        ]
+      ],
+      "outShapes": [
+        [
+          1,
+          16,
+          32
+        ]
+      ],
+      "params": {
+        "inFeatures": 128,
+        "outFeatures": 32,
+        "bias": true
+      },
+      "numParams": 4128,
+      "flops": 131584,
+      "tags": [
+        "weighted"
+      ],
+      "groupId": "g3",
+      "source": {
+        "file": "samples/transformer_classifier.py",
+        "line": 18,
+        "code": "class TinyTransformerClassifier(nn.Module): \"\"\"Token embedding -> sinusoidal positions -> TransformerEncoder -> mean pool -> head.\"\"\" def __init__( self, vocab_size: int = 128, d_model: int = 32, nhea"
+      },
+      "notes": [],
+      "metrics": {
+        "activationBytes": 2048,
+        "receptiveField": 1,
+        "macs": 65792
+      },
+      "meta": {
+        "formula": "y[..., o] = Σ_i x[..., i]·W[o, i] + b[o]  (in=128→out=32)",
+        "semantic": "全连接通道混合（特征维线性变换）",
+        "axes": "N×F / NLC",
+        "tags": [
+          "linear",
+          "channel_mix"
+        ]
+      }
+    },
+    {
+      "id": "n12",
+      "name": "encoder.layers.0.dropout2",
+      "op": "Dropout",
+      "kind": "dropout",
+      "modulePath": "encoder.layers.0.dropout2",
+      "depth": 3,
+      "inShapes": [
+        [
+          1,
+          16,
+          32
+        ]
+      ],
+      "outShapes": [
+        [
+          1,
+          16,
+          32
+        ]
+      ],
+      "params": {
+        "p": 0.1
+      },
+      "numParams": 0,
+      "flops": 0,
+      "tags": [
+        "regularization"
+      ],
+      "groupId": "g3",
+      "source": {
+        "file": "samples/transformer_classifier.py",
+        "line": 18,
+        "code": "class TinyTransformerClassifier(nn.Module): \"\"\"Token embedding -> sinusoidal positions -> TransformerEncoder -> mean pool -> head.\"\"\" def __init__( self, vocab_size: int = 128, d_model: int = 32, nhea"
+      },
+      "notes": [],
+      "metrics": {
+        "activationBytes": 2048,
+        "receptiveField": 1,
+        "macs": 0
+      },
+      "meta": {
+        "formula": "y = x ⊙ mask/(1-p),  p=0.1",
+        "semantic": "训练期随机失活（推理期恒等）",
+        "axes": null,
+        "tags": [
+          "dropout",
+          "regularization"
+        ]
+      }
+    },
+    {
+      "id": "n13",
+      "name": "encoder.layers.0.add#2",
+      "op": "add",
+      "kind": "add",
+      "modulePath": "encoder.layers.0.add",
+      "depth": 3,
+      "inShapes": [
+        [
+          1,
+          16,
+          32
+        ],
+        [
+          1,
+          16,
+          32
+        ]
+      ],
+      "outShapes": [
+        [
+          1,
+          16,
+          32
+        ]
+      ],
+      "params": {},
+      "numParams": 0,
+      "flops": 512,
+      "tags": [
+        "merge",
+        "residual"
+      ],
+      "groupId": "g3",
+      "source": null,
+      "notes": [
+        "Residual add"
+      ],
+      "metrics": {
+        "activationBytes": 2048,
+        "receptiveField": 1,
+        "macs": 256
+      },
+      "meta": {
+        "formula": "y = x_1 + x_2",
+        "semantic": "逐元素相加（残差/分支融合）",
+        "axes": "NCW",
+        "tags": [
+          "merge",
+          "add",
+          "residual"
+        ]
+      }
+    },
+    {
+      "id": "n14",
+      "name": "encoder.layers.0.norm2",
+      "op": "LayerNorm",
+      "kind": "norm",
+      "modulePath": "encoder.layers.0.norm2",
+      "depth": 3,
+      "inShapes": [
+        [
+          1,
+          16,
+          32
+        ]
+      ],
+      "outShapes": [
+        [
+          1,
+          16,
+          32
+        ]
+      ],
+      "params": {
+        "normalizedShape": [
+          32
+        ],
+        "eps": 1e-05,
+        "affine": true
+      },
+      "numParams": 64,
+      "flops": 2048,
+      "tags": [
+        "normalized"
+      ],
+      "groupId": "g3",
+      "source": {
+        "file": "samples/transformer_classifier.py",
+        "line": 18,
+        "code": "class TinyTransformerClassifier(nn.Module): \"\"\"Token embedding -> sinusoidal positions -> TransformerEncoder -> mean pool -> head.\"\"\" def __init__( self, vocab_size: int = 128, d_model: int = 32, nhea"
+      },
+      "notes": [],
+      "metrics": {
+        "activationBytes": 2048,
+        "receptiveField": 1,
+        "macs": 1024
+      },
+      "meta": {
+        "formula": "y[..., d] = γ[d]·(x[..., d]-μ)/√(σ²+ε) + β[d]  (E=32, ε=1e-05)",
+        "semantic": "层归一化：对每个样本最后一维标准化",
+        "axes": "最后一维 E",
+        "tags": [
+          "norm",
+          "layernorm"
+        ]
+      }
+    },
+    {
+      "id": "n15",
+      "name": "encoder.layers.1.self_attn",
+      "op": "MultiheadAttention",
+      "kind": "attention",
+      "modulePath": "encoder.layers.1.self_attn",
+      "depth": 3,
+      "inShapes": [
+        [
+          1,
+          16,
+          32
+        ],
+        [
+          1,
+          16,
+          32
+        ],
+        [
+          1,
+          16,
+          32
+        ]
+      ],
+      "outShapes": [
+        [
+          1,
+          16,
+          32
+        ]
+      ],
+      "params": {
+        "embedDim": 32,
+        "numHeads": 4,
+        "headDim": 8,
+        "kdim": 32,
+        "vdim": 32,
+        "batchFirst": true,
+        "dropout": 0.1
+      },
+      "numParams": 4224,
+      "flops": 81920,
+      "tags": [
+        "attention",
+        "weighted",
+        "head"
+      ],
+      "groupId": "g4",
+      "source": {
+        "file": "samples/transformer_classifier.py",
+        "line": 18,
+        "code": "class TinyTransformerClassifier(nn.Module): \"\"\"Token embedding -> sinusoidal positions -> TransformerEncoder -> mean pool -> head.\"\"\" def __init__( self, vocab_size: int = 128, d_model: int = 32, nhea"
+      },
+      "notes": [
+        "FLOPs estimated"
+      ],
+      "metrics": {
+        "activationBytes": 2048,
+        "receptiveField": 1,
+        "macs": 40960
+      },
+      "meta": {
+        "formula": "y = W_o·cat_{h}(softmax(Q_h·K_hᵀ/√d_k)·V_h)  (h=4, d_k=8)",
+        "semantic": "多头注意力：Q/K/V 线性投影后按头缩放点积并拼接",
+        "axes": "NLC (B,L,E)",
+        "tags": [
+          "attention",
+          "multi_head"
+        ]
+      }
+    },
+    {
+      "id": "n16",
+      "name": "encoder.layers.1.dropout1",
+      "op": "Dropout",
+      "kind": "dropout",
+      "modulePath": "encoder.layers.1.dropout1",
+      "depth": 3,
+      "inShapes": [
+        [
+          1,
+          16,
+          32
+        ]
+      ],
+      "outShapes": [
+        [
+          1,
+          16,
+          32
+        ]
+      ],
+      "params": {
+        "p": 0.1
+      },
+      "numParams": 0,
+      "flops": 0,
+      "tags": [
+        "regularization"
+      ],
+      "groupId": "g4",
+      "source": {
+        "file": "samples/transformer_classifier.py",
+        "line": 18,
+        "code": "class TinyTransformerClassifier(nn.Module): \"\"\"Token embedding -> sinusoidal positions -> TransformerEncoder -> mean pool -> head.\"\"\" def __init__( self, vocab_size: int = 128, d_model: int = 32, nhea"
+      },
+      "notes": [],
+      "metrics": {
+        "activationBytes": 2048,
+        "receptiveField": 1,
+        "macs": 0
+      },
+      "meta": {
+        "formula": "y = x ⊙ mask/(1-p),  p=0.1",
+        "semantic": "训练期随机失活（推理期恒等）",
+        "axes": null,
+        "tags": [
+          "dropout",
+          "regularization"
+        ]
+      }
+    },
+    {
+      "id": "n17",
+      "name": "encoder.layers.1.add",
+      "op": "add",
+      "kind": "add",
+      "modulePath": "encoder.layers.1.add",
+      "depth": 3,
+      "inShapes": [
+        [
+          1,
+          16,
+          32
+        ],
+        [
+          1,
+          16,
+          32
+        ]
+      ],
+      "outShapes": [
+        [
+          1,
+          16,
+          32
+        ]
+      ],
+      "params": {},
+      "numParams": 0,
+      "flops": 512,
+      "tags": [
+        "merge",
+        "residual"
+      ],
+      "groupId": "g4",
+      "source": null,
+      "notes": [
+        "Residual add"
+      ],
+      "metrics": {
+        "activationBytes": 2048,
+        "receptiveField": 1,
+        "macs": 256
+      },
+      "meta": {
+        "formula": "y = x_1 + x_2",
+        "semantic": "逐元素相加（残差/分支融合）",
+        "axes": "NCW",
+        "tags": [
+          "merge",
+          "add",
+          "residual"
+        ]
+      }
+    },
+    {
+      "id": "n18",
+      "name": "encoder.layers.1.norm1",
+      "op": "LayerNorm",
+      "kind": "norm",
+      "modulePath": "encoder.layers.1.norm1",
+      "depth": 3,
+      "inShapes": [
+        [
+          1,
+          16,
+          32
+        ]
+      ],
+      "outShapes": [
+        [
+          1,
+          16,
+          32
+        ]
+      ],
+      "params": {
+        "normalizedShape": [
+          32
+        ],
+        "eps": 1e-05,
+        "affine": true
+      },
+      "numParams": 64,
+      "flops": 2048,
+      "tags": [
+        "normalized"
+      ],
+      "groupId": "g4",
+      "source": {
+        "file": "samples/transformer_classifier.py",
+        "line": 18,
+        "code": "class TinyTransformerClassifier(nn.Module): \"\"\"Token embedding -> sinusoidal positions -> TransformerEncoder -> mean pool -> head.\"\"\" def __init__( self, vocab_size: int = 128, d_model: int = 32, nhea"
+      },
+      "notes": [],
+      "metrics": {
+        "activationBytes": 2048,
+        "receptiveField": 1,
+        "macs": 1024
+      },
+      "meta": {
+        "formula": "y[..., d] = γ[d]·(x[..., d]-μ)/√(σ²+ε) + β[d]  (E=32, ε=1e-05)",
+        "semantic": "层归一化：对每个样本最后一维标准化",
+        "axes": "最后一维 E",
+        "tags": [
+          "norm",
+          "layernorm"
+        ]
+      }
+    },
+    {
+      "id": "n19",
+      "name": "encoder.layers.1.linear1",
+      "op": "Linear",
+      "kind": "linear",
+      "modulePath": "encoder.layers.1.linear1",
+      "depth": 3,
+      "inShapes": [
+        [
+          1,
+          16,
+          32
+        ]
+      ],
+      "outShapes": [
+        [
+          1,
+          16,
+          128
+        ]
+      ],
+      "params": {
+        "inFeatures": 32,
+        "outFeatures": 128,
+        "bias": true
+      },
+      "numParams": 4224,
+      "flops": 133120,
+      "tags": [
+        "weighted"
+      ],
+      "groupId": "g4",
+      "source": {
+        "file": "samples/transformer_classifier.py",
+        "line": 18,
+        "code": "class TinyTransformerClassifier(nn.Module): \"\"\"Token embedding -> sinusoidal positions -> TransformerEncoder -> mean pool -> head.\"\"\" def __init__( self, vocab_size: int = 128, d_model: int = 32, nhea"
+      },
+      "notes": [],
+      "metrics": {
+        "activationBytes": 8192,
+        "receptiveField": 1,
+        "macs": 66560
+      },
+      "meta": {
+        "formula": "y[..., o] = Σ_i x[..., i]·W[o, i] + b[o]  (in=32→out=128)",
+        "semantic": "全连接通道混合（特征维线性变换）",
+        "axes": "N×F / NLC",
+        "tags": [
+          "linear",
+          "channel_mix"
+        ]
+      }
+    },
+    {
+      "id": "n20",
+      "name": "encoder.layers.1.gelu",
+      "op": "torch.gelu",
+      "kind": "activation",
+      "modulePath": "encoder.layers.1.gelu",
+      "depth": 3,
+      "inShapes": [
+        [
+          1,
+          16,
+          128
+        ]
+      ],
+      "outShapes": [
+        [
+          1,
+          16,
+          128
+        ]
+      ],
+      "params": {},
+      "numParams": 0,
+      "flops": 2048,
+      "tags": [
+        "elementwise"
+      ],
+      "groupId": "g4",
+      "source": null,
+      "notes": [],
+      "metrics": {
+        "activationBytes": 8192,
+        "receptiveField": 1,
+        "macs": 1024
+      },
+      "meta": {
+        "formula": "y = x·Φ(x)",
+        "semantic": "GELU：高斯误差线性单元",
+        "axes": "逐元素（任意轴）",
+        "tags": [
+          "activation",
+          "gelu"
+        ]
+      }
+    },
+    {
+      "id": "n21",
+      "name": "encoder.layers.1.dropout",
+      "op": "Dropout",
+      "kind": "dropout",
+      "modulePath": "encoder.layers.1.dropout",
+      "depth": 3,
+      "inShapes": [
+        [
+          1,
+          16,
+          128
+        ]
+      ],
+      "outShapes": [
+        [
+          1,
+          16,
+          128
+        ]
+      ],
+      "params": {
+        "p": 0.1
+      },
+      "numParams": 0,
+      "flops": 0,
+      "tags": [
+        "regularization"
+      ],
+      "groupId": "g4",
+      "source": {
+        "file": "samples/transformer_classifier.py",
+        "line": 18,
+        "code": "class TinyTransformerClassifier(nn.Module): \"\"\"Token embedding -> sinusoidal positions -> TransformerEncoder -> mean pool -> head.\"\"\" def __init__( self, vocab_size: int = 128, d_model: int = 32, nhea"
+      },
+      "notes": [],
+      "metrics": {
+        "activationBytes": 8192,
+        "receptiveField": 1,
+        "macs": 0
+      },
+      "meta": {
+        "formula": "y = x ⊙ mask/(1-p),  p=0.1",
+        "semantic": "训练期随机失活（推理期恒等）",
+        "axes": null,
+        "tags": [
+          "dropout",
+          "regularization"
+        ]
+      }
+    },
+    {
+      "id": "n22",
+      "name": "encoder.layers.1.linear2",
+      "op": "Linear",
+      "kind": "linear",
+      "modulePath": "encoder.layers.1.linear2",
+      "depth": 3,
+      "inShapes": [
+        [
+          1,
+          16,
+          128
+        ]
+      ],
+      "outShapes": [
+        [
+          1,
+          16,
+          32
+        ]
+      ],
+      "params": {
+        "inFeatures": 128,
+        "outFeatures": 32,
+        "bias": true
+      },
+      "numParams": 4128,
+      "flops": 131584,
+      "tags": [
+        "weighted"
+      ],
+      "groupId": "g4",
+      "source": {
+        "file": "samples/transformer_classifier.py",
+        "line": 18,
+        "code": "class TinyTransformerClassifier(nn.Module): \"\"\"Token embedding -> sinusoidal positions -> TransformerEncoder -> mean pool -> head.\"\"\" def __init__( self, vocab_size: int = 128, d_model: int = 32, nhea"
+      },
+      "notes": [],
+      "metrics": {
+        "activationBytes": 2048,
+        "receptiveField": 1,
+        "macs": 65792
+      },
+      "meta": {
+        "formula": "y[..., o] = Σ_i x[..., i]·W[o, i] + b[o]  (in=128→out=32)",
+        "semantic": "全连接通道混合（特征维线性变换）",
+        "axes": "N×F / NLC",
+        "tags": [
+          "linear",
+          "channel_mix"
+        ]
+      }
+    },
+    {
+      "id": "n23",
+      "name": "encoder.layers.1.dropout2",
+      "op": "Dropout",
+      "kind": "dropout",
+      "modulePath": "encoder.layers.1.dropout2",
+      "depth": 3,
+      "inShapes": [
+        [
+          1,
+          16,
+          32
+        ]
+      ],
+      "outShapes": [
+        [
+          1,
+          16,
+          32
+        ]
+      ],
+      "params": {
+        "p": 0.1
+      },
+      "numParams": 0,
+      "flops": 0,
+      "tags": [
+        "regularization"
+      ],
+      "groupId": "g4",
+      "source": {
+        "file": "samples/transformer_classifier.py",
+        "line": 18,
+        "code": "class TinyTransformerClassifier(nn.Module): \"\"\"Token embedding -> sinusoidal positions -> TransformerEncoder -> mean pool -> head.\"\"\" def __init__( self, vocab_size: int = 128, d_model: int = 32, nhea"
+      },
+      "notes": [],
+      "metrics": {
+        "activationBytes": 2048,
+        "receptiveField": 1,
+        "macs": 0
+      },
+      "meta": {
+        "formula": "y = x ⊙ mask/(1-p),  p=0.1",
+        "semantic": "训练期随机失活（推理期恒等）",
+        "axes": null,
+        "tags": [
+          "dropout",
+          "regularization"
+        ]
+      }
+    },
+    {
+      "id": "n24",
+      "name": "encoder.layers.1.add#2",
+      "op": "add",
+      "kind": "add",
+      "modulePath": "encoder.layers.1.add",
+      "depth": 3,
+      "inShapes": [
+        [
+          1,
+          16,
+          32
+        ],
+        [
+          1,
+          16,
+          32
+        ]
+      ],
+      "outShapes": [
+        [
+          1,
+          16,
+          32
+        ]
+      ],
+      "params": {},
+      "numParams": 0,
+      "flops": 512,
+      "tags": [
+        "merge",
+        "residual"
+      ],
+      "groupId": "g4",
+      "source": null,
+      "notes": [
+        "Residual add"
+      ],
+      "metrics": {
+        "activationBytes": 2048,
+        "receptiveField": 1,
+        "macs": 256
+      },
+      "meta": {
+        "formula": "y = x_1 + x_2",
+        "semantic": "逐元素相加（残差/分支融合）",
+        "axes": "NCW",
+        "tags": [
+          "merge",
+          "add",
+          "residual"
+        ]
+      }
+    },
+    {
+      "id": "n25",
+      "name": "encoder.layers.1.norm2",
+      "op": "LayerNorm",
+      "kind": "norm",
+      "modulePath": "encoder.layers.1.norm2",
+      "depth": 3,
+      "inShapes": [
+        [
+          1,
+          16,
+          32
+        ]
+      ],
+      "outShapes": [
+        [
+          1,
+          16,
+          32
+        ]
+      ],
+      "params": {
+        "normalizedShape": [
+          32
+        ],
+        "eps": 1e-05,
+        "affine": true
+      },
+      "numParams": 64,
+      "flops": 2048,
+      "tags": [
+        "normalized"
+      ],
+      "groupId": "g4",
+      "source": {
+        "file": "samples/transformer_classifier.py",
+        "line": 18,
+        "code": "class TinyTransformerClassifier(nn.Module): \"\"\"Token embedding -> sinusoidal positions -> TransformerEncoder -> mean pool -> head.\"\"\" def __init__( self, vocab_size: int = 128, d_model: int = 32, nhea"
+      },
+      "notes": [],
+      "metrics": {
+        "activationBytes": 2048,
+        "receptiveField": 1,
+        "macs": 1024
+      },
+      "meta": {
+        "formula": "y[..., d] = γ[d]·(x[..., d]-μ)/√(σ²+ε) + β[d]  (E=32, ε=1e-05)",
+        "semantic": "层归一化：对每个样本最后一维标准化",
+        "axes": "最后一维 E",
+        "tags": [
+          "norm",
+          "layernorm"
+        ]
+      }
+    },
+    {
+      "id": "n26",
+      "name": "mean",
+      "op": "mean",
+      "kind": "pool",
+      "modulePath": "mean",
+      "depth": 1,
+      "inShapes": [
+        [
+          1,
+          16,
+          32
+        ]
+      ],
+      "outShapes": [
+        [
+          1,
+          32
+        ]
+      ],
+      "params": {
+        "dim": 1
+      },
+      "numParams": 0,
+      "flops": 512,
+      "tags": [
+        "downsample"
+      ],
+      "groupId": "g0",
+      "source": {
+        "file": "samples/transformer_classifier.py",
+        "line": 58,
+        "code": "x.mean(dim=1)"
+      },
+      "notes": [],
+      "metrics": {
+        "activationBytes": 128,
+        "receptiveField": 1,
+        "macs": 256
+      },
+      "meta": {
+        "formula": "y = mean(x, dim=1)",
+        "semantic": "沿序列/空间维平均池化（全局池化）",
+        "axes": "N×F → NC",
+        "tags": [
+          "pool",
+          "global"
+        ]
+      }
+    },
+    {
+      "id": "n27",
+      "name": "norm",
+      "op": "LayerNorm",
+      "kind": "norm",
+      "modulePath": "norm",
+      "depth": 1,
+      "inShapes": [
+        [
+          1,
+          32
+        ]
+      ],
+      "outShapes": [
+        [
+          1,
+          32
+        ]
+      ],
+      "params": {
+        "normalizedShape": [
+          32
+        ],
+        "eps": 1e-05,
+        "affine": true
+      },
+      "numParams": 64,
+      "flops": 128,
+      "tags": [
+        "normalized"
+      ],
+      "groupId": "g0",
+      "source": {
+        "file": "samples/transformer_classifier.py",
+        "line": 51,
+        "code": "nn.LayerNorm(d_model)"
+      },
+      "notes": [],
+      "metrics": {
+        "activationBytes": 128,
+        "receptiveField": 1,
+        "macs": 64
+      },
+      "meta": {
+        "formula": "y[..., d] = γ[d]·(x[..., d]-μ)/√(σ²+ε) + β[d]  (E=32, ε=1e-05)",
+        "semantic": "层归一化：对每个样本最后一维标准化",
+        "axes": "最后一维 E",
+        "tags": [
+          "norm",
+          "layernorm"
+        ]
+      }
+    },
+    {
+      "id": "n28",
+      "name": "head",
+      "op": "Linear",
+      "kind": "linear",
+      "modulePath": "head",
+      "depth": 1,
+      "inShapes": [
+        [
+          1,
+          32
+        ]
+      ],
+      "outShapes": [
+        [
+          1,
+          10
+        ]
+      ],
+      "params": {
+        "inFeatures": 32,
+        "outFeatures": 10,
+        "bias": true
+      },
+      "numParams": 330,
+      "flops": 650,
+      "tags": [
+        "weighted"
+      ],
+      "groupId": "g0",
+      "source": {
+        "file": "samples/transformer_classifier.py",
+        "line": 52,
+        "code": "nn.Linear(d_model, num_classes)"
+      },
+      "notes": [],
+      "metrics": {
+        "activationBytes": 40,
+        "receptiveField": 1,
+        "macs": 325
+      },
+      "meta": {
+        "formula": "y[..., o] = Σ_i x[..., i]·W[o, i] + b[o]  (in=32→out=10)",
+        "semantic": "全连接通道混合（特征维线性变换）",
+        "axes": "N×F / NLC",
+        "tags": [
+          "linear",
+          "channel_mix"
+        ]
+      }
+    },
+    {
+      "id": "n29",
+      "name": "output",
+      "op": "Output",
+      "kind": "output",
+      "modulePath": "",
+      "depth": 0,
+      "inShapes": [
+        [
+          1,
+          10
+        ]
+      ],
+      "outShapes": [
+        [
+          1,
+          10
+        ]
+      ],
+      "params": {},
+      "numParams": 0,
+      "flops": 0,
+      "tags": [
+        "boundary"
+      ],
+      "groupId": null,
+      "source": null,
+      "notes": [],
+      "metrics": {
+        "activationBytes": 40,
+        "receptiveField": 1,
+        "macs": 0
+      },
+      "meta": {
+        "formula": "y = Output((1, 10))",
+        "semantic": "网络输出张量",
+        "axes": "N×F",
+        "tags": [
+          "boundary",
+          "output"
+        ]
+      }
+    }
+  ],
+  "edges": [
+    {
+      "id": "e0",
+      "source": "n0",
+      "target": "n1",
+      "kind": "data",
+      "shapes": [
+        [
+          1,
+          16
+        ]
+      ],
+      "label": ""
+    },
+    {
+      "id": "e1",
+      "source": "n1",
+      "target": "n2",
+      "kind": "data",
+      "shapes": [
+        [
+          1,
+          16,
+          32
+        ]
+      ],
+      "label": ""
+    },
+    {
+      "id": "e2",
+      "source": "n2",
+      "target": "n3",
+      "kind": "data",
+      "shapes": [
+        [
+          1,
+          16,
+          32
+        ]
+      ],
+      "label": ""
+    },
+    {
+      "id": "e3",
+      "source": "n3",
+      "target": "n4",
+      "kind": "data",
+      "shapes": [
+        [
+          1,
+          16,
+          32
+        ]
+      ],
+      "label": ""
+    },
+    {
+      "id": "e4",
+      "source": "n4",
+      "target": "n5",
+      "kind": "data",
+      "shapes": [
+        [
+          1,
+          16,
+          32
+        ]
+      ],
+      "label": ""
+    },
+    {
+      "id": "e5",
+      "source": "n3",
+      "target": "n6",
+      "kind": "residual",
+      "shapes": [
+        [
+          1,
+          16,
+          32
+        ]
+      ],
+      "label": "identity"
+    },
+    {
+      "id": "e6",
+      "source": "n5",
+      "target": "n6",
+      "kind": "data",
+      "shapes": [
+        [
+          1,
+          16,
+          32
+        ]
+      ],
+      "label": ""
+    },
+    {
+      "id": "e7",
+      "source": "n6",
+      "target": "n7",
+      "kind": "data",
+      "shapes": [
+        [
+          1,
+          16,
+          32
+        ]
+      ],
+      "label": ""
+    },
+    {
+      "id": "e8",
+      "source": "n7",
+      "target": "n8",
+      "kind": "data",
+      "shapes": [
+        [
+          1,
+          16,
+          32
+        ]
+      ],
+      "label": ""
+    },
+    {
+      "id": "e9",
+      "source": "n8",
+      "target": "n9",
+      "kind": "data",
+      "shapes": [
+        [
+          1,
+          16,
+          128
+        ]
+      ],
+      "label": ""
+    },
+    {
+      "id": "e10",
+      "source": "n9",
+      "target": "n10",
+      "kind": "data",
+      "shapes": [
+        [
+          1,
+          16,
+          128
+        ]
+      ],
+      "label": ""
+    },
+    {
+      "id": "e11",
+      "source": "n10",
+      "target": "n11",
+      "kind": "data",
+      "shapes": [
+        [
+          1,
+          16,
+          128
+        ]
+      ],
+      "label": ""
+    },
+    {
+      "id": "e12",
+      "source": "n11",
+      "target": "n12",
+      "kind": "data",
+      "shapes": [
+        [
+          1,
+          16,
+          32
+        ]
+      ],
+      "label": ""
+    },
+    {
+      "id": "e13",
+      "source": "n7",
+      "target": "n13",
+      "kind": "residual",
+      "shapes": [
+        [
+          1,
+          16,
+          32
+        ]
+      ],
+      "label": "identity"
+    },
+    {
+      "id": "e14",
+      "source": "n12",
+      "target": "n13",
+      "kind": "data",
+      "shapes": [
+        [
+          1,
+          16,
+          32
+        ]
+      ],
+      "label": ""
+    },
+    {
+      "id": "e15",
+      "source": "n13",
+      "target": "n14",
+      "kind": "data",
+      "shapes": [
+        [
+          1,
+          16,
+          32
+        ]
+      ],
+      "label": ""
+    },
+    {
+      "id": "e16",
+      "source": "n14",
+      "target": "n15",
+      "kind": "data",
+      "shapes": [
+        [
+          1,
+          16,
+          32
+        ]
+      ],
+      "label": ""
+    },
+    {
+      "id": "e17",
+      "source": "n15",
+      "target": "n16",
+      "kind": "data",
+      "shapes": [
+        [
+          1,
+          16,
+          32
+        ]
+      ],
+      "label": ""
+    },
+    {
+      "id": "e18",
+      "source": "n14",
+      "target": "n17",
+      "kind": "residual",
+      "shapes": [
+        [
+          1,
+          16,
+          32
+        ]
+      ],
+      "label": "identity"
+    },
+    {
+      "id": "e19",
+      "source": "n16",
+      "target": "n17",
+      "kind": "data",
+      "shapes": [
+        [
+          1,
+          16,
+          32
+        ]
+      ],
+      "label": ""
+    },
+    {
+      "id": "e20",
+      "source": "n17",
+      "target": "n18",
+      "kind": "data",
+      "shapes": [
+        [
+          1,
+          16,
+          32
+        ]
+      ],
+      "label": ""
+    },
+    {
+      "id": "e21",
+      "source": "n18",
+      "target": "n19",
+      "kind": "data",
+      "shapes": [
+        [
+          1,
+          16,
+          32
+        ]
+      ],
+      "label": ""
+    },
+    {
+      "id": "e22",
+      "source": "n19",
+      "target": "n20",
+      "kind": "data",
+      "shapes": [
+        [
+          1,
+          16,
+          128
+        ]
+      ],
+      "label": ""
+    },
+    {
+      "id": "e23",
+      "source": "n20",
+      "target": "n21",
+      "kind": "data",
+      "shapes": [
+        [
+          1,
+          16,
+          128
+        ]
+      ],
+      "label": ""
+    },
+    {
+      "id": "e24",
+      "source": "n21",
+      "target": "n22",
+      "kind": "data",
+      "shapes": [
+        [
+          1,
+          16,
+          128
+        ]
+      ],
+      "label": ""
+    },
+    {
+      "id": "e25",
+      "source": "n22",
+      "target": "n23",
+      "kind": "data",
+      "shapes": [
+        [
+          1,
+          16,
+          32
+        ]
+      ],
+      "label": ""
+    },
+    {
+      "id": "e26",
+      "source": "n18",
+      "target": "n24",
+      "kind": "residual",
+      "shapes": [
+        [
+          1,
+          16,
+          32
+        ]
+      ],
+      "label": "identity"
+    },
+    {
+      "id": "e27",
+      "source": "n23",
+      "target": "n24",
+      "kind": "data",
+      "shapes": [
+        [
+          1,
+          16,
+          32
+        ]
+      ],
+      "label": ""
+    },
+    {
+      "id": "e28",
+      "source": "n24",
+      "target": "n25",
+      "kind": "data",
+      "shapes": [
+        [
+          1,
+          16,
+          32
+        ]
+      ],
+      "label": ""
+    },
+    {
+      "id": "e29",
+      "source": "n25",
+      "target": "n26",
+      "kind": "data",
+      "shapes": [
+        [
+          1,
+          16,
+          32
+        ]
+      ],
+      "label": ""
+    },
+    {
+      "id": "e30",
+      "source": "n26",
+      "target": "n27",
+      "kind": "data",
+      "shapes": [
+        [
+          1,
+          32
+        ]
+      ],
+      "label": ""
+    },
+    {
+      "id": "e31",
+      "source": "n27",
+      "target": "n28",
+      "kind": "data",
+      "shapes": [
+        [
+          1,
+          32
+        ]
+      ],
+      "label": ""
+    },
+    {
+      "id": "e32",
+      "source": "n28",
+      "target": "n29",
+      "kind": "data",
+      "shapes": [
+        [
+          1,
+          10
+        ]
+      ],
+      "label": ""
+    }
+  ],
+  "groups": [
+    {
+      "id": "g0",
+      "name": "TinyTransformerClassifier",
+      "label": "Tiny Transformer Classifier",
+      "kind": "model",
+      "parentId": null,
+      "depth": 0,
+      "nodeIds": [
+        "n1",
+        "n2",
+        "n3",
+        "n26",
+        "n27",
+        "n28"
+      ],
+      "childGroupIds": [
+        "g1"
+      ],
+      "numParams": 29898,
+      "flops": 709898,
+      "source": {
+        "line": 18,
+        "code": "class TinyTransformerClassifier(nn.Module): \"\"\"Token embedding -> sinusoidal positions -> TransformerEncoder -> mean pool -> head.\"\"\" def __init__( self, vocab_size: int = 128, d_model: int = 32, nhea",
+        "file": "samples/transformer_classifier.py"
+      },
+      "meta": {
+        "pattern": {
+          "kind": "classifier_head",
+          "label": "Classifier Head",
+          "formula": "logits = W·x + b",
+          "confidence": 0.85,
+          "tags": [
+            "classifier_head",
+            "linear"
+          ]
+        }
+      }
+    },
+    {
+      "id": "g1",
+      "name": "encoder",
+      "label": "Encoder",
+      "kind": "encoder",
+      "parentId": "g0",
+      "depth": 1,
+      "nodeIds": [],
+      "childGroupIds": [
+        "g2"
+      ],
+      "numParams": 25408,
+      "flops": 707584,
+      "source": {
+        "line": 50,
+        "code": "nn.TransformerEncoder(encoder_layer, num_layers=num_layers, enable_nested_tensor=False)",
+        "file": "samples/transformer_classifier.py"
+      }
+    },
+    {
+      "id": "g2",
+      "name": "encoder.layers",
+      "label": "Layers",
+      "kind": "module",
+      "parentId": "g1",
+      "depth": 2,
+      "nodeIds": [],
+      "childGroupIds": [
+        "g3",
+        "g4"
+      ],
+      "numParams": 25408,
+      "flops": 707584,
+      "source": {
+        "line": 18,
+        "code": "class TinyTransformerClassifier(nn.Module): \"\"\"Token embedding -> sinusoidal positions -> TransformerEncoder -> mean pool -> head.\"\"\" def __init__( self, vocab_size: int = 128, d_model: int = 32, nhea",
+        "file": "samples/transformer_classifier.py"
+      }
+    },
+    {
+      "id": "g3",
+      "name": "encoder.layers.0",
+      "label": "Transformer Block 1",
+      "kind": "transformer_block",
+      "parentId": "g2",
+      "depth": 3,
+      "nodeIds": [
+        "n4",
+        "n5",
+        "n6",
+        "n7",
+        "n8",
+        "n9",
+        "n10",
+        "n11",
+        "n12",
+        "n13",
+        "n14"
+      ],
+      "childGroupIds": [],
+      "numParams": 12704,
+      "flops": 353792,
+      "source": {
+        "line": 18,
+        "code": "class TinyTransformerClassifier(nn.Module): \"\"\"Token embedding -> sinusoidal positions -> TransformerEncoder -> mean pool -> head.\"\"\" def __init__( self, vocab_size: int = 128, d_model: int = 32, nhea",
+        "file": "samples/transformer_classifier.py"
+      },
+      "meta": {
+        "pattern": {
+          "kind": "transformer_block",
+          "label": "Transformer Block",
+          "formula": "x = x + MHA(LN(x)); x = x + FFN(LN(x))",
+          "confidence": 0.95,
+          "tags": [
+            "transformer",
+            "attention",
+            "residual"
+          ]
+        }
+      }
+    },
+    {
+      "id": "g4",
+      "name": "encoder.layers.1",
+      "label": "Transformer Block 2",
+      "kind": "transformer_block",
+      "parentId": "g2",
+      "depth": 3,
+      "nodeIds": [
+        "n15",
+        "n16",
+        "n17",
+        "n18",
+        "n19",
+        "n20",
+        "n21",
+        "n22",
+        "n23",
+        "n24",
+        "n25"
+      ],
+      "childGroupIds": [],
+      "numParams": 12704,
+      "flops": 353792,
+      "source": {
+        "line": 18,
+        "code": "class TinyTransformerClassifier(nn.Module): \"\"\"Token embedding -> sinusoidal positions -> TransformerEncoder -> mean pool -> head.\"\"\" def __init__( self, vocab_size: int = 128, d_model: int = 32, nhea",
+        "file": "samples/transformer_classifier.py"
+      },
+      "meta": {
+        "pattern": {
+          "kind": "transformer_block",
+          "label": "Transformer Block",
+          "formula": "x = x + MHA(LN(x)); x = x + FFN(LN(x))",
+          "confidence": 0.95,
+          "tags": [
+            "transformer",
+            "attention",
+            "residual"
+          ]
+        }
+      }
+    }
+  ]
+}

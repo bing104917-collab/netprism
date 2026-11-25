@@ -1,0 +1,3656 @@
+{
+  "schemaVersion": "1.0",
+  "generator": {
+    "name": "netprism",
+    "version": "0.1.0"
+  },
+  "model": {
+    "name": "UNetMini",
+    "framework": "pytorch",
+    "className": "UNetMini",
+    "mode": "trace",
+    "source": {
+      "file": "samples/unet_mini.py",
+      "relPath": "unet_mini.py"
+    },
+    "inputSpec": [
+      {
+        "name": "x",
+        "shape": [
+          1,
+          3,
+          64,
+          64
+        ],
+        "dtype": "float32"
+      }
+    ],
+    "outputSpec": [
+      {
+        "name": "output",
+        "shape": [
+          1,
+          1,
+          64,
+          64
+        ],
+        "dtype": "float32"
+      }
+    ],
+    "totalParams": 117361,
+    "trainableParams": 117361,
+    "totalFlops": 228298752,
+    "flopsApprox": false,
+    "numLayers": 37,
+    "warnings": [],
+    "metrics": {
+      "paramBytes": 469444,
+      "activationBytes": 6471680,
+      "peakActivationBytes": 1048576,
+      "maxReceptiveField": 140,
+      "macs": 114149376
+    },
+    "meta": {
+      "family": "unet",
+      "familyLabel": "UNet",
+      "familyConfidence": 0.78,
+      "confidence": 0.78,
+      "algorithmTags": [
+        "cnn",
+        "segmentation",
+        "skip_connection",
+        "unet",
+        "conv",
+        "conv_bn_act",
+        "normalization",
+        "activation",
+        "concat"
+      ],
+      "families": [
+        {
+          "id": "unet",
+          "label": "UNet",
+          "confidence": 0.78,
+          "evidence": [
+            "名称/类名命中别名 'unetmini'",
+            "必需组件 unet_skip: UNet Skip Connection×2",
+            "必需组件全部满足",
+            "可选组件 plain_conv: 卷积层×11",
+            "可选组件 upsampling: 转置卷积×2"
+          ]
+        },
+        {
+          "id": "unet_plus_plus",
+          "label": "UNet++",
+          "confidence": 0.46,
+          "evidence": [
+            "名称/类名命中别名 'unet'",
+            "必需组件 unet_skip: UNet Skip Connection×2",
+            "可选组件 upsampling: 转置卷积×2",
+            "可选组件 segmentation_head: 末端逐像素分类卷积（分割头）",
+            "签名算子匹配 6/7"
+          ]
+        },
+        {
+          "id": "unet3d",
+          "label": "3D UNet",
+          "confidence": 0.46,
+          "evidence": [
+            "必需组件 unet_skip: UNet Skip Connection×2",
+            "必需组件全部满足",
+            "可选组件 plain_conv: 卷积层×11",
+            "可选组件 upsampling: 转置卷积×2",
+            "可选组件 segmentation_head: 末端逐像素分类卷积（分割头）"
+          ]
+        }
+      ],
+      "patterns": [
+        {
+          "kind": "conv_bn_act",
+          "label": "Conv-BN-Act",
+          "formula": "y = Act(BN(Conv(x)))",
+          "nodeIds": [
+            "n1",
+            "n2",
+            "n3",
+            "n4",
+            "n5",
+            "n6"
+          ],
+          "groupIds": [
+            "g8"
+          ],
+          "confidence": 0.95,
+          "evidence": [
+            "2 条 Conv→Norm→Act 链",
+            "例如 n1→n2→n3"
+          ],
+          "tags": [
+            "conv",
+            "conv_bn_act",
+            "normalization",
+            "activation"
+          ],
+          "id": "p1"
+        },
+        {
+          "kind": "unet_skip",
+          "label": "UNet Skip Connection",
+          "formula": "y = Dec(cat(x_enc, up(x)))",
+          "nodeIds": [
+            "n6",
+            "n29",
+            "n30"
+          ],
+          "groupIds": [
+            "g0",
+            "g8"
+          ],
+          "confidence": 0.95,
+          "evidence": [
+            "2 条 kind=skip 跳连边汇入 concat n30",
+            "上采样分支 n29 与编码器特征拼接"
+          ],
+          "tags": [
+            "unet",
+            "skip_connection",
+            "concat"
+          ],
+          "id": "p2"
+        },
+        {
+          "kind": "conv_bn_act",
+          "label": "Conv-BN-Act",
+          "formula": "y = Act(BN(Conv(x)))",
+          "nodeIds": [
+            "n8",
+            "n9",
+            "n10",
+            "n11",
+            "n12",
+            "n13"
+          ],
+          "groupIds": [
+            "g9"
+          ],
+          "confidence": 0.95,
+          "evidence": [
+            "2 条 Conv→Norm→Act 链",
+            "例如 n8→n9→n10"
+          ],
+          "tags": [
+            "conv",
+            "conv_bn_act",
+            "normalization",
+            "activation"
+          ],
+          "id": "p3"
+        },
+        {
+          "kind": "unet_skip",
+          "label": "UNet Skip Connection",
+          "formula": "y = Dec(cat(x_enc, up(x)))",
+          "nodeIds": [
+            "n13",
+            "n21",
+            "n22"
+          ],
+          "groupIds": [
+            "g0",
+            "g9"
+          ],
+          "confidence": 0.95,
+          "evidence": [
+            "2 条 kind=skip 跳连边汇入 concat n22",
+            "上采样分支 n21 与编码器特征拼接"
+          ],
+          "tags": [
+            "unet",
+            "skip_connection",
+            "concat"
+          ],
+          "id": "p4"
+        },
+        {
+          "kind": "conv_bn_act",
+          "label": "Conv-BN-Act",
+          "formula": "y = Act(BN(Conv(x)))",
+          "nodeIds": [
+            "n15",
+            "n16",
+            "n17",
+            "n18",
+            "n19",
+            "n20"
+          ],
+          "groupIds": [
+            "g10"
+          ],
+          "confidence": 0.95,
+          "evidence": [
+            "2 条 Conv→Norm→Act 链",
+            "例如 n15→n16→n17"
+          ],
+          "tags": [
+            "conv",
+            "conv_bn_act",
+            "normalization",
+            "activation"
+          ],
+          "id": "p5"
+        },
+        {
+          "kind": "conv_bn_act",
+          "label": "Conv-BN-Act",
+          "formula": "y = Act(BN(Conv(x)))",
+          "nodeIds": [
+            "n23",
+            "n24",
+            "n25",
+            "n26",
+            "n27",
+            "n28"
+          ],
+          "groupIds": [
+            "g7"
+          ],
+          "confidence": 0.95,
+          "evidence": [
+            "2 条 Conv→Norm→Act 链",
+            "例如 n23→n24→n25"
+          ],
+          "tags": [
+            "conv",
+            "conv_bn_act",
+            "normalization",
+            "activation"
+          ],
+          "id": "p6"
+        },
+        {
+          "kind": "conv_bn_act",
+          "label": "Conv-BN-Act",
+          "formula": "y = Act(BN(Conv(x)))",
+          "nodeIds": [
+            "n31",
+            "n32",
+            "n33",
+            "n34",
+            "n35",
+            "n36"
+          ],
+          "groupIds": [
+            "g6"
+          ],
+          "confidence": 0.95,
+          "evidence": [
+            "2 条 Conv→Norm→Act 链",
+            "例如 n31→n32→n33"
+          ],
+          "tags": [
+            "conv",
+            "conv_bn_act",
+            "normalization",
+            "activation"
+          ],
+          "id": "p7"
+        }
+      ],
+      "pseudocode": [
+        "x = Input(1, 3, 64, 64)",
+        "v6 = EncoderBlock(16)(x)   # -> (1, 16, 64, 64)",
+        "x = MaxPool(2x2,s2x2)(v6)   # -> (1, 16, 32, 32)",
+        "v13 = EncoderBlock(32)(x)   # -> (1, 32, 32, 32)",
+        "x = MaxPool(2x2,s2x2)(v13)   # -> (1, 32, 16, 16)",
+        "x = EncoderBlock(64)(x)   # -> (1, 64, 16, 16)",
+        "x = ConvTranspose2d(32,2x2,s2x2)(x)   # -> (1, 32, 32, 32)",
+        "x = Concat(dim=1)(v13, x)   # -> (1, 64, 32, 32)",
+        "x = DecoderBlock(32)(x)   # -> (1, 32, 32, 32)",
+        "x = ConvTranspose2d(16,2x2,s2x2)(x)   # -> (1, 16, 64, 64)",
+        "x = Concat(dim=1)(v6, x)   # -> (1, 32, 64, 64)",
+        "x = DecoderBlock(16)(x)   # -> (1, 16, 64, 64)",
+        "x = Conv2d(1,1x1)(x)   # -> (1, 1, 64, 64)"
+      ],
+      "familyEvidence": [
+        "名称/类名命中别名 'unetmini'",
+        "必需组件 unet_skip: UNet Skip Connection×2",
+        "必需组件全部满足",
+        "可选组件 plain_conv: 卷积层×11",
+        "可选组件 upsampling: 转置卷积×2"
+      ]
+    }
+  },
+  "nodes": [
+    {
+      "id": "n0",
+      "name": "x",
+      "op": "Input",
+      "kind": "input",
+      "modulePath": "",
+      "depth": 0,
+      "inShapes": [],
+      "outShapes": [
+        [
+          1,
+          3,
+          64,
+          64
+        ]
+      ],
+      "params": {},
+      "numParams": 0,
+      "flops": 0,
+      "tags": [
+        "boundary"
+      ],
+      "groupId": null,
+      "source": null,
+      "notes": [],
+      "metrics": {
+        "activationBytes": 49152,
+        "receptiveField": 1,
+        "macs": 0
+      },
+      "meta": {
+        "formula": "x = Input(1, 3, 64, 64)",
+        "semantic": "网络输入张量",
+        "axes": "NCHW",
+        "tags": [
+          "boundary",
+          "input"
+        ]
+      }
+    },
+    {
+      "id": "n1",
+      "name": "enc1.block.0",
+      "op": "Conv2d",
+      "kind": "conv",
+      "modulePath": "enc1.block.0",
+      "depth": 2,
+      "inShapes": [
+        [
+          1,
+          3,
+          64,
+          64
+        ]
+      ],
+      "outShapes": [
+        [
+          1,
+          16,
+          64,
+          64
+        ]
+      ],
+      "params": {
+        "inChannels": 3,
+        "outChannels": 16,
+        "kernelSize": [
+          3,
+          3
+        ],
+        "stride": [
+          1,
+          1
+        ],
+        "padding": [
+          1,
+          1
+        ],
+        "dilation": [
+          1,
+          1
+        ],
+        "groups": 1,
+        "bias": false
+      },
+      "numParams": 432,
+      "flops": 3538944,
+      "tags": [
+        "spatial",
+        "weighted",
+        "upsample"
+      ],
+      "groupId": "g8",
+      "source": {
+        "file": "samples/unet_mini.py",
+        "line": 19,
+        "code": "nn.Conv2d(in_channels, out_channels, kernel_size=3, padding=1, bias=False)"
+      },
+      "notes": [],
+      "metrics": {
+        "activationBytes": 262144,
+        "receptiveField": 3,
+        "macs": 1769472
+      },
+      "meta": {
+        "formula": "y[n,o,h',w'] = Σ_{c,kh,kw} W[o,c,kh,kw]·x[n,c,h·s+kh-p,w·s+kw-p] + b[o]  (Cin=3→Cout=16, k=3x3, s=1x1, p=1x1)",
+        "semantic": "3x3 空间卷积（通道 3→16）",
+        "axes": "NCHW",
+        "tags": [
+          "conv",
+          "spatial"
+        ]
+      }
+    },
+    {
+      "id": "n2",
+      "name": "enc1.block.1",
+      "op": "BatchNorm2d",
+      "kind": "norm",
+      "modulePath": "enc1.block.1",
+      "depth": 2,
+      "inShapes": [
+        [
+          1,
+          16,
+          64,
+          64
+        ]
+      ],
+      "outShapes": [
+        [
+          1,
+          16,
+          64,
+          64
+        ]
+      ],
+      "params": {
+        "normalizedShape": [
+          16
+        ],
+        "eps": 1e-05,
+        "affine": true
+      },
+      "numParams": 32,
+      "flops": 262144,
+      "tags": [
+        "normalized"
+      ],
+      "groupId": "g8",
+      "source": {
+        "file": "samples/unet_mini.py",
+        "line": 20,
+        "code": "nn.BatchNorm2d(out_channels)"
+      },
+      "notes": [],
+      "metrics": {
+        "activationBytes": 262144,
+        "receptiveField": 3,
+        "macs": 131072
+      },
+      "meta": {
+        "formula": "y[n,c,:] = γ[c]·(x[n,c,:]-μ_B[c])/√(σ²_B[c]+ε) + β[c]  (C=16, ε=1e-05)",
+        "semantic": "批归一化：按通道统计量标准化并仿射",
+        "axes": "NCHW（逐通道）",
+        "tags": [
+          "norm",
+          "batchnorm"
+        ]
+      }
+    },
+    {
+      "id": "n3",
+      "name": "enc1.block.2",
+      "op": "ReLU",
+      "kind": "activation",
+      "modulePath": "enc1.block.2",
+      "depth": 2,
+      "inShapes": [
+        [
+          1,
+          16,
+          64,
+          64
+        ]
+      ],
+      "outShapes": [
+        [
+          1,
+          16,
+          64,
+          64
+        ]
+      ],
+      "params": {
+        "inplace": true
+      },
+      "numParams": 0,
+      "flops": 65536,
+      "tags": [
+        "elementwise"
+      ],
+      "groupId": "g8",
+      "source": {
+        "file": "samples/unet_mini.py",
+        "line": 21,
+        "code": "nn.ReLU(inplace=True)"
+      },
+      "notes": [],
+      "metrics": {
+        "activationBytes": 262144,
+        "receptiveField": 3,
+        "macs": 32768
+      },
+      "meta": {
+        "formula": "y = max(x, 0)",
+        "semantic": "逐元素 ReLU 非线性（负值截断）",
+        "axes": "逐元素（任意轴）",
+        "tags": [
+          "activation",
+          "relu"
+        ]
+      }
+    },
+    {
+      "id": "n4",
+      "name": "enc1.block.3",
+      "op": "Conv2d",
+      "kind": "conv",
+      "modulePath": "enc1.block.3",
+      "depth": 2,
+      "inShapes": [
+        [
+          1,
+          16,
+          64,
+          64
+        ]
+      ],
+      "outShapes": [
+        [
+          1,
+          16,
+          64,
+          64
+        ]
+      ],
+      "params": {
+        "inChannels": 16,
+        "outChannels": 16,
+        "kernelSize": [
+          3,
+          3
+        ],
+        "stride": [
+          1,
+          1
+        ],
+        "padding": [
+          1,
+          1
+        ],
+        "dilation": [
+          1,
+          1
+        ],
+        "groups": 1,
+        "bias": false
+      },
+      "numParams": 2304,
+      "flops": 18874368,
+      "tags": [
+        "spatial",
+        "weighted"
+      ],
+      "groupId": "g8",
+      "source": {
+        "file": "samples/unet_mini.py",
+        "line": 22,
+        "code": "nn.Conv2d(out_channels, out_channels, kernel_size=3, padding=1, bias=False)"
+      },
+      "notes": [],
+      "metrics": {
+        "activationBytes": 262144,
+        "receptiveField": 5,
+        "macs": 9437184
+      },
+      "meta": {
+        "formula": "y[n,o,h',w'] = Σ_{c,kh,kw} W[o,c,kh,kw]·x[n,c,h·s+kh-p,w·s+kw-p] + b[o]  (Cin=16→Cout=16, k=3x3, s=1x1, p=1x1)",
+        "semantic": "3x3 空间卷积（通道 16→16）",
+        "axes": "NCHW",
+        "tags": [
+          "conv",
+          "spatial"
+        ]
+      }
+    },
+    {
+      "id": "n5",
+      "name": "enc1.block.4",
+      "op": "BatchNorm2d",
+      "kind": "norm",
+      "modulePath": "enc1.block.4",
+      "depth": 2,
+      "inShapes": [
+        [
+          1,
+          16,
+          64,
+          64
+        ]
+      ],
+      "outShapes": [
+        [
+          1,
+          16,
+          64,
+          64
+        ]
+      ],
+      "params": {
+        "normalizedShape": [
+          16
+        ],
+        "eps": 1e-05,
+        "affine": true
+      },
+      "numParams": 32,
+      "flops": 262144,
+      "tags": [
+        "normalized"
+      ],
+      "groupId": "g8",
+      "source": {
+        "file": "samples/unet_mini.py",
+        "line": 23,
+        "code": "nn.BatchNorm2d(out_channels)"
+      },
+      "notes": [],
+      "metrics": {
+        "activationBytes": 262144,
+        "receptiveField": 5,
+        "macs": 131072
+      },
+      "meta": {
+        "formula": "y[n,c,:] = γ[c]·(x[n,c,:]-μ_B[c])/√(σ²_B[c]+ε) + β[c]  (C=16, ε=1e-05)",
+        "semantic": "批归一化：按通道统计量标准化并仿射",
+        "axes": "NCHW（逐通道）",
+        "tags": [
+          "norm",
+          "batchnorm"
+        ]
+      }
+    },
+    {
+      "id": "n6",
+      "name": "enc1.block.5",
+      "op": "ReLU",
+      "kind": "activation",
+      "modulePath": "enc1.block.5",
+      "depth": 2,
+      "inShapes": [
+        [
+          1,
+          16,
+          64,
+          64
+        ]
+      ],
+      "outShapes": [
+        [
+          1,
+          16,
+          64,
+          64
+        ]
+      ],
+      "params": {
+        "inplace": true
+      },
+      "numParams": 0,
+      "flops": 65536,
+      "tags": [
+        "elementwise"
+      ],
+      "groupId": "g8",
+      "source": {
+        "file": "samples/unet_mini.py",
+        "line": 24,
+        "code": "nn.ReLU(inplace=True)"
+      },
+      "notes": [],
+      "metrics": {
+        "activationBytes": 262144,
+        "receptiveField": 5,
+        "macs": 32768
+      },
+      "meta": {
+        "formula": "y = max(x, 0)",
+        "semantic": "逐元素 ReLU 非线性（负值截断）",
+        "axes": "逐元素（任意轴）",
+        "tags": [
+          "activation",
+          "relu"
+        ]
+      }
+    },
+    {
+      "id": "n7",
+      "name": "pool",
+      "op": "MaxPool2d",
+      "kind": "pool",
+      "modulePath": "pool",
+      "depth": 1,
+      "inShapes": [
+        [
+          1,
+          16,
+          64,
+          64
+        ]
+      ],
+      "outShapes": [
+        [
+          1,
+          16,
+          32,
+          32
+        ]
+      ],
+      "params": {
+        "type": "max",
+        "kernelSize": [
+          2,
+          2
+        ],
+        "stride": [
+          2,
+          2
+        ],
+        "padding": [
+          0,
+          0
+        ]
+      },
+      "numParams": 0,
+      "flops": 65536,
+      "tags": [
+        "downsample"
+      ],
+      "groupId": "g0",
+      "source": {
+        "file": "samples/unet_mini.py",
+        "line": 39,
+        "code": "nn.MaxPool2d(kernel_size=2)"
+      },
+      "notes": [],
+      "metrics": {
+        "activationBytes": 65536,
+        "receptiveField": 6,
+        "macs": 32768
+      },
+      "meta": {
+        "formula": "y[n,c,oh,ow] = max_{kh,kw} x[n,c,oh·s+kh-p, ow·s+kw-p]  (k=2x2, s=2x2)",
+        "semantic": "局部最大池化（k=2x2）下采样",
+        "axes": "NCHW",
+        "tags": [
+          "pool",
+          "max"
+        ]
+      }
+    },
+    {
+      "id": "n8",
+      "name": "enc2.block.0",
+      "op": "Conv2d",
+      "kind": "conv",
+      "modulePath": "enc2.block.0",
+      "depth": 2,
+      "inShapes": [
+        [
+          1,
+          16,
+          32,
+          32
+        ]
+      ],
+      "outShapes": [
+        [
+          1,
+          32,
+          32,
+          32
+        ]
+      ],
+      "params": {
+        "inChannels": 16,
+        "outChannels": 32,
+        "kernelSize": [
+          3,
+          3
+        ],
+        "stride": [
+          1,
+          1
+        ],
+        "padding": [
+          1,
+          1
+        ],
+        "dilation": [
+          1,
+          1
+        ],
+        "groups": 1,
+        "bias": false
+      },
+      "numParams": 4608,
+      "flops": 9437184,
+      "tags": [
+        "spatial",
+        "weighted",
+        "upsample"
+      ],
+      "groupId": "g9",
+      "source": {
+        "file": "samples/unet_mini.py",
+        "line": 19,
+        "code": "nn.Conv2d(in_channels, out_channels, kernel_size=3, padding=1, bias=False)"
+      },
+      "notes": [],
+      "metrics": {
+        "activationBytes": 131072,
+        "receptiveField": 10,
+        "macs": 4718592
+      },
+      "meta": {
+        "formula": "y[n,o,h',w'] = Σ_{c,kh,kw} W[o,c,kh,kw]·x[n,c,h·s+kh-p,w·s+kw-p] + b[o]  (Cin=16→Cout=32, k=3x3, s=1x1, p=1x1)",
+        "semantic": "3x3 空间卷积（通道 16→32）",
+        "axes": "NCHW",
+        "tags": [
+          "conv",
+          "spatial"
+        ]
+      }
+    },
+    {
+      "id": "n9",
+      "name": "enc2.block.1",
+      "op": "BatchNorm2d",
+      "kind": "norm",
+      "modulePath": "enc2.block.1",
+      "depth": 2,
+      "inShapes": [
+        [
+          1,
+          32,
+          32,
+          32
+        ]
+      ],
+      "outShapes": [
+        [
+          1,
+          32,
+          32,
+          32
+        ]
+      ],
+      "params": {
+        "normalizedShape": [
+          32
+        ],
+        "eps": 1e-05,
+        "affine": true
+      },
+      "numParams": 64,
+      "flops": 131072,
+      "tags": [
+        "normalized"
+      ],
+      "groupId": "g9",
+      "source": {
+        "file": "samples/unet_mini.py",
+        "line": 20,
+        "code": "nn.BatchNorm2d(out_channels)"
+      },
+      "notes": [],
+      "metrics": {
+        "activationBytes": 131072,
+        "receptiveField": 10,
+        "macs": 65536
+      },
+      "meta": {
+        "formula": "y[n,c,:] = γ[c]·(x[n,c,:]-μ_B[c])/√(σ²_B[c]+ε) + β[c]  (C=32, ε=1e-05)",
+        "semantic": "批归一化：按通道统计量标准化并仿射",
+        "axes": "NCHW（逐通道）",
+        "tags": [
+          "norm",
+          "batchnorm"
+        ]
+      }
+    },
+    {
+      "id": "n10",
+      "name": "enc2.block.2",
+      "op": "ReLU",
+      "kind": "activation",
+      "modulePath": "enc2.block.2",
+      "depth": 2,
+      "inShapes": [
+        [
+          1,
+          32,
+          32,
+          32
+        ]
+      ],
+      "outShapes": [
+        [
+          1,
+          32,
+          32,
+          32
+        ]
+      ],
+      "params": {
+        "inplace": true
+      },
+      "numParams": 0,
+      "flops": 32768,
+      "tags": [
+        "elementwise"
+      ],
+      "groupId": "g9",
+      "source": {
+        "file": "samples/unet_mini.py",
+        "line": 21,
+        "code": "nn.ReLU(inplace=True)"
+      },
+      "notes": [],
+      "metrics": {
+        "activationBytes": 131072,
+        "receptiveField": 10,
+        "macs": 16384
+      },
+      "meta": {
+        "formula": "y = max(x, 0)",
+        "semantic": "逐元素 ReLU 非线性（负值截断）",
+        "axes": "逐元素（任意轴）",
+        "tags": [
+          "activation",
+          "relu"
+        ]
+      }
+    },
+    {
+      "id": "n11",
+      "name": "enc2.block.3",
+      "op": "Conv2d",
+      "kind": "conv",
+      "modulePath": "enc2.block.3",
+      "depth": 2,
+      "inShapes": [
+        [
+          1,
+          32,
+          32,
+          32
+        ]
+      ],
+      "outShapes": [
+        [
+          1,
+          32,
+          32,
+          32
+        ]
+      ],
+      "params": {
+        "inChannels": 32,
+        "outChannels": 32,
+        "kernelSize": [
+          3,
+          3
+        ],
+        "stride": [
+          1,
+          1
+        ],
+        "padding": [
+          1,
+          1
+        ],
+        "dilation": [
+          1,
+          1
+        ],
+        "groups": 1,
+        "bias": false
+      },
+      "numParams": 9216,
+      "flops": 18874368,
+      "tags": [
+        "spatial",
+        "weighted"
+      ],
+      "groupId": "g9",
+      "source": {
+        "file": "samples/unet_mini.py",
+        "line": 22,
+        "code": "nn.Conv2d(out_channels, out_channels, kernel_size=3, padding=1, bias=False)"
+      },
+      "notes": [],
+      "metrics": {
+        "activationBytes": 131072,
+        "receptiveField": 14,
+        "macs": 9437184
+      },
+      "meta": {
+        "formula": "y[n,o,h',w'] = Σ_{c,kh,kw} W[o,c,kh,kw]·x[n,c,h·s+kh-p,w·s+kw-p] + b[o]  (Cin=32→Cout=32, k=3x3, s=1x1, p=1x1)",
+        "semantic": "3x3 空间卷积（通道 32→32）",
+        "axes": "NCHW",
+        "tags": [
+          "conv",
+          "spatial"
+        ]
+      }
+    },
+    {
+      "id": "n12",
+      "name": "enc2.block.4",
+      "op": "BatchNorm2d",
+      "kind": "norm",
+      "modulePath": "enc2.block.4",
+      "depth": 2,
+      "inShapes": [
+        [
+          1,
+          32,
+          32,
+          32
+        ]
+      ],
+      "outShapes": [
+        [
+          1,
+          32,
+          32,
+          32
+        ]
+      ],
+      "params": {
+        "normalizedShape": [
+          32
+        ],
+        "eps": 1e-05,
+        "affine": true
+      },
+      "numParams": 64,
+      "flops": 131072,
+      "tags": [
+        "normalized"
+      ],
+      "groupId": "g9",
+      "source": {
+        "file": "samples/unet_mini.py",
+        "line": 23,
+        "code": "nn.BatchNorm2d(out_channels)"
+      },
+      "notes": [],
+      "metrics": {
+        "activationBytes": 131072,
+        "receptiveField": 14,
+        "macs": 65536
+      },
+      "meta": {
+        "formula": "y[n,c,:] = γ[c]·(x[n,c,:]-μ_B[c])/√(σ²_B[c]+ε) + β[c]  (C=32, ε=1e-05)",
+        "semantic": "批归一化：按通道统计量标准化并仿射",
+        "axes": "NCHW（逐通道）",
+        "tags": [
+          "norm",
+          "batchnorm"
+        ]
+      }
+    },
+    {
+      "id": "n13",
+      "name": "enc2.block.5",
+      "op": "ReLU",
+      "kind": "activation",
+      "modulePath": "enc2.block.5",
+      "depth": 2,
+      "inShapes": [
+        [
+          1,
+          32,
+          32,
+          32
+        ]
+      ],
+      "outShapes": [
+        [
+          1,
+          32,
+          32,
+          32
+        ]
+      ],
+      "params": {
+        "inplace": true
+      },
+      "numParams": 0,
+      "flops": 32768,
+      "tags": [
+        "elementwise"
+      ],
+      "groupId": "g9",
+      "source": {
+        "file": "samples/unet_mini.py",
+        "line": 24,
+        "code": "nn.ReLU(inplace=True)"
+      },
+      "notes": [],
+      "metrics": {
+        "activationBytes": 131072,
+        "receptiveField": 14,
+        "macs": 16384
+      },
+      "meta": {
+        "formula": "y = max(x, 0)",
+        "semantic": "逐元素 ReLU 非线性（负值截断）",
+        "axes": "逐元素（任意轴）",
+        "tags": [
+          "activation",
+          "relu"
+        ]
+      }
+    },
+    {
+      "id": "n14",
+      "name": "pool#2",
+      "op": "MaxPool2d",
+      "kind": "pool",
+      "modulePath": "pool",
+      "depth": 1,
+      "inShapes": [
+        [
+          1,
+          32,
+          32,
+          32
+        ]
+      ],
+      "outShapes": [
+        [
+          1,
+          32,
+          16,
+          16
+        ]
+      ],
+      "params": {
+        "type": "max",
+        "kernelSize": [
+          2,
+          2
+        ],
+        "stride": [
+          2,
+          2
+        ],
+        "padding": [
+          0,
+          0
+        ]
+      },
+      "numParams": 0,
+      "flops": 32768,
+      "tags": [
+        "downsample"
+      ],
+      "groupId": "g0",
+      "source": {
+        "file": "samples/unet_mini.py",
+        "line": 39,
+        "code": "nn.MaxPool2d(kernel_size=2)"
+      },
+      "notes": [],
+      "metrics": {
+        "activationBytes": 32768,
+        "receptiveField": 16,
+        "macs": 16384
+      },
+      "meta": {
+        "formula": "y[n,c,oh,ow] = max_{kh,kw} x[n,c,oh·s+kh-p, ow·s+kw-p]  (k=2x2, s=2x2)",
+        "semantic": "局部最大池化（k=2x2）下采样",
+        "axes": "NCHW",
+        "tags": [
+          "pool",
+          "max"
+        ]
+      }
+    },
+    {
+      "id": "n15",
+      "name": "enc3.block.0",
+      "op": "Conv2d",
+      "kind": "conv",
+      "modulePath": "enc3.block.0",
+      "depth": 2,
+      "inShapes": [
+        [
+          1,
+          32,
+          16,
+          16
+        ]
+      ],
+      "outShapes": [
+        [
+          1,
+          64,
+          16,
+          16
+        ]
+      ],
+      "params": {
+        "inChannels": 32,
+        "outChannels": 64,
+        "kernelSize": [
+          3,
+          3
+        ],
+        "stride": [
+          1,
+          1
+        ],
+        "padding": [
+          1,
+          1
+        ],
+        "dilation": [
+          1,
+          1
+        ],
+        "groups": 1,
+        "bias": false
+      },
+      "numParams": 18432,
+      "flops": 9437184,
+      "tags": [
+        "spatial",
+        "weighted",
+        "upsample"
+      ],
+      "groupId": "g10",
+      "source": {
+        "file": "samples/unet_mini.py",
+        "line": 19,
+        "code": "nn.Conv2d(in_channels, out_channels, kernel_size=3, padding=1, bias=False)"
+      },
+      "notes": [],
+      "metrics": {
+        "activationBytes": 65536,
+        "receptiveField": 24,
+        "macs": 4718592
+      },
+      "meta": {
+        "formula": "y[n,o,h',w'] = Σ_{c,kh,kw} W[o,c,kh,kw]·x[n,c,h·s+kh-p,w·s+kw-p] + b[o]  (Cin=32→Cout=64, k=3x3, s=1x1, p=1x1)",
+        "semantic": "3x3 空间卷积（通道 32→64）",
+        "axes": "NCHW",
+        "tags": [
+          "conv",
+          "spatial"
+        ]
+      }
+    },
+    {
+      "id": "n16",
+      "name": "enc3.block.1",
+      "op": "BatchNorm2d",
+      "kind": "norm",
+      "modulePath": "enc3.block.1",
+      "depth": 2,
+      "inShapes": [
+        [
+          1,
+          64,
+          16,
+          16
+        ]
+      ],
+      "outShapes": [
+        [
+          1,
+          64,
+          16,
+          16
+        ]
+      ],
+      "params": {
+        "normalizedShape": [
+          64
+        ],
+        "eps": 1e-05,
+        "affine": true
+      },
+      "numParams": 128,
+      "flops": 65536,
+      "tags": [
+        "normalized"
+      ],
+      "groupId": "g10",
+      "source": {
+        "file": "samples/unet_mini.py",
+        "line": 20,
+        "code": "nn.BatchNorm2d(out_channels)"
+      },
+      "notes": [],
+      "metrics": {
+        "activationBytes": 65536,
+        "receptiveField": 24,
+        "macs": 32768
+      },
+      "meta": {
+        "formula": "y[n,c,:] = γ[c]·(x[n,c,:]-μ_B[c])/√(σ²_B[c]+ε) + β[c]  (C=64, ε=1e-05)",
+        "semantic": "批归一化：按通道统计量标准化并仿射",
+        "axes": "NCHW（逐通道）",
+        "tags": [
+          "norm",
+          "batchnorm"
+        ]
+      }
+    },
+    {
+      "id": "n17",
+      "name": "enc3.block.2",
+      "op": "ReLU",
+      "kind": "activation",
+      "modulePath": "enc3.block.2",
+      "depth": 2,
+      "inShapes": [
+        [
+          1,
+          64,
+          16,
+          16
+        ]
+      ],
+      "outShapes": [
+        [
+          1,
+          64,
+          16,
+          16
+        ]
+      ],
+      "params": {
+        "inplace": true
+      },
+      "numParams": 0,
+      "flops": 16384,
+      "tags": [
+        "elementwise"
+      ],
+      "groupId": "g10",
+      "source": {
+        "file": "samples/unet_mini.py",
+        "line": 21,
+        "code": "nn.ReLU(inplace=True)"
+      },
+      "notes": [],
+      "metrics": {
+        "activationBytes": 65536,
+        "receptiveField": 24,
+        "macs": 8192
+      },
+      "meta": {
+        "formula": "y = max(x, 0)",
+        "semantic": "逐元素 ReLU 非线性（负值截断）",
+        "axes": "逐元素（任意轴）",
+        "tags": [
+          "activation",
+          "relu"
+        ]
+      }
+    },
+    {
+      "id": "n18",
+      "name": "enc3.block.3",
+      "op": "Conv2d",
+      "kind": "conv",
+      "modulePath": "enc3.block.3",
+      "depth": 2,
+      "inShapes": [
+        [
+          1,
+          64,
+          16,
+          16
+        ]
+      ],
+      "outShapes": [
+        [
+          1,
+          64,
+          16,
+          16
+        ]
+      ],
+      "params": {
+        "inChannels": 64,
+        "outChannels": 64,
+        "kernelSize": [
+          3,
+          3
+        ],
+        "stride": [
+          1,
+          1
+        ],
+        "padding": [
+          1,
+          1
+        ],
+        "dilation": [
+          1,
+          1
+        ],
+        "groups": 1,
+        "bias": false
+      },
+      "numParams": 36864,
+      "flops": 18874368,
+      "tags": [
+        "spatial",
+        "weighted"
+      ],
+      "groupId": "g10",
+      "source": {
+        "file": "samples/unet_mini.py",
+        "line": 22,
+        "code": "nn.Conv2d(out_channels, out_channels, kernel_size=3, padding=1, bias=False)"
+      },
+      "notes": [],
+      "metrics": {
+        "activationBytes": 65536,
+        "receptiveField": 32,
+        "macs": 9437184
+      },
+      "meta": {
+        "formula": "y[n,o,h',w'] = Σ_{c,kh,kw} W[o,c,kh,kw]·x[n,c,h·s+kh-p,w·s+kw-p] + b[o]  (Cin=64→Cout=64, k=3x3, s=1x1, p=1x1)",
+        "semantic": "3x3 空间卷积（通道 64→64）",
+        "axes": "NCHW",
+        "tags": [
+          "conv",
+          "spatial"
+        ]
+      }
+    },
+    {
+      "id": "n19",
+      "name": "enc3.block.4",
+      "op": "BatchNorm2d",
+      "kind": "norm",
+      "modulePath": "enc3.block.4",
+      "depth": 2,
+      "inShapes": [
+        [
+          1,
+          64,
+          16,
+          16
+        ]
+      ],
+      "outShapes": [
+        [
+          1,
+          64,
+          16,
+          16
+        ]
+      ],
+      "params": {
+        "normalizedShape": [
+          64
+        ],
+        "eps": 1e-05,
+        "affine": true
+      },
+      "numParams": 128,
+      "flops": 65536,
+      "tags": [
+        "normalized"
+      ],
+      "groupId": "g10",
+      "source": {
+        "file": "samples/unet_mini.py",
+        "line": 23,
+        "code": "nn.BatchNorm2d(out_channels)"
+      },
+      "notes": [],
+      "metrics": {
+        "activationBytes": 65536,
+        "receptiveField": 32,
+        "macs": 32768
+      },
+      "meta": {
+        "formula": "y[n,c,:] = γ[c]·(x[n,c,:]-μ_B[c])/√(σ²_B[c]+ε) + β[c]  (C=64, ε=1e-05)",
+        "semantic": "批归一化：按通道统计量标准化并仿射",
+        "axes": "NCHW（逐通道）",
+        "tags": [
+          "norm",
+          "batchnorm"
+        ]
+      }
+    },
+    {
+      "id": "n20",
+      "name": "enc3.block.5",
+      "op": "ReLU",
+      "kind": "activation",
+      "modulePath": "enc3.block.5",
+      "depth": 2,
+      "inShapes": [
+        [
+          1,
+          64,
+          16,
+          16
+        ]
+      ],
+      "outShapes": [
+        [
+          1,
+          64,
+          16,
+          16
+        ]
+      ],
+      "params": {
+        "inplace": true
+      },
+      "numParams": 0,
+      "flops": 16384,
+      "tags": [
+        "elementwise"
+      ],
+      "groupId": "g10",
+      "source": {
+        "file": "samples/unet_mini.py",
+        "line": 24,
+        "code": "nn.ReLU(inplace=True)"
+      },
+      "notes": [],
+      "metrics": {
+        "activationBytes": 65536,
+        "receptiveField": 32,
+        "macs": 8192
+      },
+      "meta": {
+        "formula": "y = max(x, 0)",
+        "semantic": "逐元素 ReLU 非线性（负值截断）",
+        "axes": "逐元素（任意轴）",
+        "tags": [
+          "activation",
+          "relu"
+        ]
+      }
+    },
+    {
+      "id": "n21",
+      "name": "up2",
+      "op": "ConvTranspose2d",
+      "kind": "deconv",
+      "modulePath": "up2",
+      "depth": 1,
+      "inShapes": [
+        [
+          1,
+          64,
+          16,
+          16
+        ]
+      ],
+      "outShapes": [
+        [
+          1,
+          32,
+          32,
+          32
+        ]
+      ],
+      "params": {
+        "inChannels": 64,
+        "outChannels": 32,
+        "kernelSize": [
+          2,
+          2
+        ],
+        "stride": [
+          2,
+          2
+        ],
+        "padding": [
+          0,
+          0
+        ],
+        "dilation": [
+          1,
+          1
+        ],
+        "groups": 1,
+        "bias": true,
+        "outputPadding": [
+          0,
+          0
+        ]
+      },
+      "numParams": 8224,
+      "flops": 16809984,
+      "tags": [
+        "spatial",
+        "weighted",
+        "upsample"
+      ],
+      "groupId": "g0",
+      "source": {
+        "file": "samples/unet_mini.py",
+        "line": 40,
+        "code": "nn.ConvTranspose2d(base * 4, base * 2, kernel_size=2, stride=2)"
+      },
+      "notes": [],
+      "metrics": {
+        "activationBytes": 131072,
+        "receptiveField": 36,
+        "macs": 8404992
+      },
+      "meta": {
+        "formula": "y[n,o,h',w'] = Σ_{c,kh,kw} W[c,o,kh,kw]·x[n,c,h,w]  (h'=(h-1)·s-2p+k+op)  (Cin=64→Cout=32, k=2x2, s=2x2)",
+        "semantic": "转置卷积上采样（学习式放大空间分辨率）",
+        "axes": "NCHW",
+        "tags": [
+          "deconv",
+          "upsample",
+          "spatial"
+        ]
+      }
+    },
+    {
+      "id": "n22",
+      "name": "cat",
+      "op": "torch.cat",
+      "kind": "concat",
+      "modulePath": "cat",
+      "depth": 1,
+      "inShapes": [
+        [
+          1,
+          32,
+          32,
+          32
+        ],
+        [
+          1,
+          32,
+          32,
+          32
+        ]
+      ],
+      "outShapes": [
+        [
+          1,
+          64,
+          32,
+          32
+        ]
+      ],
+      "params": {
+        "dim": 1
+      },
+      "numParams": 0,
+      "flops": 0,
+      "tags": [
+        "merge"
+      ],
+      "groupId": "g0",
+      "source": {
+        "file": "samples/unet_mini.py",
+        "line": 51,
+        "code": "torch.cat([skip2, x], dim=1)"
+      },
+      "notes": [],
+      "metrics": {
+        "activationBytes": 262144,
+        "receptiveField": 36,
+        "macs": 0
+      },
+      "meta": {
+        "formula": "y = cat(x_1, x_2, dim=1)",
+        "semantic": "沿指定轴拼接多路特征",
+        "axes": "NCHW",
+        "tags": [
+          "merge",
+          "concat"
+        ]
+      }
+    },
+    {
+      "id": "n23",
+      "name": "dec2.block.0",
+      "op": "Conv2d",
+      "kind": "conv",
+      "modulePath": "dec2.block.0",
+      "depth": 2,
+      "inShapes": [
+        [
+          1,
+          64,
+          32,
+          32
+        ]
+      ],
+      "outShapes": [
+        [
+          1,
+          32,
+          32,
+          32
+        ]
+      ],
+      "params": {
+        "inChannels": 64,
+        "outChannels": 32,
+        "kernelSize": [
+          3,
+          3
+        ],
+        "stride": [
+          1,
+          1
+        ],
+        "padding": [
+          1,
+          1
+        ],
+        "dilation": [
+          1,
+          1
+        ],
+        "groups": 1,
+        "bias": false
+      },
+      "numParams": 18432,
+      "flops": 37748736,
+      "tags": [
+        "spatial",
+        "weighted"
+      ],
+      "groupId": "g7",
+      "source": {
+        "file": "samples/unet_mini.py",
+        "line": 19,
+        "code": "nn.Conv2d(in_channels, out_channels, kernel_size=3, padding=1, bias=False)"
+      },
+      "notes": [],
+      "metrics": {
+        "activationBytes": 131072,
+        "receptiveField": 52,
+        "macs": 18874368
+      },
+      "meta": {
+        "formula": "y[n,o,h',w'] = Σ_{c,kh,kw} W[o,c,kh,kw]·x[n,c,h·s+kh-p,w·s+kw-p] + b[o]  (Cin=64→Cout=32, k=3x3, s=1x1, p=1x1)",
+        "semantic": "3x3 空间卷积（通道 64→32）",
+        "axes": "NCHW",
+        "tags": [
+          "conv",
+          "spatial"
+        ]
+      }
+    },
+    {
+      "id": "n24",
+      "name": "dec2.block.1",
+      "op": "BatchNorm2d",
+      "kind": "norm",
+      "modulePath": "dec2.block.1",
+      "depth": 2,
+      "inShapes": [
+        [
+          1,
+          32,
+          32,
+          32
+        ]
+      ],
+      "outShapes": [
+        [
+          1,
+          32,
+          32,
+          32
+        ]
+      ],
+      "params": {
+        "normalizedShape": [
+          32
+        ],
+        "eps": 1e-05,
+        "affine": true
+      },
+      "numParams": 64,
+      "flops": 131072,
+      "tags": [
+        "normalized"
+      ],
+      "groupId": "g7",
+      "source": {
+        "file": "samples/unet_mini.py",
+        "line": 20,
+        "code": "nn.BatchNorm2d(out_channels)"
+      },
+      "notes": [],
+      "metrics": {
+        "activationBytes": 131072,
+        "receptiveField": 52,
+        "macs": 65536
+      },
+      "meta": {
+        "formula": "y[n,c,:] = γ[c]·(x[n,c,:]-μ_B[c])/√(σ²_B[c]+ε) + β[c]  (C=32, ε=1e-05)",
+        "semantic": "批归一化：按通道统计量标准化并仿射",
+        "axes": "NCHW（逐通道）",
+        "tags": [
+          "norm",
+          "batchnorm"
+        ]
+      }
+    },
+    {
+      "id": "n25",
+      "name": "dec2.block.2",
+      "op": "ReLU",
+      "kind": "activation",
+      "modulePath": "dec2.block.2",
+      "depth": 2,
+      "inShapes": [
+        [
+          1,
+          32,
+          32,
+          32
+        ]
+      ],
+      "outShapes": [
+        [
+          1,
+          32,
+          32,
+          32
+        ]
+      ],
+      "params": {
+        "inplace": true
+      },
+      "numParams": 0,
+      "flops": 32768,
+      "tags": [
+        "elementwise"
+      ],
+      "groupId": "g7",
+      "source": {
+        "file": "samples/unet_mini.py",
+        "line": 21,
+        "code": "nn.ReLU(inplace=True)"
+      },
+      "notes": [],
+      "metrics": {
+        "activationBytes": 131072,
+        "receptiveField": 52,
+        "macs": 16384
+      },
+      "meta": {
+        "formula": "y = max(x, 0)",
+        "semantic": "逐元素 ReLU 非线性（负值截断）",
+        "axes": "逐元素（任意轴）",
+        "tags": [
+          "activation",
+          "relu"
+        ]
+      }
+    },
+    {
+      "id": "n26",
+      "name": "dec2.block.3",
+      "op": "Conv2d",
+      "kind": "conv",
+      "modulePath": "dec2.block.3",
+      "depth": 2,
+      "inShapes": [
+        [
+          1,
+          32,
+          32,
+          32
+        ]
+      ],
+      "outShapes": [
+        [
+          1,
+          32,
+          32,
+          32
+        ]
+      ],
+      "params": {
+        "inChannels": 32,
+        "outChannels": 32,
+        "kernelSize": [
+          3,
+          3
+        ],
+        "stride": [
+          1,
+          1
+        ],
+        "padding": [
+          1,
+          1
+        ],
+        "dilation": [
+          1,
+          1
+        ],
+        "groups": 1,
+        "bias": false
+      },
+      "numParams": 9216,
+      "flops": 18874368,
+      "tags": [
+        "spatial",
+        "weighted"
+      ],
+      "groupId": "g7",
+      "source": {
+        "file": "samples/unet_mini.py",
+        "line": 22,
+        "code": "nn.Conv2d(out_channels, out_channels, kernel_size=3, padding=1, bias=False)"
+      },
+      "notes": [],
+      "metrics": {
+        "activationBytes": 131072,
+        "receptiveField": 68,
+        "macs": 9437184
+      },
+      "meta": {
+        "formula": "y[n,o,h',w'] = Σ_{c,kh,kw} W[o,c,kh,kw]·x[n,c,h·s+kh-p,w·s+kw-p] + b[o]  (Cin=32→Cout=32, k=3x3, s=1x1, p=1x1)",
+        "semantic": "3x3 空间卷积（通道 32→32）",
+        "axes": "NCHW",
+        "tags": [
+          "conv",
+          "spatial"
+        ]
+      }
+    },
+    {
+      "id": "n27",
+      "name": "dec2.block.4",
+      "op": "BatchNorm2d",
+      "kind": "norm",
+      "modulePath": "dec2.block.4",
+      "depth": 2,
+      "inShapes": [
+        [
+          1,
+          32,
+          32,
+          32
+        ]
+      ],
+      "outShapes": [
+        [
+          1,
+          32,
+          32,
+          32
+        ]
+      ],
+      "params": {
+        "normalizedShape": [
+          32
+        ],
+        "eps": 1e-05,
+        "affine": true
+      },
+      "numParams": 64,
+      "flops": 131072,
+      "tags": [
+        "normalized"
+      ],
+      "groupId": "g7",
+      "source": {
+        "file": "samples/unet_mini.py",
+        "line": 23,
+        "code": "nn.BatchNorm2d(out_channels)"
+      },
+      "notes": [],
+      "metrics": {
+        "activationBytes": 131072,
+        "receptiveField": 68,
+        "macs": 65536
+      },
+      "meta": {
+        "formula": "y[n,c,:] = γ[c]·(x[n,c,:]-μ_B[c])/√(σ²_B[c]+ε) + β[c]  (C=32, ε=1e-05)",
+        "semantic": "批归一化：按通道统计量标准化并仿射",
+        "axes": "NCHW（逐通道）",
+        "tags": [
+          "norm",
+          "batchnorm"
+        ]
+      }
+    },
+    {
+      "id": "n28",
+      "name": "dec2.block.5",
+      "op": "ReLU",
+      "kind": "activation",
+      "modulePath": "dec2.block.5",
+      "depth": 2,
+      "inShapes": [
+        [
+          1,
+          32,
+          32,
+          32
+        ]
+      ],
+      "outShapes": [
+        [
+          1,
+          32,
+          32,
+          32
+        ]
+      ],
+      "params": {
+        "inplace": true
+      },
+      "numParams": 0,
+      "flops": 32768,
+      "tags": [
+        "elementwise"
+      ],
+      "groupId": "g7",
+      "source": {
+        "file": "samples/unet_mini.py",
+        "line": 24,
+        "code": "nn.ReLU(inplace=True)"
+      },
+      "notes": [],
+      "metrics": {
+        "activationBytes": 131072,
+        "receptiveField": 68,
+        "macs": 16384
+      },
+      "meta": {
+        "formula": "y = max(x, 0)",
+        "semantic": "逐元素 ReLU 非线性（负值截断）",
+        "axes": "逐元素（任意轴）",
+        "tags": [
+          "activation",
+          "relu"
+        ]
+      }
+    },
+    {
+      "id": "n29",
+      "name": "up1",
+      "op": "ConvTranspose2d",
+      "kind": "deconv",
+      "modulePath": "up1",
+      "depth": 1,
+      "inShapes": [
+        [
+          1,
+          32,
+          32,
+          32
+        ]
+      ],
+      "outShapes": [
+        [
+          1,
+          16,
+          64,
+          64
+        ]
+      ],
+      "params": {
+        "inChannels": 32,
+        "outChannels": 16,
+        "kernelSize": [
+          2,
+          2
+        ],
+        "stride": [
+          2,
+          2
+        ],
+        "padding": [
+          0,
+          0
+        ],
+        "dilation": [
+          1,
+          1
+        ],
+        "groups": 1,
+        "bias": true,
+        "outputPadding": [
+          0,
+          0
+        ]
+      },
+      "numParams": 2064,
+      "flops": 16842752,
+      "tags": [
+        "spatial",
+        "weighted",
+        "upsample"
+      ],
+      "groupId": "g0",
+      "source": {
+        "file": "samples/unet_mini.py",
+        "line": 42,
+        "code": "nn.ConvTranspose2d(base * 2, base, kernel_size=2, stride=2)"
+      },
+      "notes": [],
+      "metrics": {
+        "activationBytes": 262144,
+        "receptiveField": 76,
+        "macs": 8421376
+      },
+      "meta": {
+        "formula": "y[n,o,h',w'] = Σ_{c,kh,kw} W[c,o,kh,kw]·x[n,c,h,w]  (h'=(h-1)·s-2p+k+op)  (Cin=32→Cout=16, k=2x2, s=2x2)",
+        "semantic": "转置卷积上采样（学习式放大空间分辨率）",
+        "axes": "NCHW",
+        "tags": [
+          "deconv",
+          "upsample",
+          "spatial"
+        ]
+      }
+    },
+    {
+      "id": "n30",
+      "name": "cat#2",
+      "op": "torch.cat",
+      "kind": "concat",
+      "modulePath": "cat",
+      "depth": 1,
+      "inShapes": [
+        [
+          1,
+          16,
+          64,
+          64
+        ],
+        [
+          1,
+          16,
+          64,
+          64
+        ]
+      ],
+      "outShapes": [
+        [
+          1,
+          32,
+          64,
+          64
+        ]
+      ],
+      "params": {
+        "dim": 1
+      },
+      "numParams": 0,
+      "flops": 0,
+      "tags": [
+        "merge"
+      ],
+      "groupId": "g0",
+      "source": {
+        "file": "samples/unet_mini.py",
+        "line": 53,
+        "code": "torch.cat([skip1, x], dim=1)"
+      },
+      "notes": [],
+      "metrics": {
+        "activationBytes": 524288,
+        "receptiveField": 76,
+        "macs": 0
+      },
+      "meta": {
+        "formula": "y = cat(x_1, x_2, dim=1)",
+        "semantic": "沿指定轴拼接多路特征",
+        "axes": "NCHW",
+        "tags": [
+          "merge",
+          "concat"
+        ]
+      }
+    },
+    {
+      "id": "n31",
+      "name": "dec1.block.0",
+      "op": "Conv2d",
+      "kind": "conv",
+      "modulePath": "dec1.block.0",
+      "depth": 2,
+      "inShapes": [
+        [
+          1,
+          32,
+          64,
+          64
+        ]
+      ],
+      "outShapes": [
+        [
+          1,
+          16,
+          64,
+          64
+        ]
+      ],
+      "params": {
+        "inChannels": 32,
+        "outChannels": 16,
+        "kernelSize": [
+          3,
+          3
+        ],
+        "stride": [
+          1,
+          1
+        ],
+        "padding": [
+          1,
+          1
+        ],
+        "dilation": [
+          1,
+          1
+        ],
+        "groups": 1,
+        "bias": false
+      },
+      "numParams": 4608,
+      "flops": 37748736,
+      "tags": [
+        "spatial",
+        "weighted"
+      ],
+      "groupId": "g6",
+      "source": {
+        "file": "samples/unet_mini.py",
+        "line": 19,
+        "code": "nn.Conv2d(in_channels, out_channels, kernel_size=3, padding=1, bias=False)"
+      },
+      "notes": [],
+      "metrics": {
+        "activationBytes": 262144,
+        "receptiveField": 108,
+        "macs": 18874368
+      },
+      "meta": {
+        "formula": "y[n,o,h',w'] = Σ_{c,kh,kw} W[o,c,kh,kw]·x[n,c,h·s+kh-p,w·s+kw-p] + b[o]  (Cin=32→Cout=16, k=3x3, s=1x1, p=1x1)",
+        "semantic": "3x3 空间卷积（通道 32→16）",
+        "axes": "NCHW",
+        "tags": [
+          "conv",
+          "spatial"
+        ]
+      }
+    },
+    {
+      "id": "n32",
+      "name": "dec1.block.1",
+      "op": "BatchNorm2d",
+      "kind": "norm",
+      "modulePath": "dec1.block.1",
+      "depth": 2,
+      "inShapes": [
+        [
+          1,
+          16,
+          64,
+          64
+        ]
+      ],
+      "outShapes": [
+        [
+          1,
+          16,
+          64,
+          64
+        ]
+      ],
+      "params": {
+        "normalizedShape": [
+          16
+        ],
+        "eps": 1e-05,
+        "affine": true
+      },
+      "numParams": 32,
+      "flops": 262144,
+      "tags": [
+        "normalized"
+      ],
+      "groupId": "g6",
+      "source": {
+        "file": "samples/unet_mini.py",
+        "line": 20,
+        "code": "nn.BatchNorm2d(out_channels)"
+      },
+      "notes": [],
+      "metrics": {
+        "activationBytes": 262144,
+        "receptiveField": 108,
+        "macs": 131072
+      },
+      "meta": {
+        "formula": "y[n,c,:] = γ[c]·(x[n,c,:]-μ_B[c])/√(σ²_B[c]+ε) + β[c]  (C=16, ε=1e-05)",
+        "semantic": "批归一化：按通道统计量标准化并仿射",
+        "axes": "NCHW（逐通道）",
+        "tags": [
+          "norm",
+          "batchnorm"
+        ]
+      }
+    },
+    {
+      "id": "n33",
+      "name": "dec1.block.2",
+      "op": "ReLU",
+      "kind": "activation",
+      "modulePath": "dec1.block.2",
+      "depth": 2,
+      "inShapes": [
+        [
+          1,
+          16,
+          64,
+          64
+        ]
+      ],
+      "outShapes": [
+        [
+          1,
+          16,
+          64,
+          64
+        ]
+      ],
+      "params": {
+        "inplace": true
+      },
+      "numParams": 0,
+      "flops": 65536,
+      "tags": [
+        "elementwise"
+      ],
+      "groupId": "g6",
+      "source": {
+        "file": "samples/unet_mini.py",
+        "line": 21,
+        "code": "nn.ReLU(inplace=True)"
+      },
+      "notes": [],
+      "metrics": {
+        "activationBytes": 262144,
+        "receptiveField": 108,
+        "macs": 32768
+      },
+      "meta": {
+        "formula": "y = max(x, 0)",
+        "semantic": "逐元素 ReLU 非线性（负值截断）",
+        "axes": "逐元素（任意轴）",
+        "tags": [
+          "activation",
+          "relu"
+        ]
+      }
+    },
+    {
+      "id": "n34",
+      "name": "dec1.block.3",
+      "op": "Conv2d",
+      "kind": "conv",
+      "modulePath": "dec1.block.3",
+      "depth": 2,
+      "inShapes": [
+        [
+          1,
+          16,
+          64,
+          64
+        ]
+      ],
+      "outShapes": [
+        [
+          1,
+          16,
+          64,
+          64
+        ]
+      ],
+      "params": {
+        "inChannels": 16,
+        "outChannels": 16,
+        "kernelSize": [
+          3,
+          3
+        ],
+        "stride": [
+          1,
+          1
+        ],
+        "padding": [
+          1,
+          1
+        ],
+        "dilation": [
+          1,
+          1
+        ],
+        "groups": 1,
+        "bias": false
+      },
+      "numParams": 2304,
+      "flops": 18874368,
+      "tags": [
+        "spatial",
+        "weighted"
+      ],
+      "groupId": "g6",
+      "source": {
+        "file": "samples/unet_mini.py",
+        "line": 22,
+        "code": "nn.Conv2d(out_channels, out_channels, kernel_size=3, padding=1, bias=False)"
+      },
+      "notes": [],
+      "metrics": {
+        "activationBytes": 262144,
+        "receptiveField": 140,
+        "macs": 9437184
+      },
+      "meta": {
+        "formula": "y[n,o,h',w'] = Σ_{c,kh,kw} W[o,c,kh,kw]·x[n,c,h·s+kh-p,w·s+kw-p] + b[o]  (Cin=16→Cout=16, k=3x3, s=1x1, p=1x1)",
+        "semantic": "3x3 空间卷积（通道 16→16）",
+        "axes": "NCHW",
+        "tags": [
+          "conv",
+          "spatial"
+        ]
+      }
+    },
+    {
+      "id": "n35",
+      "name": "dec1.block.4",
+      "op": "BatchNorm2d",
+      "kind": "norm",
+      "modulePath": "dec1.block.4",
+      "depth": 2,
+      "inShapes": [
+        [
+          1,
+          16,
+          64,
+          64
+        ]
+      ],
+      "outShapes": [
+        [
+          1,
+          16,
+          64,
+          64
+        ]
+      ],
+      "params": {
+        "normalizedShape": [
+          16
+        ],
+        "eps": 1e-05,
+        "affine": true
+      },
+      "numParams": 32,
+      "flops": 262144,
+      "tags": [
+        "normalized"
+      ],
+      "groupId": "g6",
+      "source": {
+        "file": "samples/unet_mini.py",
+        "line": 23,
+        "code": "nn.BatchNorm2d(out_channels)"
+      },
+      "notes": [],
+      "metrics": {
+        "activationBytes": 262144,
+        "receptiveField": 140,
+        "macs": 131072
+      },
+      "meta": {
+        "formula": "y[n,c,:] = γ[c]·(x[n,c,:]-μ_B[c])/√(σ²_B[c]+ε) + β[c]  (C=16, ε=1e-05)",
+        "semantic": "批归一化：按通道统计量标准化并仿射",
+        "axes": "NCHW（逐通道）",
+        "tags": [
+          "norm",
+          "batchnorm"
+        ]
+      }
+    },
+    {
+      "id": "n36",
+      "name": "dec1.block.5",
+      "op": "ReLU",
+      "kind": "activation",
+      "modulePath": "dec1.block.5",
+      "depth": 2,
+      "inShapes": [
+        [
+          1,
+          16,
+          64,
+          64
+        ]
+      ],
+      "outShapes": [
+        [
+          1,
+          16,
+          64,
+          64
+        ]
+      ],
+      "params": {
+        "inplace": true
+      },
+      "numParams": 0,
+      "flops": 65536,
+      "tags": [
+        "elementwise"
+      ],
+      "groupId": "g6",
+      "source": {
+        "file": "samples/unet_mini.py",
+        "line": 24,
+        "code": "nn.ReLU(inplace=True)"
+      },
+      "notes": [],
+      "metrics": {
+        "activationBytes": 262144,
+        "receptiveField": 140,
+        "macs": 32768
+      },
+      "meta": {
+        "formula": "y = max(x, 0)",
+        "semantic": "逐元素 ReLU 非线性（负值截断）",
+        "axes": "逐元素（任意轴）",
+        "tags": [
+          "activation",
+          "relu"
+        ]
+      }
+    },
+    {
+      "id": "n37",
+      "name": "head",
+      "op": "Conv2d",
+      "kind": "conv",
+      "modulePath": "head",
+      "depth": 1,
+      "inShapes": [
+        [
+          1,
+          16,
+          64,
+          64
+        ]
+      ],
+      "outShapes": [
+        [
+          1,
+          1,
+          64,
+          64
+        ]
+      ],
+      "params": {
+        "inChannels": 16,
+        "outChannels": 1,
+        "kernelSize": [
+          1,
+          1
+        ],
+        "stride": [
+          1,
+          1
+        ],
+        "padding": [
+          0,
+          0
+        ],
+        "dilation": [
+          1,
+          1
+        ],
+        "groups": 1,
+        "bias": true
+      },
+      "numParams": 17,
+      "flops": 135168,
+      "tags": [
+        "spatial",
+        "weighted"
+      ],
+      "groupId": "g0",
+      "source": {
+        "file": "samples/unet_mini.py",
+        "line": 44,
+        "code": "nn.Conv2d(base, out_channels, kernel_size=1)"
+      },
+      "notes": [],
+      "metrics": {
+        "activationBytes": 16384,
+        "receptiveField": 140,
+        "macs": 67584
+      },
+      "meta": {
+        "formula": "y[n,o,h',w'] = Σ_{c,kh,kw} W[o,c,kh,kw]·x[n,c,h·s+kh-p,w·s+kw-p] + b[o]  (Cin=16→Cout=1, k=1x1, s=1x1, p=0x0)",
+        "semantic": "1×1 通道投影（逐像素线性混合）",
+        "axes": "NCHW",
+        "tags": [
+          "conv",
+          "spatial",
+          "pointwise"
+        ]
+      }
+    },
+    {
+      "id": "n38",
+      "name": "output",
+      "op": "Output",
+      "kind": "output",
+      "modulePath": "",
+      "depth": 0,
+      "inShapes": [
+        [
+          1,
+          1,
+          64,
+          64
+        ]
+      ],
+      "outShapes": [
+        [
+          1,
+          1,
+          64,
+          64
+        ]
+      ],
+      "params": {},
+      "numParams": 0,
+      "flops": 0,
+      "tags": [
+        "boundary"
+      ],
+      "groupId": null,
+      "source": null,
+      "notes": [],
+      "metrics": {
+        "activationBytes": 16384,
+        "receptiveField": 140,
+        "macs": 0
+      },
+      "meta": {
+        "formula": "y = Output((1, 1, 64, 64))",
+        "semantic": "网络输出张量",
+        "axes": "NCHW",
+        "tags": [
+          "boundary",
+          "output"
+        ]
+      }
+    }
+  ],
+  "edges": [
+    {
+      "id": "e0",
+      "source": "n0",
+      "target": "n1",
+      "kind": "data",
+      "shapes": [
+        [
+          1,
+          3,
+          64,
+          64
+        ]
+      ],
+      "label": ""
+    },
+    {
+      "id": "e1",
+      "source": "n1",
+      "target": "n2",
+      "kind": "data",
+      "shapes": [
+        [
+          1,
+          16,
+          64,
+          64
+        ]
+      ],
+      "label": ""
+    },
+    {
+      "id": "e2",
+      "source": "n2",
+      "target": "n3",
+      "kind": "data",
+      "shapes": [
+        [
+          1,
+          16,
+          64,
+          64
+        ]
+      ],
+      "label": ""
+    },
+    {
+      "id": "e3",
+      "source": "n3",
+      "target": "n4",
+      "kind": "data",
+      "shapes": [
+        [
+          1,
+          16,
+          64,
+          64
+        ]
+      ],
+      "label": ""
+    },
+    {
+      "id": "e4",
+      "source": "n4",
+      "target": "n5",
+      "kind": "data",
+      "shapes": [
+        [
+          1,
+          16,
+          64,
+          64
+        ]
+      ],
+      "label": ""
+    },
+    {
+      "id": "e5",
+      "source": "n5",
+      "target": "n6",
+      "kind": "data",
+      "shapes": [
+        [
+          1,
+          16,
+          64,
+          64
+        ]
+      ],
+      "label": ""
+    },
+    {
+      "id": "e6",
+      "source": "n6",
+      "target": "n7",
+      "kind": "data",
+      "shapes": [
+        [
+          1,
+          16,
+          64,
+          64
+        ]
+      ],
+      "label": ""
+    },
+    {
+      "id": "e7",
+      "source": "n7",
+      "target": "n8",
+      "kind": "data",
+      "shapes": [
+        [
+          1,
+          16,
+          32,
+          32
+        ]
+      ],
+      "label": ""
+    },
+    {
+      "id": "e8",
+      "source": "n8",
+      "target": "n9",
+      "kind": "data",
+      "shapes": [
+        [
+          1,
+          32,
+          32,
+          32
+        ]
+      ],
+      "label": ""
+    },
+    {
+      "id": "e9",
+      "source": "n9",
+      "target": "n10",
+      "kind": "data",
+      "shapes": [
+        [
+          1,
+          32,
+          32,
+          32
+        ]
+      ],
+      "label": ""
+    },
+    {
+      "id": "e10",
+      "source": "n10",
+      "target": "n11",
+      "kind": "data",
+      "shapes": [
+        [
+          1,
+          32,
+          32,
+          32
+        ]
+      ],
+      "label": ""
+    },
+    {
+      "id": "e11",
+      "source": "n11",
+      "target": "n12",
+      "kind": "data",
+      "shapes": [
+        [
+          1,
+          32,
+          32,
+          32
+        ]
+      ],
+      "label": ""
+    },
+    {
+      "id": "e12",
+      "source": "n12",
+      "target": "n13",
+      "kind": "data",
+      "shapes": [
+        [
+          1,
+          32,
+          32,
+          32
+        ]
+      ],
+      "label": ""
+    },
+    {
+      "id": "e13",
+      "source": "n13",
+      "target": "n14",
+      "kind": "data",
+      "shapes": [
+        [
+          1,
+          32,
+          32,
+          32
+        ]
+      ],
+      "label": ""
+    },
+    {
+      "id": "e14",
+      "source": "n14",
+      "target": "n15",
+      "kind": "data",
+      "shapes": [
+        [
+          1,
+          32,
+          16,
+          16
+        ]
+      ],
+      "label": ""
+    },
+    {
+      "id": "e15",
+      "source": "n15",
+      "target": "n16",
+      "kind": "data",
+      "shapes": [
+        [
+          1,
+          64,
+          16,
+          16
+        ]
+      ],
+      "label": ""
+    },
+    {
+      "id": "e16",
+      "source": "n16",
+      "target": "n17",
+      "kind": "data",
+      "shapes": [
+        [
+          1,
+          64,
+          16,
+          16
+        ]
+      ],
+      "label": ""
+    },
+    {
+      "id": "e17",
+      "source": "n17",
+      "target": "n18",
+      "kind": "data",
+      "shapes": [
+        [
+          1,
+          64,
+          16,
+          16
+        ]
+      ],
+      "label": ""
+    },
+    {
+      "id": "e18",
+      "source": "n18",
+      "target": "n19",
+      "kind": "data",
+      "shapes": [
+        [
+          1,
+          64,
+          16,
+          16
+        ]
+      ],
+      "label": ""
+    },
+    {
+      "id": "e19",
+      "source": "n19",
+      "target": "n20",
+      "kind": "data",
+      "shapes": [
+        [
+          1,
+          64,
+          16,
+          16
+        ]
+      ],
+      "label": ""
+    },
+    {
+      "id": "e20",
+      "source": "n20",
+      "target": "n21",
+      "kind": "data",
+      "shapes": [
+        [
+          1,
+          64,
+          16,
+          16
+        ]
+      ],
+      "label": ""
+    },
+    {
+      "id": "e21",
+      "source": "n13",
+      "target": "n22",
+      "kind": "skip",
+      "shapes": [
+        [
+          1,
+          32,
+          32,
+          32
+        ]
+      ],
+      "label": "skip"
+    },
+    {
+      "id": "e22",
+      "source": "n21",
+      "target": "n22",
+      "kind": "skip",
+      "shapes": [
+        [
+          1,
+          32,
+          32,
+          32
+        ]
+      ],
+      "label": "skip"
+    },
+    {
+      "id": "e23",
+      "source": "n22",
+      "target": "n23",
+      "kind": "data",
+      "shapes": [
+        [
+          1,
+          64,
+          32,
+          32
+        ]
+      ],
+      "label": ""
+    },
+    {
+      "id": "e24",
+      "source": "n23",
+      "target": "n24",
+      "kind": "data",
+      "shapes": [
+        [
+          1,
+          32,
+          32,
+          32
+        ]
+      ],
+      "label": ""
+    },
+    {
+      "id": "e25",
+      "source": "n24",
+      "target": "n25",
+      "kind": "data",
+      "shapes": [
+        [
+          1,
+          32,
+          32,
+          32
+        ]
+      ],
+      "label": ""
+    },
+    {
+      "id": "e26",
+      "source": "n25",
+      "target": "n26",
+      "kind": "data",
+      "shapes": [
+        [
+          1,
+          32,
+          32,
+          32
+        ]
+      ],
+      "label": ""
+    },
+    {
+      "id": "e27",
+      "source": "n26",
+      "target": "n27",
+      "kind": "data",
+      "shapes": [
+        [
+          1,
+          32,
+          32,
+          32
+        ]
+      ],
+      "label": ""
+    },
+    {
+      "id": "e28",
+      "source": "n27",
+      "target": "n28",
+      "kind": "data",
+      "shapes": [
+        [
+          1,
+          32,
+          32,
+          32
+        ]
+      ],
+      "label": ""
+    },
+    {
+      "id": "e29",
+      "source": "n28",
+      "target": "n29",
+      "kind": "data",
+      "shapes": [
+        [
+          1,
+          32,
+          32,
+          32
+        ]
+      ],
+      "label": ""
+    },
+    {
+      "id": "e30",
+      "source": "n6",
+      "target": "n30",
+      "kind": "skip",
+      "shapes": [
+        [
+          1,
+          16,
+          64,
+          64
+        ]
+      ],
+      "label": "skip"
+    },
+    {
+      "id": "e31",
+      "source": "n29",
+      "target": "n30",
+      "kind": "skip",
+      "shapes": [
+        [
+          1,
+          16,
+          64,
+          64
+        ]
+      ],
+      "label": "skip"
+    },
+    {
+      "id": "e32",
+      "source": "n30",
+      "target": "n31",
+      "kind": "data",
+      "shapes": [
+        [
+          1,
+          32,
+          64,
+          64
+        ]
+      ],
+      "label": ""
+    },
+    {
+      "id": "e33",
+      "source": "n31",
+      "target": "n32",
+      "kind": "data",
+      "shapes": [
+        [
+          1,
+          16,
+          64,
+          64
+        ]
+      ],
+      "label": ""
+    },
+    {
+      "id": "e34",
+      "source": "n32",
+      "target": "n33",
+      "kind": "data",
+      "shapes": [
+        [
+          1,
+          16,
+          64,
+          64
+        ]
+      ],
+      "label": ""
+    },
+    {
+      "id": "e35",
+      "source": "n33",
+      "target": "n34",
+      "kind": "data",
+      "shapes": [
+        [
+          1,
+          16,
+          64,
+          64
+        ]
+      ],
+      "label": ""
+    },
+    {
+      "id": "e36",
+      "source": "n34",
+      "target": "n35",
+      "kind": "data",
+      "shapes": [
+        [
+          1,
+          16,
+          64,
+          64
+        ]
+      ],
+      "label": ""
+    },
+    {
+      "id": "e37",
+      "source": "n35",
+      "target": "n36",
+      "kind": "data",
+      "shapes": [
+        [
+          1,
+          16,
+          64,
+          64
+        ]
+      ],
+      "label": ""
+    },
+    {
+      "id": "e38",
+      "source": "n36",
+      "target": "n37",
+      "kind": "data",
+      "shapes": [
+        [
+          1,
+          16,
+          64,
+          64
+        ]
+      ],
+      "label": ""
+    },
+    {
+      "id": "e39",
+      "source": "n37",
+      "target": "n38",
+      "kind": "data",
+      "shapes": [
+        [
+          1,
+          1,
+          64,
+          64
+        ]
+      ],
+      "label": ""
+    }
+  ],
+  "groups": [
+    {
+      "id": "g0",
+      "name": "UNetMini",
+      "label": "Unet Mini",
+      "kind": "model",
+      "parentId": null,
+      "depth": 0,
+      "nodeIds": [
+        "n7",
+        "n14",
+        "n21",
+        "n22",
+        "n29",
+        "n30",
+        "n37"
+      ],
+      "childGroupIds": [
+        "g1",
+        "g2",
+        "g3",
+        "g4",
+        "g5"
+      ],
+      "numParams": 117361,
+      "flops": 228298752,
+      "source": {
+        "line": 31,
+        "code": "class UNetMini(nn.Module): \"\"\"Two-stage encoder/decoder with transposed-conv upsampling and skip cats.\"\"\" def __init__(self, in_channels: int = 3, out_channels: int = 1, base: int = 16) -> None: super",
+        "file": "samples/unet_mini.py"
+      },
+      "meta": {
+        "pattern": {
+          "kind": "unet_skip",
+          "label": "UNet Skip Connection",
+          "formula": "y = Dec(cat(x_enc, up(x)))",
+          "confidence": 0.95,
+          "tags": [
+            "unet",
+            "skip_connection",
+            "concat"
+          ]
+        }
+      }
+    },
+    {
+      "id": "g1",
+      "name": "dec1",
+      "label": "Decoder 1",
+      "kind": "unet_block",
+      "parentId": "g0",
+      "depth": 1,
+      "nodeIds": [],
+      "childGroupIds": [
+        "g6"
+      ],
+      "numParams": 6976,
+      "flops": 57278464,
+      "source": {
+        "line": 13,
+        "code": "class DoubleConv(nn.Module): \"\"\"(conv 3x3 -> BN -> ReLU) applied twice.\"\"\" def __init__(self, in_channels: int, out_channels: int) -> None: super().__init__() self.block = nn.Sequential( nn.Conv2d(in_",
+        "file": "samples/unet_mini.py"
+      }
+    },
+    {
+      "id": "g2",
+      "name": "dec2",
+      "label": "Decoder 2",
+      "kind": "unet_block",
+      "parentId": "g0",
+      "depth": 1,
+      "nodeIds": [],
+      "childGroupIds": [
+        "g7"
+      ],
+      "numParams": 27776,
+      "flops": 56950784,
+      "source": {
+        "line": 13,
+        "code": "class DoubleConv(nn.Module): \"\"\"(conv 3x3 -> BN -> ReLU) applied twice.\"\"\" def __init__(self, in_channels: int, out_channels: int) -> None: super().__init__() self.block = nn.Sequential( nn.Conv2d(in_",
+        "file": "samples/unet_mini.py"
+      }
+    },
+    {
+      "id": "g3",
+      "name": "enc1",
+      "label": "Encoder 1",
+      "kind": "unet_block",
+      "parentId": "g0",
+      "depth": 1,
+      "nodeIds": [],
+      "childGroupIds": [
+        "g8"
+      ],
+      "numParams": 2800,
+      "flops": 23068672,
+      "source": {
+        "line": 13,
+        "code": "class DoubleConv(nn.Module): \"\"\"(conv 3x3 -> BN -> ReLU) applied twice.\"\"\" def __init__(self, in_channels: int, out_channels: int) -> None: super().__init__() self.block = nn.Sequential( nn.Conv2d(in_",
+        "file": "samples/unet_mini.py"
+      }
+    },
+    {
+      "id": "g4",
+      "name": "enc2",
+      "label": "Encoder 2",
+      "kind": "unet_block",
+      "parentId": "g0",
+      "depth": 1,
+      "nodeIds": [],
+      "childGroupIds": [
+        "g9"
+      ],
+      "numParams": 13952,
+      "flops": 28639232,
+      "source": {
+        "line": 13,
+        "code": "class DoubleConv(nn.Module): \"\"\"(conv 3x3 -> BN -> ReLU) applied twice.\"\"\" def __init__(self, in_channels: int, out_channels: int) -> None: super().__init__() self.block = nn.Sequential( nn.Conv2d(in_",
+        "file": "samples/unet_mini.py"
+      }
+    },
+    {
+      "id": "g5",
+      "name": "enc3",
+      "label": "Encoder 3",
+      "kind": "unet_block",
+      "parentId": "g0",
+      "depth": 1,
+      "nodeIds": [],
+      "childGroupIds": [
+        "g10"
+      ],
+      "numParams": 55552,
+      "flops": 28475392,
+      "source": {
+        "line": 13,
+        "code": "class DoubleConv(nn.Module): \"\"\"(conv 3x3 -> BN -> ReLU) applied twice.\"\"\" def __init__(self, in_channels: int, out_channels: int) -> None: super().__init__() self.block = nn.Sequential( nn.Conv2d(in_",
+        "file": "samples/unet_mini.py"
+      }
+    },
+    {
+      "id": "g6",
+      "name": "dec1.block",
+      "label": "Decoder 1 · Conv Block",
+      "kind": "conv_block",
+      "parentId": "g1",
+      "depth": 2,
+      "nodeIds": [
+        "n31",
+        "n32",
+        "n33",
+        "n34",
+        "n35",
+        "n36"
+      ],
+      "childGroupIds": [],
+      "numParams": 6976,
+      "flops": 57278464,
+      "source": {
+        "line": 31,
+        "code": "class UNetMini(nn.Module): \"\"\"Two-stage encoder/decoder with transposed-conv upsampling and skip cats.\"\"\" def __init__(self, in_channels: int = 3, out_channels: int = 1, base: int = 16) -> None: super",
+        "file": "samples/unet_mini.py"
+      },
+      "meta": {
+        "pattern": {
+          "kind": "conv_bn_act",
+          "label": "Conv-BN-Act",
+          "formula": "y = Act(BN(Conv(x)))",
+          "confidence": 0.95,
+          "tags": [
+            "conv",
+            "conv_bn_act",
+            "normalization",
+            "activation"
+          ]
+        }
+      }
+    },
+    {
+      "id": "g7",
+      "name": "dec2.block",
+      "label": "Decoder 2 · Conv Block",
+      "kind": "conv_block",
+      "parentId": "g2",
+      "depth": 2,
+      "nodeIds": [
+        "n23",
+        "n24",
+        "n25",
+        "n26",
+        "n27",
+        "n28"
+      ],
+      "childGroupIds": [],
+      "numParams": 27776,
+      "flops": 56950784,
+      "source": {
+        "line": 31,
+        "code": "class UNetMini(nn.Module): \"\"\"Two-stage encoder/decoder with transposed-conv upsampling and skip cats.\"\"\" def __init__(self, in_channels: int = 3, out_channels: int = 1, base: int = 16) -> None: super",
+        "file": "samples/unet_mini.py"
+      },
+      "meta": {
+        "pattern": {
+          "kind": "conv_bn_act",
+          "label": "Conv-BN-Act",
+          "formula": "y = Act(BN(Conv(x)))",
+          "confidence": 0.95,
+          "tags": [
+            "conv",
+            "conv_bn_act",
+            "normalization",
+            "activation"
+          ]
+        }
+      }
+    },
+    {
+      "id": "g8",
+      "name": "enc1.block",
+      "label": "Encoder 1 · Conv Block",
+      "kind": "conv_block",
+      "parentId": "g3",
+      "depth": 2,
+      "nodeIds": [
+        "n1",
+        "n2",
+        "n3",
+        "n4",
+        "n5",
+        "n6"
+      ],
+      "childGroupIds": [],
+      "numParams": 2800,
+      "flops": 23068672,
+      "source": {
+        "line": 31,
+        "code": "class UNetMini(nn.Module): \"\"\"Two-stage encoder/decoder with transposed-conv upsampling and skip cats.\"\"\" def __init__(self, in_channels: int = 3, out_channels: int = 1, base: int = 16) -> None: super",
+        "file": "samples/unet_mini.py"
+      },
+      "meta": {
+        "pattern": {
+          "kind": "unet_skip",
+          "label": "UNet Skip Connection",
+          "formula": "y = Dec(cat(x_enc, up(x)))",
+          "confidence": 0.95,
+          "tags": [
+            "unet",
+            "skip_connection",
+            "concat"
+          ]
+        }
+      }
+    },
+    {
+      "id": "g9",
+      "name": "enc2.block",
+      "label": "Encoder 2 · Conv Block",
+      "kind": "conv_block",
+      "parentId": "g4",
+      "depth": 2,
+      "nodeIds": [
+        "n8",
+        "n9",
+        "n10",
+        "n11",
+        "n12",
+        "n13"
+      ],
+      "childGroupIds": [],
+      "numParams": 13952,
+      "flops": 28639232,
+      "source": {
+        "line": 31,
+        "code": "class UNetMini(nn.Module): \"\"\"Two-stage encoder/decoder with transposed-conv upsampling and skip cats.\"\"\" def __init__(self, in_channels: int = 3, out_channels: int = 1, base: int = 16) -> None: super",
+        "file": "samples/unet_mini.py"
+      },
+      "meta": {
+        "pattern": {
+          "kind": "unet_skip",
+          "label": "UNet Skip Connection",
+          "formula": "y = Dec(cat(x_enc, up(x)))",
+          "confidence": 0.95,
+          "tags": [
+            "unet",
+            "skip_connection",
+            "concat"
+          ]
+        }
+      }
+    },
+    {
+      "id": "g10",
+      "name": "enc3.block",
+      "label": "Encoder 3 · Conv Block",
+      "kind": "conv_block",
+      "parentId": "g5",
+      "depth": 2,
+      "nodeIds": [
+        "n15",
+        "n16",
+        "n17",
+        "n18",
+        "n19",
+        "n20"
+      ],
+      "childGroupIds": [],
+      "numParams": 55552,
+      "flops": 28475392,
+      "source": {
+        "line": 31,
+        "code": "class UNetMini(nn.Module): \"\"\"Two-stage encoder/decoder with transposed-conv upsampling and skip cats.\"\"\" def __init__(self, in_channels: int = 3, out_channels: int = 1, base: int = 16) -> None: super",
+        "file": "samples/unet_mini.py"
+      },
+      "meta": {
+        "pattern": {
+          "kind": "conv_bn_act",
+          "label": "Conv-BN-Act",
+          "formula": "y = Act(BN(Conv(x)))",
+          "confidence": 0.95,
+          "tags": [
+            "conv",
+            "conv_bn_act",
+            "normalization",
+            "activation"
+          ]
+        }
+      }
+    }
+  ]
+}

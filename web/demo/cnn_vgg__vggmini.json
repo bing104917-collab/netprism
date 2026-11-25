@@ -1,0 +1,2207 @@
+{
+  "schemaVersion": "1.0",
+  "generator": {
+    "name": "netprism",
+    "version": "0.1.0"
+  },
+  "model": {
+    "name": "VGGMini",
+    "framework": "pytorch",
+    "className": "VGGMini",
+    "mode": "trace",
+    "source": {
+      "file": "samples/cnn_vgg.py",
+      "relPath": "cnn_vgg.py"
+    },
+    "inputSpec": [
+      {
+        "name": "x",
+        "shape": [
+          1,
+          3,
+          64,
+          64
+        ],
+        "dtype": "float32"
+      }
+    ],
+    "outputSpec": [
+      {
+        "name": "output",
+        "shape": [
+          1,
+          10
+        ],
+        "dtype": "float32"
+      }
+    ],
+    "totalParams": 66474,
+    "trainableParams": 66474,
+    "totalFlops": 63230666,
+    "flopsApprox": false,
+    "numLayers": 24,
+    "warnings": [],
+    "metrics": {
+      "paramBytes": 265896,
+      "activationBytes": 2507728,
+      "peakActivationBytes": 524288,
+      "maxReceptiveField": 28,
+      "macs": 31615333
+    },
+    "meta": {
+      "family": "vgg",
+      "familyLabel": "VGG",
+      "familyConfidence": 0.78,
+      "confidence": 0.78,
+      "algorithmTags": [
+        "cnn",
+        "vgg",
+        "conv",
+        "conv_bn_act",
+        "normalization",
+        "activation",
+        "global_pool",
+        "pool",
+        "classifier_head",
+        "linear"
+      ],
+      "families": [
+        {
+          "id": "vgg",
+          "label": "VGG",
+          "confidence": 0.78,
+          "evidence": [
+            "名称/类名命中别名 'vggmini'",
+            "必需组件 plain_conv: 卷积层×6",
+            "必需组件全部满足",
+            "可选组件 normalization: 归一化层×4",
+            "可选组件 classification_head: Classifier Head"
+          ]
+        },
+        {
+          "id": "cnn",
+          "label": "CNN",
+          "confidence": 0.61,
+          "evidence": [
+            "名称/类名命中别名 'cnn'",
+            "必需组件 conv_bn_act: Conv-BN-Act",
+            "必需组件全部满足",
+            "可选组件 plain_conv: 卷积层×6",
+            "可选组件 normalization: 归一化层×4"
+          ]
+        },
+        {
+          "id": "alexnet",
+          "label": "AlexNet",
+          "confidence": 0.43,
+          "evidence": [
+            "必需组件 plain_conv: 卷积层×6",
+            "必需组件 classification_head: Classifier Head",
+            "必需组件全部满足",
+            "签名算子匹配 5/5"
+          ]
+        }
+      ],
+      "patterns": [
+        {
+          "kind": "conv_bn_act",
+          "label": "Conv-BN-Act",
+          "formula": "y = Act(BN(Conv(x)))",
+          "nodeIds": [
+            "n1",
+            "n2",
+            "n3",
+            "n7",
+            "n8",
+            "n9",
+            "n13",
+            "n14",
+            "n15",
+            "n16",
+            "n17",
+            "n18"
+          ],
+          "groupIds": [
+            "g2"
+          ],
+          "confidence": 0.95,
+          "evidence": [
+            "4 条 Conv→Norm→Act 链",
+            "例如 n1→n2→n3"
+          ],
+          "tags": [
+            "conv",
+            "conv_bn_act",
+            "normalization",
+            "activation"
+          ],
+          "id": "p1"
+        },
+        {
+          "kind": "global_pool",
+          "label": "Global Pool",
+          "formula": "y = mean_{h,w}(x)",
+          "nodeIds": [
+            "n19"
+          ],
+          "groupIds": [
+            "g2"
+          ],
+          "confidence": 0.9,
+          "evidence": [
+            "全局池化 ×1",
+            "空间维压缩为 1×1 后进入分类头"
+          ],
+          "tags": [
+            "global_pool",
+            "pool"
+          ],
+          "id": "p2"
+        },
+        {
+          "kind": "classifier_head",
+          "label": "Classifier Head",
+          "formula": "logits = W·x + b",
+          "nodeIds": [
+            "n24"
+          ],
+          "groupIds": [
+            "g1"
+          ],
+          "confidence": 0.85,
+          "evidence": [
+            "末端 Linear 输出 10 维 logits"
+          ],
+          "tags": [
+            "classifier_head",
+            "linear"
+          ],
+          "id": "p3"
+        }
+      ],
+      "pseudocode": [
+        "x = Input(1, 3, 64, 64)",
+        "x = Conv2d(16,3x3,p1x1)(x)   # -> (1, 16, 64, 64)",
+        "x = BatchNorm(16)(x)   # -> (1, 16, 64, 64)",
+        "x = ReLU()(x)   # -> (1, 16, 64, 64)",
+        "x = Conv2d(16,3x3,p1x1)(x)   # -> (1, 16, 64, 64)",
+        "x = ReLU()(x)   # -> (1, 16, 64, 64)",
+        "x = MaxPool(2x2,s2x2)(x)   # -> (1, 16, 32, 32)",
+        "x = Conv2d(32,3x3,p1x1)(x)   # -> (1, 32, 32, 32)",
+        "x = BatchNorm(32)(x)   # -> (1, 32, 32, 32)",
+        "x = ReLU()(x)   # -> (1, 32, 32, 32)",
+        "x = Conv2d(32,1x1)(x)   # -> (1, 32, 32, 32)",
+        "x = ReLU()(x)   # -> (1, 32, 32, 32)",
+        "x = MaxPool(2x2,s2x2)(x)   # -> (1, 32, 16, 16)",
+        "x = Conv2d(64,3x3,p1x1)(x)   # -> (1, 64, 16, 16)",
+        "x = BatchNorm(64)(x)   # -> (1, 64, 16, 16)",
+        "x = ReLU()(x)   # -> (1, 64, 16, 16)",
+        "x = Conv2d(64,3x3,p1x1)(x)   # -> (1, 64, 16, 16)",
+        "x = BatchNorm(64)(x)   # -> (1, 64, 16, 16)",
+        "x = ReLU()(x)   # -> (1, 64, 16, 16)",
+        "x = GlobalAvgPool()(x)   # -> (1, 64, 1, 1)",
+        "x = Flatten()(x)   # -> (1, 64)",
+        "x = Linear(32)(x)   # -> (1, 32)",
+        "x = ReLU()(x)   # -> (1, 32)",
+        "x = Dropout(0.2)(x)   # -> (1, 32)",
+        "logits = Linear(10)(x)   # -> (1, 10)",
+        "return logits"
+      ],
+      "familyEvidence": [
+        "名称/类名命中别名 'vggmini'",
+        "必需组件 plain_conv: 卷积层×6",
+        "必需组件全部满足",
+        "可选组件 normalization: 归一化层×4",
+        "可选组件 classification_head: Classifier Head"
+      ]
+    }
+  },
+  "nodes": [
+    {
+      "id": "n0",
+      "name": "x",
+      "op": "Input",
+      "kind": "input",
+      "modulePath": "",
+      "depth": 0,
+      "inShapes": [],
+      "outShapes": [
+        [
+          1,
+          3,
+          64,
+          64
+        ]
+      ],
+      "params": {},
+      "numParams": 0,
+      "flops": 0,
+      "tags": [
+        "boundary"
+      ],
+      "groupId": null,
+      "source": null,
+      "notes": [],
+      "metrics": {
+        "activationBytes": 49152,
+        "receptiveField": 1,
+        "macs": 0
+      },
+      "meta": {
+        "formula": "x = Input(1, 3, 64, 64)",
+        "semantic": "网络输入张量",
+        "axes": "NCHW",
+        "tags": [
+          "boundary",
+          "input"
+        ]
+      }
+    },
+    {
+      "id": "n1",
+      "name": "features.0",
+      "op": "Conv2d",
+      "kind": "conv",
+      "modulePath": "features.0",
+      "depth": 1,
+      "inShapes": [
+        [
+          1,
+          3,
+          64,
+          64
+        ]
+      ],
+      "outShapes": [
+        [
+          1,
+          16,
+          64,
+          64
+        ]
+      ],
+      "params": {
+        "inChannels": 3,
+        "outChannels": 16,
+        "kernelSize": [
+          3,
+          3
+        ],
+        "stride": [
+          1,
+          1
+        ],
+        "padding": [
+          1,
+          1
+        ],
+        "dilation": [
+          1,
+          1
+        ],
+        "groups": 1,
+        "bias": false
+      },
+      "numParams": 432,
+      "flops": 3538944,
+      "tags": [
+        "spatial",
+        "weighted",
+        "upsample"
+      ],
+      "groupId": "g2",
+      "source": {
+        "file": "samples/cnn_vgg.py",
+        "line": 20,
+        "code": "nn.Conv2d(3, 16, kernel_size=3, padding=1, bias=False)"
+      },
+      "notes": [],
+      "metrics": {
+        "activationBytes": 262144,
+        "receptiveField": 3,
+        "macs": 1769472
+      },
+      "meta": {
+        "formula": "y[n,o,h',w'] = Σ_{c,kh,kw} W[o,c,kh,kw]·x[n,c,h·s+kh-p,w·s+kw-p] + b[o]  (Cin=3→Cout=16, k=3x3, s=1x1, p=1x1)",
+        "semantic": "3x3 空间卷积（通道 3→16）",
+        "axes": "NCHW",
+        "tags": [
+          "conv",
+          "spatial"
+        ]
+      }
+    },
+    {
+      "id": "n2",
+      "name": "features.1",
+      "op": "BatchNorm2d",
+      "kind": "norm",
+      "modulePath": "features.1",
+      "depth": 1,
+      "inShapes": [
+        [
+          1,
+          16,
+          64,
+          64
+        ]
+      ],
+      "outShapes": [
+        [
+          1,
+          16,
+          64,
+          64
+        ]
+      ],
+      "params": {
+        "normalizedShape": [
+          16
+        ],
+        "eps": 1e-05,
+        "affine": true
+      },
+      "numParams": 32,
+      "flops": 262144,
+      "tags": [
+        "normalized"
+      ],
+      "groupId": "g2",
+      "source": {
+        "file": "samples/cnn_vgg.py",
+        "line": 21,
+        "code": "nn.BatchNorm2d(16)"
+      },
+      "notes": [],
+      "metrics": {
+        "activationBytes": 262144,
+        "receptiveField": 3,
+        "macs": 131072
+      },
+      "meta": {
+        "formula": "y[n,c,:] = γ[c]·(x[n,c,:]-μ_B[c])/√(σ²_B[c]+ε) + β[c]  (C=16, ε=1e-05)",
+        "semantic": "批归一化：按通道统计量标准化并仿射",
+        "axes": "NCHW（逐通道）",
+        "tags": [
+          "norm",
+          "batchnorm"
+        ]
+      }
+    },
+    {
+      "id": "n3",
+      "name": "features.2",
+      "op": "ReLU",
+      "kind": "activation",
+      "modulePath": "features.2",
+      "depth": 1,
+      "inShapes": [
+        [
+          1,
+          16,
+          64,
+          64
+        ]
+      ],
+      "outShapes": [
+        [
+          1,
+          16,
+          64,
+          64
+        ]
+      ],
+      "params": {
+        "inplace": true
+      },
+      "numParams": 0,
+      "flops": 65536,
+      "tags": [
+        "elementwise"
+      ],
+      "groupId": "g2",
+      "source": {
+        "file": "samples/cnn_vgg.py",
+        "line": 22,
+        "code": "nn.ReLU(inplace=True)"
+      },
+      "notes": [],
+      "metrics": {
+        "activationBytes": 262144,
+        "receptiveField": 3,
+        "macs": 32768
+      },
+      "meta": {
+        "formula": "y = max(x, 0)",
+        "semantic": "逐元素 ReLU 非线性（负值截断）",
+        "axes": "逐元素（任意轴）",
+        "tags": [
+          "activation",
+          "relu"
+        ]
+      }
+    },
+    {
+      "id": "n4",
+      "name": "features.3",
+      "op": "Conv2d",
+      "kind": "conv",
+      "modulePath": "features.3",
+      "depth": 1,
+      "inShapes": [
+        [
+          1,
+          16,
+          64,
+          64
+        ]
+      ],
+      "outShapes": [
+        [
+          1,
+          16,
+          64,
+          64
+        ]
+      ],
+      "params": {
+        "inChannels": 16,
+        "outChannels": 16,
+        "kernelSize": [
+          3,
+          3
+        ],
+        "stride": [
+          1,
+          1
+        ],
+        "padding": [
+          1,
+          1
+        ],
+        "dilation": [
+          1,
+          1
+        ],
+        "groups": 1,
+        "bias": true
+      },
+      "numParams": 2320,
+      "flops": 18939904,
+      "tags": [
+        "spatial",
+        "weighted"
+      ],
+      "groupId": "g2",
+      "source": {
+        "file": "samples/cnn_vgg.py",
+        "line": 23,
+        "code": "nn.Conv2d(16, 16, kernel_size=3, padding=1)"
+      },
+      "notes": [],
+      "metrics": {
+        "activationBytes": 262144,
+        "receptiveField": 5,
+        "macs": 9469952
+      },
+      "meta": {
+        "formula": "y[n,o,h',w'] = Σ_{c,kh,kw} W[o,c,kh,kw]·x[n,c,h·s+kh-p,w·s+kw-p] + b[o]  (Cin=16→Cout=16, k=3x3, s=1x1, p=1x1)",
+        "semantic": "3x3 空间卷积（通道 16→16）",
+        "axes": "NCHW",
+        "tags": [
+          "conv",
+          "spatial"
+        ]
+      }
+    },
+    {
+      "id": "n5",
+      "name": "features.4",
+      "op": "ReLU",
+      "kind": "activation",
+      "modulePath": "features.4",
+      "depth": 1,
+      "inShapes": [
+        [
+          1,
+          16,
+          64,
+          64
+        ]
+      ],
+      "outShapes": [
+        [
+          1,
+          16,
+          64,
+          64
+        ]
+      ],
+      "params": {
+        "inplace": true
+      },
+      "numParams": 0,
+      "flops": 65536,
+      "tags": [
+        "elementwise"
+      ],
+      "groupId": "g2",
+      "source": {
+        "file": "samples/cnn_vgg.py",
+        "line": 24,
+        "code": "nn.ReLU(inplace=True)"
+      },
+      "notes": [],
+      "metrics": {
+        "activationBytes": 262144,
+        "receptiveField": 5,
+        "macs": 32768
+      },
+      "meta": {
+        "formula": "y = max(x, 0)",
+        "semantic": "逐元素 ReLU 非线性（负值截断）",
+        "axes": "逐元素（任意轴）",
+        "tags": [
+          "activation",
+          "relu"
+        ]
+      }
+    },
+    {
+      "id": "n6",
+      "name": "features.5",
+      "op": "MaxPool2d",
+      "kind": "pool",
+      "modulePath": "features.5",
+      "depth": 1,
+      "inShapes": [
+        [
+          1,
+          16,
+          64,
+          64
+        ]
+      ],
+      "outShapes": [
+        [
+          1,
+          16,
+          32,
+          32
+        ]
+      ],
+      "params": {
+        "type": "max",
+        "kernelSize": [
+          2,
+          2
+        ],
+        "stride": [
+          2,
+          2
+        ],
+        "padding": [
+          0,
+          0
+        ]
+      },
+      "numParams": 0,
+      "flops": 65536,
+      "tags": [
+        "downsample"
+      ],
+      "groupId": "g2",
+      "source": {
+        "file": "samples/cnn_vgg.py",
+        "line": 25,
+        "code": "nn.MaxPool2d(kernel_size=2)"
+      },
+      "notes": [],
+      "metrics": {
+        "activationBytes": 65536,
+        "receptiveField": 6,
+        "macs": 32768
+      },
+      "meta": {
+        "formula": "y[n,c,oh,ow] = max_{kh,kw} x[n,c,oh·s+kh-p, ow·s+kw-p]  (k=2x2, s=2x2)",
+        "semantic": "局部最大池化（k=2x2）下采样",
+        "axes": "NCHW",
+        "tags": [
+          "pool",
+          "max"
+        ]
+      }
+    },
+    {
+      "id": "n7",
+      "name": "features.6",
+      "op": "Conv2d",
+      "kind": "conv",
+      "modulePath": "features.6",
+      "depth": 1,
+      "inShapes": [
+        [
+          1,
+          16,
+          32,
+          32
+        ]
+      ],
+      "outShapes": [
+        [
+          1,
+          32,
+          32,
+          32
+        ]
+      ],
+      "params": {
+        "inChannels": 16,
+        "outChannels": 32,
+        "kernelSize": [
+          3,
+          3
+        ],
+        "stride": [
+          1,
+          1
+        ],
+        "padding": [
+          1,
+          1
+        ],
+        "dilation": [
+          1,
+          1
+        ],
+        "groups": 1,
+        "bias": false
+      },
+      "numParams": 4608,
+      "flops": 9437184,
+      "tags": [
+        "spatial",
+        "weighted",
+        "upsample"
+      ],
+      "groupId": "g2",
+      "source": {
+        "file": "samples/cnn_vgg.py",
+        "line": 27,
+        "code": "nn.Conv2d(16, 32, kernel_size=3, padding=1, bias=False)"
+      },
+      "notes": [],
+      "metrics": {
+        "activationBytes": 131072,
+        "receptiveField": 10,
+        "macs": 4718592
+      },
+      "meta": {
+        "formula": "y[n,o,h',w'] = Σ_{c,kh,kw} W[o,c,kh,kw]·x[n,c,h·s+kh-p,w·s+kw-p] + b[o]  (Cin=16→Cout=32, k=3x3, s=1x1, p=1x1)",
+        "semantic": "3x3 空间卷积（通道 16→32）",
+        "axes": "NCHW",
+        "tags": [
+          "conv",
+          "spatial"
+        ]
+      }
+    },
+    {
+      "id": "n8",
+      "name": "features.7",
+      "op": "BatchNorm2d",
+      "kind": "norm",
+      "modulePath": "features.7",
+      "depth": 1,
+      "inShapes": [
+        [
+          1,
+          32,
+          32,
+          32
+        ]
+      ],
+      "outShapes": [
+        [
+          1,
+          32,
+          32,
+          32
+        ]
+      ],
+      "params": {
+        "normalizedShape": [
+          32
+        ],
+        "eps": 1e-05,
+        "affine": true
+      },
+      "numParams": 64,
+      "flops": 131072,
+      "tags": [
+        "normalized"
+      ],
+      "groupId": "g2",
+      "source": {
+        "file": "samples/cnn_vgg.py",
+        "line": 28,
+        "code": "nn.BatchNorm2d(32)"
+      },
+      "notes": [],
+      "metrics": {
+        "activationBytes": 131072,
+        "receptiveField": 10,
+        "macs": 65536
+      },
+      "meta": {
+        "formula": "y[n,c,:] = γ[c]·(x[n,c,:]-μ_B[c])/√(σ²_B[c]+ε) + β[c]  (C=32, ε=1e-05)",
+        "semantic": "批归一化：按通道统计量标准化并仿射",
+        "axes": "NCHW（逐通道）",
+        "tags": [
+          "norm",
+          "batchnorm"
+        ]
+      }
+    },
+    {
+      "id": "n9",
+      "name": "features.8",
+      "op": "ReLU",
+      "kind": "activation",
+      "modulePath": "features.8",
+      "depth": 1,
+      "inShapes": [
+        [
+          1,
+          32,
+          32,
+          32
+        ]
+      ],
+      "outShapes": [
+        [
+          1,
+          32,
+          32,
+          32
+        ]
+      ],
+      "params": {
+        "inplace": true
+      },
+      "numParams": 0,
+      "flops": 32768,
+      "tags": [
+        "elementwise"
+      ],
+      "groupId": "g2",
+      "source": {
+        "file": "samples/cnn_vgg.py",
+        "line": 29,
+        "code": "nn.ReLU(inplace=True)"
+      },
+      "notes": [],
+      "metrics": {
+        "activationBytes": 131072,
+        "receptiveField": 10,
+        "macs": 16384
+      },
+      "meta": {
+        "formula": "y = max(x, 0)",
+        "semantic": "逐元素 ReLU 非线性（负值截断）",
+        "axes": "逐元素（任意轴）",
+        "tags": [
+          "activation",
+          "relu"
+        ]
+      }
+    },
+    {
+      "id": "n10",
+      "name": "features.9",
+      "op": "Conv2d",
+      "kind": "conv",
+      "modulePath": "features.9",
+      "depth": 1,
+      "inShapes": [
+        [
+          1,
+          32,
+          32,
+          32
+        ]
+      ],
+      "outShapes": [
+        [
+          1,
+          32,
+          32,
+          32
+        ]
+      ],
+      "params": {
+        "inChannels": 32,
+        "outChannels": 32,
+        "kernelSize": [
+          1,
+          1
+        ],
+        "stride": [
+          1,
+          1
+        ],
+        "padding": [
+          0,
+          0
+        ],
+        "dilation": [
+          1,
+          1
+        ],
+        "groups": 1,
+        "bias": true
+      },
+      "numParams": 1056,
+      "flops": 2129920,
+      "tags": [
+        "spatial",
+        "weighted"
+      ],
+      "groupId": "g2",
+      "source": {
+        "file": "samples/cnn_vgg.py",
+        "line": 30,
+        "code": "nn.Conv2d(32, 32, kernel_size=1)"
+      },
+      "notes": [],
+      "metrics": {
+        "activationBytes": 131072,
+        "receptiveField": 10,
+        "macs": 1064960
+      },
+      "meta": {
+        "formula": "y[n,o,h',w'] = Σ_{c,kh,kw} W[o,c,kh,kw]·x[n,c,h·s+kh-p,w·s+kw-p] + b[o]  (Cin=32→Cout=32, k=1x1, s=1x1, p=0x0)",
+        "semantic": "1×1 通道投影（逐像素线性混合）",
+        "axes": "NCHW",
+        "tags": [
+          "conv",
+          "spatial",
+          "pointwise"
+        ]
+      }
+    },
+    {
+      "id": "n11",
+      "name": "features.10",
+      "op": "ReLU",
+      "kind": "activation",
+      "modulePath": "features.10",
+      "depth": 1,
+      "inShapes": [
+        [
+          1,
+          32,
+          32,
+          32
+        ]
+      ],
+      "outShapes": [
+        [
+          1,
+          32,
+          32,
+          32
+        ]
+      ],
+      "params": {
+        "inplace": true
+      },
+      "numParams": 0,
+      "flops": 32768,
+      "tags": [
+        "elementwise"
+      ],
+      "groupId": "g2",
+      "source": {
+        "file": "samples/cnn_vgg.py",
+        "line": 31,
+        "code": "nn.ReLU(inplace=True)"
+      },
+      "notes": [],
+      "metrics": {
+        "activationBytes": 131072,
+        "receptiveField": 10,
+        "macs": 16384
+      },
+      "meta": {
+        "formula": "y = max(x, 0)",
+        "semantic": "逐元素 ReLU 非线性（负值截断）",
+        "axes": "逐元素（任意轴）",
+        "tags": [
+          "activation",
+          "relu"
+        ]
+      }
+    },
+    {
+      "id": "n12",
+      "name": "features.11",
+      "op": "MaxPool2d",
+      "kind": "pool",
+      "modulePath": "features.11",
+      "depth": 1,
+      "inShapes": [
+        [
+          1,
+          32,
+          32,
+          32
+        ]
+      ],
+      "outShapes": [
+        [
+          1,
+          32,
+          16,
+          16
+        ]
+      ],
+      "params": {
+        "type": "max",
+        "kernelSize": [
+          2,
+          2
+        ],
+        "stride": [
+          2,
+          2
+        ],
+        "padding": [
+          0,
+          0
+        ]
+      },
+      "numParams": 0,
+      "flops": 32768,
+      "tags": [
+        "downsample"
+      ],
+      "groupId": "g2",
+      "source": {
+        "file": "samples/cnn_vgg.py",
+        "line": 32,
+        "code": "nn.MaxPool2d(kernel_size=2)"
+      },
+      "notes": [],
+      "metrics": {
+        "activationBytes": 32768,
+        "receptiveField": 12,
+        "macs": 16384
+      },
+      "meta": {
+        "formula": "y[n,c,oh,ow] = max_{kh,kw} x[n,c,oh·s+kh-p, ow·s+kw-p]  (k=2x2, s=2x2)",
+        "semantic": "局部最大池化（k=2x2）下采样",
+        "axes": "NCHW",
+        "tags": [
+          "pool",
+          "max"
+        ]
+      }
+    },
+    {
+      "id": "n13",
+      "name": "features.12",
+      "op": "Conv2d",
+      "kind": "conv",
+      "modulePath": "features.12",
+      "depth": 1,
+      "inShapes": [
+        [
+          1,
+          32,
+          16,
+          16
+        ]
+      ],
+      "outShapes": [
+        [
+          1,
+          64,
+          16,
+          16
+        ]
+      ],
+      "params": {
+        "inChannels": 32,
+        "outChannels": 64,
+        "kernelSize": [
+          3,
+          3
+        ],
+        "stride": [
+          1,
+          1
+        ],
+        "padding": [
+          1,
+          1
+        ],
+        "dilation": [
+          1,
+          1
+        ],
+        "groups": 1,
+        "bias": false
+      },
+      "numParams": 18432,
+      "flops": 9437184,
+      "tags": [
+        "spatial",
+        "weighted",
+        "upsample"
+      ],
+      "groupId": "g2",
+      "source": {
+        "file": "samples/cnn_vgg.py",
+        "line": 34,
+        "code": "nn.Conv2d(32, 64, kernel_size=3, padding=1, bias=False)"
+      },
+      "notes": [],
+      "metrics": {
+        "activationBytes": 65536,
+        "receptiveField": 20,
+        "macs": 4718592
+      },
+      "meta": {
+        "formula": "y[n,o,h',w'] = Σ_{c,kh,kw} W[o,c,kh,kw]·x[n,c,h·s+kh-p,w·s+kw-p] + b[o]  (Cin=32→Cout=64, k=3x3, s=1x1, p=1x1)",
+        "semantic": "3x3 空间卷积（通道 32→64）",
+        "axes": "NCHW",
+        "tags": [
+          "conv",
+          "spatial"
+        ]
+      }
+    },
+    {
+      "id": "n14",
+      "name": "features.13",
+      "op": "BatchNorm2d",
+      "kind": "norm",
+      "modulePath": "features.13",
+      "depth": 1,
+      "inShapes": [
+        [
+          1,
+          64,
+          16,
+          16
+        ]
+      ],
+      "outShapes": [
+        [
+          1,
+          64,
+          16,
+          16
+        ]
+      ],
+      "params": {
+        "normalizedShape": [
+          64
+        ],
+        "eps": 1e-05,
+        "affine": true
+      },
+      "numParams": 128,
+      "flops": 65536,
+      "tags": [
+        "normalized"
+      ],
+      "groupId": "g2",
+      "source": {
+        "file": "samples/cnn_vgg.py",
+        "line": 35,
+        "code": "nn.BatchNorm2d(64)"
+      },
+      "notes": [],
+      "metrics": {
+        "activationBytes": 65536,
+        "receptiveField": 20,
+        "macs": 32768
+      },
+      "meta": {
+        "formula": "y[n,c,:] = γ[c]·(x[n,c,:]-μ_B[c])/√(σ²_B[c]+ε) + β[c]  (C=64, ε=1e-05)",
+        "semantic": "批归一化：按通道统计量标准化并仿射",
+        "axes": "NCHW（逐通道）",
+        "tags": [
+          "norm",
+          "batchnorm"
+        ]
+      }
+    },
+    {
+      "id": "n15",
+      "name": "features.14",
+      "op": "ReLU",
+      "kind": "activation",
+      "modulePath": "features.14",
+      "depth": 1,
+      "inShapes": [
+        [
+          1,
+          64,
+          16,
+          16
+        ]
+      ],
+      "outShapes": [
+        [
+          1,
+          64,
+          16,
+          16
+        ]
+      ],
+      "params": {
+        "inplace": true
+      },
+      "numParams": 0,
+      "flops": 16384,
+      "tags": [
+        "elementwise"
+      ],
+      "groupId": "g2",
+      "source": {
+        "file": "samples/cnn_vgg.py",
+        "line": 36,
+        "code": "nn.ReLU(inplace=True)"
+      },
+      "notes": [],
+      "metrics": {
+        "activationBytes": 65536,
+        "receptiveField": 20,
+        "macs": 8192
+      },
+      "meta": {
+        "formula": "y = max(x, 0)",
+        "semantic": "逐元素 ReLU 非线性（负值截断）",
+        "axes": "逐元素（任意轴）",
+        "tags": [
+          "activation",
+          "relu"
+        ]
+      }
+    },
+    {
+      "id": "n16",
+      "name": "features.15",
+      "op": "Conv2d",
+      "kind": "conv",
+      "modulePath": "features.15",
+      "depth": 1,
+      "inShapes": [
+        [
+          1,
+          64,
+          16,
+          16
+        ]
+      ],
+      "outShapes": [
+        [
+          1,
+          64,
+          16,
+          16
+        ]
+      ],
+      "params": {
+        "inChannels": 64,
+        "outChannels": 64,
+        "kernelSize": [
+          3,
+          3
+        ],
+        "stride": [
+          1,
+          1
+        ],
+        "padding": [
+          1,
+          1
+        ],
+        "dilation": [
+          1,
+          1
+        ],
+        "groups": 1,
+        "bias": false
+      },
+      "numParams": 36864,
+      "flops": 18874368,
+      "tags": [
+        "spatial",
+        "weighted"
+      ],
+      "groupId": "g2",
+      "source": {
+        "file": "samples/cnn_vgg.py",
+        "line": 37,
+        "code": "nn.Conv2d(64, 64, kernel_size=3, padding=1, bias=False)"
+      },
+      "notes": [],
+      "metrics": {
+        "activationBytes": 65536,
+        "receptiveField": 28,
+        "macs": 9437184
+      },
+      "meta": {
+        "formula": "y[n,o,h',w'] = Σ_{c,kh,kw} W[o,c,kh,kw]·x[n,c,h·s+kh-p,w·s+kw-p] + b[o]  (Cin=64→Cout=64, k=3x3, s=1x1, p=1x1)",
+        "semantic": "3x3 空间卷积（通道 64→64）",
+        "axes": "NCHW",
+        "tags": [
+          "conv",
+          "spatial"
+        ]
+      }
+    },
+    {
+      "id": "n17",
+      "name": "features.16",
+      "op": "BatchNorm2d",
+      "kind": "norm",
+      "modulePath": "features.16",
+      "depth": 1,
+      "inShapes": [
+        [
+          1,
+          64,
+          16,
+          16
+        ]
+      ],
+      "outShapes": [
+        [
+          1,
+          64,
+          16,
+          16
+        ]
+      ],
+      "params": {
+        "normalizedShape": [
+          64
+        ],
+        "eps": 1e-05,
+        "affine": true
+      },
+      "numParams": 128,
+      "flops": 65536,
+      "tags": [
+        "normalized"
+      ],
+      "groupId": "g2",
+      "source": {
+        "file": "samples/cnn_vgg.py",
+        "line": 38,
+        "code": "nn.BatchNorm2d(64)"
+      },
+      "notes": [],
+      "metrics": {
+        "activationBytes": 65536,
+        "receptiveField": 28,
+        "macs": 32768
+      },
+      "meta": {
+        "formula": "y[n,c,:] = γ[c]·(x[n,c,:]-μ_B[c])/√(σ²_B[c]+ε) + β[c]  (C=64, ε=1e-05)",
+        "semantic": "批归一化：按通道统计量标准化并仿射",
+        "axes": "NCHW（逐通道）",
+        "tags": [
+          "norm",
+          "batchnorm"
+        ]
+      }
+    },
+    {
+      "id": "n18",
+      "name": "features.17",
+      "op": "ReLU",
+      "kind": "activation",
+      "modulePath": "features.17",
+      "depth": 1,
+      "inShapes": [
+        [
+          1,
+          64,
+          16,
+          16
+        ]
+      ],
+      "outShapes": [
+        [
+          1,
+          64,
+          16,
+          16
+        ]
+      ],
+      "params": {
+        "inplace": true
+      },
+      "numParams": 0,
+      "flops": 16384,
+      "tags": [
+        "elementwise"
+      ],
+      "groupId": "g2",
+      "source": {
+        "file": "samples/cnn_vgg.py",
+        "line": 39,
+        "code": "nn.ReLU(inplace=True)"
+      },
+      "notes": [],
+      "metrics": {
+        "activationBytes": 65536,
+        "receptiveField": 28,
+        "macs": 8192
+      },
+      "meta": {
+        "formula": "y = max(x, 0)",
+        "semantic": "逐元素 ReLU 非线性（负值截断）",
+        "axes": "逐元素（任意轴）",
+        "tags": [
+          "activation",
+          "relu"
+        ]
+      }
+    },
+    {
+      "id": "n19",
+      "name": "features.18",
+      "op": "AdaptiveAvgPool2d",
+      "kind": "pool",
+      "modulePath": "features.18",
+      "depth": 1,
+      "inShapes": [
+        [
+          1,
+          64,
+          16,
+          16
+        ]
+      ],
+      "outShapes": [
+        [
+          1,
+          64,
+          1,
+          1
+        ]
+      ],
+      "params": {
+        "type": "adaptive",
+        "outputSize": [
+          1,
+          1
+        ]
+      },
+      "numParams": 0,
+      "flops": 16384,
+      "tags": [
+        "downsample",
+        "global"
+      ],
+      "groupId": "g2",
+      "source": {
+        "file": "samples/cnn_vgg.py",
+        "line": 40,
+        "code": "nn.AdaptiveAvgPool2d((1, 1))"
+      },
+      "notes": [],
+      "metrics": {
+        "activationBytes": 256,
+        "receptiveField": 28,
+        "macs": 8192
+      },
+      "meta": {
+        "formula": "y[n,c] = mean_{h,w} x[n,c,h,w]",
+        "semantic": "全局平均池化：空间维压成 1×1",
+        "axes": "NCHW → NC",
+        "tags": [
+          "pool",
+          "global"
+        ]
+      }
+    },
+    {
+      "id": "n20",
+      "name": "classifier.0",
+      "op": "Flatten",
+      "kind": "flatten",
+      "modulePath": "classifier.0",
+      "depth": 1,
+      "inShapes": [
+        [
+          1,
+          64,
+          1,
+          1
+        ]
+      ],
+      "outShapes": [
+        [
+          1,
+          64
+        ]
+      ],
+      "params": {
+        "startDim": 1,
+        "endDim": -1
+      },
+      "numParams": 0,
+      "flops": 0,
+      "tags": [
+        "reshape"
+      ],
+      "groupId": "g1",
+      "source": {
+        "file": "samples/cnn_vgg.py",
+        "line": 43,
+        "code": "nn.Flatten(1)"
+      },
+      "notes": [],
+      "metrics": {
+        "activationBytes": 256,
+        "receptiveField": 28,
+        "macs": 0
+      },
+      "meta": {
+        "formula": "y = reshape(x, (N, -1))  (start_dim=1)",
+        "semantic": "展平空间/通道维为特征向量",
+        "axes": "N×… → N×F",
+        "tags": [
+          "flatten",
+          "reshape"
+        ]
+      }
+    },
+    {
+      "id": "n21",
+      "name": "classifier.1",
+      "op": "Linear",
+      "kind": "linear",
+      "modulePath": "classifier.1",
+      "depth": 1,
+      "inShapes": [
+        [
+          1,
+          64
+        ]
+      ],
+      "outShapes": [
+        [
+          1,
+          32
+        ]
+      ],
+      "params": {
+        "inFeatures": 64,
+        "outFeatures": 32,
+        "bias": true
+      },
+      "numParams": 2080,
+      "flops": 4128,
+      "tags": [
+        "weighted"
+      ],
+      "groupId": "g1",
+      "source": {
+        "file": "samples/cnn_vgg.py",
+        "line": 44,
+        "code": "nn.Linear(64, 32)"
+      },
+      "notes": [],
+      "metrics": {
+        "activationBytes": 128,
+        "receptiveField": 28,
+        "macs": 2064
+      },
+      "meta": {
+        "formula": "y[..., o] = Σ_i x[..., i]·W[o, i] + b[o]  (in=64→out=32)",
+        "semantic": "全连接通道混合（特征维线性变换）",
+        "axes": "N×F / NLC",
+        "tags": [
+          "linear",
+          "channel_mix"
+        ]
+      }
+    },
+    {
+      "id": "n22",
+      "name": "classifier.2",
+      "op": "ReLU",
+      "kind": "activation",
+      "modulePath": "classifier.2",
+      "depth": 1,
+      "inShapes": [
+        [
+          1,
+          32
+        ]
+      ],
+      "outShapes": [
+        [
+          1,
+          32
+        ]
+      ],
+      "params": {
+        "inplace": true
+      },
+      "numParams": 0,
+      "flops": 32,
+      "tags": [
+        "elementwise"
+      ],
+      "groupId": "g1",
+      "source": {
+        "file": "samples/cnn_vgg.py",
+        "line": 45,
+        "code": "nn.ReLU(inplace=True)"
+      },
+      "notes": [],
+      "metrics": {
+        "activationBytes": 128,
+        "receptiveField": 28,
+        "macs": 16
+      },
+      "meta": {
+        "formula": "y = max(x, 0)",
+        "semantic": "逐元素 ReLU 非线性（负值截断）",
+        "axes": "逐元素（任意轴）",
+        "tags": [
+          "activation",
+          "relu"
+        ]
+      }
+    },
+    {
+      "id": "n23",
+      "name": "classifier.3",
+      "op": "Dropout",
+      "kind": "dropout",
+      "modulePath": "classifier.3",
+      "depth": 1,
+      "inShapes": [
+        [
+          1,
+          32
+        ]
+      ],
+      "outShapes": [
+        [
+          1,
+          32
+        ]
+      ],
+      "params": {
+        "p": 0.2
+      },
+      "numParams": 0,
+      "flops": 0,
+      "tags": [
+        "regularization"
+      ],
+      "groupId": "g1",
+      "source": {
+        "file": "samples/cnn_vgg.py",
+        "line": 46,
+        "code": "nn.Dropout(p=0.2)"
+      },
+      "notes": [],
+      "metrics": {
+        "activationBytes": 128,
+        "receptiveField": 28,
+        "macs": 0
+      },
+      "meta": {
+        "formula": "y = x ⊙ mask/(1-p),  p=0.2",
+        "semantic": "训练期随机失活（推理期恒等）",
+        "axes": null,
+        "tags": [
+          "dropout",
+          "regularization"
+        ]
+      }
+    },
+    {
+      "id": "n24",
+      "name": "classifier.4",
+      "op": "Linear",
+      "kind": "linear",
+      "modulePath": "classifier.4",
+      "depth": 1,
+      "inShapes": [
+        [
+          1,
+          32
+        ]
+      ],
+      "outShapes": [
+        [
+          1,
+          10
+        ]
+      ],
+      "params": {
+        "inFeatures": 32,
+        "outFeatures": 10,
+        "bias": true
+      },
+      "numParams": 330,
+      "flops": 650,
+      "tags": [
+        "weighted"
+      ],
+      "groupId": "g1",
+      "source": {
+        "file": "samples/cnn_vgg.py",
+        "line": 47,
+        "code": "nn.Linear(32, num_classes)"
+      },
+      "notes": [],
+      "metrics": {
+        "activationBytes": 40,
+        "receptiveField": 28,
+        "macs": 325
+      },
+      "meta": {
+        "formula": "y[..., o] = Σ_i x[..., i]·W[o, i] + b[o]  (in=32→out=10)",
+        "semantic": "全连接通道混合（特征维线性变换）",
+        "axes": "N×F / NLC",
+        "tags": [
+          "linear",
+          "channel_mix"
+        ]
+      }
+    },
+    {
+      "id": "n25",
+      "name": "output",
+      "op": "Output",
+      "kind": "output",
+      "modulePath": "",
+      "depth": 0,
+      "inShapes": [
+        [
+          1,
+          10
+        ]
+      ],
+      "outShapes": [
+        [
+          1,
+          10
+        ]
+      ],
+      "params": {},
+      "numParams": 0,
+      "flops": 0,
+      "tags": [
+        "boundary"
+      ],
+      "groupId": null,
+      "source": null,
+      "notes": [],
+      "metrics": {
+        "activationBytes": 40,
+        "receptiveField": 28,
+        "macs": 0
+      },
+      "meta": {
+        "formula": "y = Output((1, 10))",
+        "semantic": "网络输出张量",
+        "axes": "N×F",
+        "tags": [
+          "boundary",
+          "output"
+        ]
+      }
+    }
+  ],
+  "edges": [
+    {
+      "id": "e0",
+      "source": "n0",
+      "target": "n1",
+      "kind": "data",
+      "shapes": [
+        [
+          1,
+          3,
+          64,
+          64
+        ]
+      ],
+      "label": ""
+    },
+    {
+      "id": "e1",
+      "source": "n1",
+      "target": "n2",
+      "kind": "data",
+      "shapes": [
+        [
+          1,
+          16,
+          64,
+          64
+        ]
+      ],
+      "label": ""
+    },
+    {
+      "id": "e2",
+      "source": "n2",
+      "target": "n3",
+      "kind": "data",
+      "shapes": [
+        [
+          1,
+          16,
+          64,
+          64
+        ]
+      ],
+      "label": ""
+    },
+    {
+      "id": "e3",
+      "source": "n3",
+      "target": "n4",
+      "kind": "data",
+      "shapes": [
+        [
+          1,
+          16,
+          64,
+          64
+        ]
+      ],
+      "label": ""
+    },
+    {
+      "id": "e4",
+      "source": "n4",
+      "target": "n5",
+      "kind": "data",
+      "shapes": [
+        [
+          1,
+          16,
+          64,
+          64
+        ]
+      ],
+      "label": ""
+    },
+    {
+      "id": "e5",
+      "source": "n5",
+      "target": "n6",
+      "kind": "data",
+      "shapes": [
+        [
+          1,
+          16,
+          64,
+          64
+        ]
+      ],
+      "label": ""
+    },
+    {
+      "id": "e6",
+      "source": "n6",
+      "target": "n7",
+      "kind": "data",
+      "shapes": [
+        [
+          1,
+          16,
+          32,
+          32
+        ]
+      ],
+      "label": ""
+    },
+    {
+      "id": "e7",
+      "source": "n7",
+      "target": "n8",
+      "kind": "data",
+      "shapes": [
+        [
+          1,
+          32,
+          32,
+          32
+        ]
+      ],
+      "label": ""
+    },
+    {
+      "id": "e8",
+      "source": "n8",
+      "target": "n9",
+      "kind": "data",
+      "shapes": [
+        [
+          1,
+          32,
+          32,
+          32
+        ]
+      ],
+      "label": ""
+    },
+    {
+      "id": "e9",
+      "source": "n9",
+      "target": "n10",
+      "kind": "data",
+      "shapes": [
+        [
+          1,
+          32,
+          32,
+          32
+        ]
+      ],
+      "label": ""
+    },
+    {
+      "id": "e10",
+      "source": "n10",
+      "target": "n11",
+      "kind": "data",
+      "shapes": [
+        [
+          1,
+          32,
+          32,
+          32
+        ]
+      ],
+      "label": ""
+    },
+    {
+      "id": "e11",
+      "source": "n11",
+      "target": "n12",
+      "kind": "data",
+      "shapes": [
+        [
+          1,
+          32,
+          32,
+          32
+        ]
+      ],
+      "label": ""
+    },
+    {
+      "id": "e12",
+      "source": "n12",
+      "target": "n13",
+      "kind": "data",
+      "shapes": [
+        [
+          1,
+          32,
+          16,
+          16
+        ]
+      ],
+      "label": ""
+    },
+    {
+      "id": "e13",
+      "source": "n13",
+      "target": "n14",
+      "kind": "data",
+      "shapes": [
+        [
+          1,
+          64,
+          16,
+          16
+        ]
+      ],
+      "label": ""
+    },
+    {
+      "id": "e14",
+      "source": "n14",
+      "target": "n15",
+      "kind": "data",
+      "shapes": [
+        [
+          1,
+          64,
+          16,
+          16
+        ]
+      ],
+      "label": ""
+    },
+    {
+      "id": "e15",
+      "source": "n15",
+      "target": "n16",
+      "kind": "data",
+      "shapes": [
+        [
+          1,
+          64,
+          16,
+          16
+        ]
+      ],
+      "label": ""
+    },
+    {
+      "id": "e16",
+      "source": "n16",
+      "target": "n17",
+      "kind": "data",
+      "shapes": [
+        [
+          1,
+          64,
+          16,
+          16
+        ]
+      ],
+      "label": ""
+    },
+    {
+      "id": "e17",
+      "source": "n17",
+      "target": "n18",
+      "kind": "data",
+      "shapes": [
+        [
+          1,
+          64,
+          16,
+          16
+        ]
+      ],
+      "label": ""
+    },
+    {
+      "id": "e18",
+      "source": "n18",
+      "target": "n19",
+      "kind": "data",
+      "shapes": [
+        [
+          1,
+          64,
+          16,
+          16
+        ]
+      ],
+      "label": ""
+    },
+    {
+      "id": "e19",
+      "source": "n19",
+      "target": "n20",
+      "kind": "data",
+      "shapes": [
+        [
+          1,
+          64,
+          1,
+          1
+        ]
+      ],
+      "label": ""
+    },
+    {
+      "id": "e20",
+      "source": "n20",
+      "target": "n21",
+      "kind": "data",
+      "shapes": [
+        [
+          1,
+          64
+        ]
+      ],
+      "label": ""
+    },
+    {
+      "id": "e21",
+      "source": "n21",
+      "target": "n22",
+      "kind": "data",
+      "shapes": [
+        [
+          1,
+          32
+        ]
+      ],
+      "label": ""
+    },
+    {
+      "id": "e22",
+      "source": "n22",
+      "target": "n23",
+      "kind": "data",
+      "shapes": [
+        [
+          1,
+          32
+        ]
+      ],
+      "label": ""
+    },
+    {
+      "id": "e23",
+      "source": "n23",
+      "target": "n24",
+      "kind": "data",
+      "shapes": [
+        [
+          1,
+          32
+        ]
+      ],
+      "label": ""
+    },
+    {
+      "id": "e24",
+      "source": "n24",
+      "target": "n25",
+      "kind": "data",
+      "shapes": [
+        [
+          1,
+          10
+        ]
+      ],
+      "label": ""
+    }
+  ],
+  "groups": [
+    {
+      "id": "g0",
+      "name": "VGGMini",
+      "label": "Vggmini",
+      "kind": "model",
+      "parentId": null,
+      "depth": 0,
+      "nodeIds": [],
+      "childGroupIds": [
+        "g1",
+        "g2"
+      ],
+      "numParams": 66474,
+      "flops": 63230666,
+      "source": {
+        "line": 13,
+        "code": "class VGGMini(nn.Module): \"\"\"VGG-ish feature extractor plus a two-layer classifier head.\"\"\" def __init__(self, num_classes: int = 10) -> None: super().__init__() self.features = nn.Sequential( # stage",
+        "file": "samples/cnn_vgg.py"
+      }
+    },
+    {
+      "id": "g1",
+      "name": "classifier",
+      "label": "Classifier",
+      "kind": "mlp",
+      "parentId": "g0",
+      "depth": 1,
+      "nodeIds": [
+        "n20",
+        "n21",
+        "n22",
+        "n23",
+        "n24"
+      ],
+      "childGroupIds": [],
+      "numParams": 2410,
+      "flops": 4810,
+      "source": {
+        "line": 13,
+        "code": "class VGGMini(nn.Module): \"\"\"VGG-ish feature extractor plus a two-layer classifier head.\"\"\" def __init__(self, num_classes: int = 10) -> None: super().__init__() self.features = nn.Sequential( # stage",
+        "file": "samples/cnn_vgg.py"
+      },
+      "meta": {
+        "pattern": {
+          "kind": "classifier_head",
+          "label": "Classifier Head",
+          "formula": "logits = W·x + b",
+          "confidence": 0.85,
+          "tags": [
+            "classifier_head",
+            "linear"
+          ]
+        }
+      }
+    },
+    {
+      "id": "g2",
+      "name": "features",
+      "label": "Features",
+      "kind": "conv_block",
+      "parentId": "g0",
+      "depth": 1,
+      "nodeIds": [
+        "n1",
+        "n2",
+        "n3",
+        "n4",
+        "n5",
+        "n6",
+        "n7",
+        "n8",
+        "n9",
+        "n10",
+        "n11",
+        "n12",
+        "n13",
+        "n14",
+        "n15",
+        "n16",
+        "n17",
+        "n18",
+        "n19"
+      ],
+      "childGroupIds": [],
+      "numParams": 64064,
+      "flops": 63225856,
+      "source": {
+        "line": 13,
+        "code": "class VGGMini(nn.Module): \"\"\"VGG-ish feature extractor plus a two-layer classifier head.\"\"\" def __init__(self, num_classes: int = 10) -> None: super().__init__() self.features = nn.Sequential( # stage",
+        "file": "samples/cnn_vgg.py"
+      },
+      "meta": {
+        "pattern": {
+          "kind": "conv_bn_act",
+          "label": "Conv-BN-Act",
+          "formula": "y = Act(BN(Conv(x)))",
+          "confidence": 0.95,
+          "tags": [
+            "conv",
+            "conv_bn_act",
+            "normalization",
+            "activation"
+          ]
+        }
+      }
+    }
+  ]
+}

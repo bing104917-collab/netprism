@@ -1,0 +1,4139 @@
+{
+  "schemaVersion": "1.0",
+  "generator": {
+    "name": "netprism",
+    "version": "0.1.0"
+  },
+  "model": {
+    "name": "ResNetMini",
+    "framework": "pytorch",
+    "className": "ResNetMini",
+    "mode": "trace",
+    "source": {
+      "file": "samples/resnet_mini.py",
+      "relPath": "resnet_mini.py"
+    },
+    "inputSpec": [
+      {
+        "name": "x",
+        "shape": [
+          1,
+          3,
+          64,
+          64
+        ],
+        "dtype": "float32"
+      }
+    ],
+    "outputSpec": [
+      {
+        "name": "output",
+        "shape": [
+          1,
+          10
+        ],
+        "dtype": "float32"
+      }
+    ],
+    "totalParams": 44890,
+    "trainableParams": 44890,
+    "totalFlops": 155746954,
+    "flopsApprox": false,
+    "numLayers": 42,
+    "warnings": [],
+    "metrics": {
+      "paramBytes": 179560,
+      "activationBytes": 7913808,
+      "peakActivationBytes": 786432,
+      "maxReceptiveField": 25,
+      "macs": 77873477
+    },
+    "meta": {
+      "family": "resnet",
+      "familyLabel": "ResNet",
+      "familyConfidence": 0.78,
+      "confidence": 0.78,
+      "algorithmTags": [
+        "cnn",
+        "residual",
+        "resnet",
+        "conv",
+        "conv_bn_act",
+        "normalization",
+        "activation",
+        "skip_connection",
+        "global_pool",
+        "pool",
+        "classifier_head",
+        "linear"
+      ],
+      "families": [
+        {
+          "id": "resnet",
+          "label": "ResNet",
+          "confidence": 0.78,
+          "evidence": [
+            "名称/类名命中别名 'resnetmini'",
+            "必需组件 residual: 残差结构×4",
+            "必需组件 conv_bn_act: Conv-BN-Act×5",
+            "必需组件全部满足",
+            "可选组件 normalization: 归一化层×13"
+          ]
+        },
+        {
+          "id": "vgg",
+          "label": "VGG",
+          "confidence": 0.48,
+          "evidence": [
+            "必需组件 plain_conv: 卷积层×13",
+            "必需组件全部满足",
+            "可选组件 normalization: 归一化层×13",
+            "可选组件 classification_head: Classifier Head",
+            "可选组件 global_pool: 全局池化×1"
+          ]
+        },
+        {
+          "id": "repvgg",
+          "label": "RepVGG",
+          "confidence": 0.47,
+          "evidence": [
+            "必需组件 residual: 残差结构×4",
+            "必需组件 plain_conv: 卷积层×13",
+            "必需组件全部满足",
+            "可选组件 classification_head: Classifier Head",
+            "可选组件 global_pool: 全局池化×1"
+          ]
+        }
+      ],
+      "patterns": [
+        {
+          "kind": "conv_bn_act",
+          "label": "Conv-BN-Act",
+          "formula": "y = Act(BN(Conv(x)))",
+          "nodeIds": [
+            "n1",
+            "n2",
+            "n3"
+          ],
+          "groupIds": [
+            "g3"
+          ],
+          "confidence": 0.9,
+          "evidence": [
+            "1 条 Conv→Norm→Act 链",
+            "例如 n1→n2→n3"
+          ],
+          "tags": [
+            "conv",
+            "conv_bn_act",
+            "normalization",
+            "activation"
+          ],
+          "id": "p1"
+        },
+        {
+          "kind": "residual_block",
+          "label": "Residual Block",
+          "formula": "y = F(x) + x",
+          "nodeIds": [
+            "n4",
+            "n5",
+            "n6",
+            "n7",
+            "n8",
+            "n9",
+            "n10",
+            "n11",
+            "n12"
+          ],
+          "groupIds": [
+            "g4"
+          ],
+          "confidence": 0.95,
+          "evidence": [
+            "Add n11 汇聚跨层分支（跨度 5 层）",
+            "1 个残差合并点",
+            "1 条 kind=residual 跳连边",
+            "group.kind=residual_block"
+          ],
+          "tags": [
+            "residual",
+            "skip_connection"
+          ],
+          "id": "p2"
+        },
+        {
+          "kind": "conv_bn_act",
+          "label": "Conv-BN-Act",
+          "formula": "y = Act(BN(Conv(x)))",
+          "nodeIds": [
+            "n6",
+            "n7",
+            "n8"
+          ],
+          "groupIds": [
+            "g4"
+          ],
+          "confidence": 0.9,
+          "evidence": [
+            "1 条 Conv→Norm→Act 链",
+            "例如 n6→n7→n8"
+          ],
+          "tags": [
+            "conv",
+            "conv_bn_act",
+            "normalization",
+            "activation"
+          ],
+          "id": "p3"
+        },
+        {
+          "kind": "residual_block",
+          "label": "Residual Block",
+          "formula": "y = F(x) + x",
+          "nodeIds": [
+            "n13",
+            "n14",
+            "n15",
+            "n16",
+            "n17",
+            "n18",
+            "n19",
+            "n20",
+            "n21"
+          ],
+          "groupIds": [
+            "g5"
+          ],
+          "confidence": 0.95,
+          "evidence": [
+            "Add n20 汇聚跨层分支（跨度 5 层）",
+            "1 个残差合并点",
+            "1 条 kind=residual 跳连边",
+            "group.kind=residual_block"
+          ],
+          "tags": [
+            "residual",
+            "skip_connection"
+          ],
+          "id": "p4"
+        },
+        {
+          "kind": "conv_bn_act",
+          "label": "Conv-BN-Act",
+          "formula": "y = Act(BN(Conv(x)))",
+          "nodeIds": [
+            "n15",
+            "n16",
+            "n17"
+          ],
+          "groupIds": [
+            "g5"
+          ],
+          "confidence": 0.9,
+          "evidence": [
+            "1 条 Conv→Norm→Act 链",
+            "例如 n15→n16→n17"
+          ],
+          "tags": [
+            "conv",
+            "conv_bn_act",
+            "normalization",
+            "activation"
+          ],
+          "id": "p5"
+        },
+        {
+          "kind": "residual_block",
+          "label": "Residual Block",
+          "formula": "y = F(x) + x",
+          "nodeIds": [
+            "n22",
+            "n23",
+            "n24",
+            "n25",
+            "n26",
+            "n27",
+            "n28",
+            "n29",
+            "n30"
+          ],
+          "groupIds": [
+            "g6"
+          ],
+          "confidence": 0.95,
+          "evidence": [
+            "Add n29 汇聚跨层分支（跨度 5 层）",
+            "1 个残差合并点",
+            "1 条 kind=residual 跳连边",
+            "group.kind=residual_block"
+          ],
+          "tags": [
+            "residual",
+            "skip_connection"
+          ],
+          "id": "p6"
+        },
+        {
+          "kind": "conv_bn_act",
+          "label": "Conv-BN-Act",
+          "formula": "y = Act(BN(Conv(x)))",
+          "nodeIds": [
+            "n24",
+            "n25",
+            "n26"
+          ],
+          "groupIds": [
+            "g6"
+          ],
+          "confidence": 0.9,
+          "evidence": [
+            "1 条 Conv→Norm→Act 链",
+            "例如 n24→n25→n26"
+          ],
+          "tags": [
+            "conv",
+            "conv_bn_act",
+            "normalization",
+            "activation"
+          ],
+          "id": "p7"
+        },
+        {
+          "kind": "residual_block",
+          "label": "Residual Block",
+          "formula": "y = F(x) + x",
+          "nodeIds": [
+            "n31",
+            "n32",
+            "n33",
+            "n34",
+            "n35",
+            "n36",
+            "n37",
+            "n38",
+            "n39"
+          ],
+          "groupIds": [
+            "g7"
+          ],
+          "confidence": 0.95,
+          "evidence": [
+            "Add n38 汇聚跨层分支（跨度 5 层）",
+            "1 个残差合并点",
+            "1 条 kind=residual 跳连边",
+            "group.kind=residual_block"
+          ],
+          "tags": [
+            "residual",
+            "skip_connection"
+          ],
+          "id": "p8"
+        },
+        {
+          "kind": "conv_bn_act",
+          "label": "Conv-BN-Act",
+          "formula": "y = Act(BN(Conv(x)))",
+          "nodeIds": [
+            "n33",
+            "n34",
+            "n35"
+          ],
+          "groupIds": [
+            "g7"
+          ],
+          "confidence": 0.9,
+          "evidence": [
+            "1 条 Conv→Norm→Act 链",
+            "例如 n33→n34→n35"
+          ],
+          "tags": [
+            "conv",
+            "conv_bn_act",
+            "normalization",
+            "activation"
+          ],
+          "id": "p9"
+        },
+        {
+          "kind": "global_pool",
+          "label": "Global Pool",
+          "formula": "y = mean_{h,w}(x)",
+          "nodeIds": [
+            "n40"
+          ],
+          "groupIds": [
+            "g0"
+          ],
+          "confidence": 0.9,
+          "evidence": [
+            "全局池化 ×1",
+            "空间维压缩为 1×1 后进入分类头"
+          ],
+          "tags": [
+            "global_pool",
+            "pool"
+          ],
+          "id": "p10"
+        },
+        {
+          "kind": "classifier_head",
+          "label": "Classifier Head",
+          "formula": "logits = W·x + b",
+          "nodeIds": [
+            "n42"
+          ],
+          "groupIds": [
+            "g0"
+          ],
+          "confidence": 0.85,
+          "evidence": [
+            "末端 Linear 输出 10 维 logits"
+          ],
+          "tags": [
+            "classifier_head",
+            "linear"
+          ],
+          "id": "p11"
+        }
+      ],
+      "pseudocode": [
+        "x = Input(1, 3, 64, 64)",
+        "x = ConvBlock(16)(x)   # -> (1, 16, 64, 64)",
+        "x = ResidualBlock(16)(x)   # -> (1, 16, 64, 64)",
+        "x = ResidualBlock(16)(x)   # -> (1, 16, 64, 64)",
+        "x = ResidualBlock(32)(x)   # -> (1, 32, 32, 32)",
+        "x = ResidualBlock(32)(x)   # -> (1, 32, 32, 32)",
+        "x = GlobalAvgPool()(x)   # -> (1, 32, 1, 1)",
+        "x = Flatten()(x)   # -> (1, 32)",
+        "logits = Linear(10)(x)   # -> (1, 10)",
+        "return logits"
+      ],
+      "familyEvidence": [
+        "名称/类名命中别名 'resnetmini'",
+        "必需组件 residual: 残差结构×4",
+        "必需组件 conv_bn_act: Conv-BN-Act×5",
+        "必需组件全部满足",
+        "可选组件 normalization: 归一化层×13"
+      ]
+    }
+  },
+  "nodes": [
+    {
+      "id": "n0",
+      "name": "x",
+      "op": "Input",
+      "kind": "input",
+      "modulePath": "",
+      "depth": 0,
+      "inShapes": [],
+      "outShapes": [
+        [
+          1,
+          3,
+          64,
+          64
+        ]
+      ],
+      "params": {},
+      "numParams": 0,
+      "flops": 0,
+      "tags": [
+        "boundary"
+      ],
+      "groupId": null,
+      "source": null,
+      "notes": [],
+      "metrics": {
+        "activationBytes": 49152,
+        "receptiveField": 1,
+        "macs": 0
+      },
+      "meta": {
+        "formula": "x = Input(1, 3, 64, 64)",
+        "semantic": "网络输入张量",
+        "axes": "NCHW",
+        "tags": [
+          "boundary",
+          "input"
+        ]
+      }
+    },
+    {
+      "id": "n1",
+      "name": "stem.0",
+      "op": "Conv2d",
+      "kind": "conv",
+      "modulePath": "stem.0",
+      "depth": 1,
+      "inShapes": [
+        [
+          1,
+          3,
+          64,
+          64
+        ]
+      ],
+      "outShapes": [
+        [
+          1,
+          16,
+          64,
+          64
+        ]
+      ],
+      "params": {
+        "inChannels": 3,
+        "outChannels": 16,
+        "kernelSize": [
+          3,
+          3
+        ],
+        "stride": [
+          1,
+          1
+        ],
+        "padding": [
+          1,
+          1
+        ],
+        "dilation": [
+          1,
+          1
+        ],
+        "groups": 1,
+        "bias": false
+      },
+      "numParams": 432,
+      "flops": 3538944,
+      "tags": [
+        "spatial",
+        "weighted",
+        "upsample"
+      ],
+      "groupId": "g3",
+      "source": {
+        "file": "samples/resnet_mini.py",
+        "line": 45,
+        "code": "nn.Conv2d(3, 16, kernel_size=3, padding=1, bias=False)"
+      },
+      "notes": [],
+      "metrics": {
+        "activationBytes": 262144,
+        "receptiveField": 3,
+        "macs": 1769472
+      },
+      "meta": {
+        "formula": "y[n,o,h',w'] = Σ_{c,kh,kw} W[o,c,kh,kw]·x[n,c,h·s+kh-p,w·s+kw-p] + b[o]  (Cin=3→Cout=16, k=3x3, s=1x1, p=1x1)",
+        "semantic": "3x3 空间卷积（通道 3→16）",
+        "axes": "NCHW",
+        "tags": [
+          "conv",
+          "spatial"
+        ]
+      }
+    },
+    {
+      "id": "n2",
+      "name": "stem.1",
+      "op": "BatchNorm2d",
+      "kind": "norm",
+      "modulePath": "stem.1",
+      "depth": 1,
+      "inShapes": [
+        [
+          1,
+          16,
+          64,
+          64
+        ]
+      ],
+      "outShapes": [
+        [
+          1,
+          16,
+          64,
+          64
+        ]
+      ],
+      "params": {
+        "normalizedShape": [
+          16
+        ],
+        "eps": 1e-05,
+        "affine": true
+      },
+      "numParams": 32,
+      "flops": 262144,
+      "tags": [
+        "normalized"
+      ],
+      "groupId": "g3",
+      "source": {
+        "file": "samples/resnet_mini.py",
+        "line": 46,
+        "code": "nn.BatchNorm2d(16)"
+      },
+      "notes": [],
+      "metrics": {
+        "activationBytes": 262144,
+        "receptiveField": 3,
+        "macs": 131072
+      },
+      "meta": {
+        "formula": "y[n,c,:] = γ[c]·(x[n,c,:]-μ_B[c])/√(σ²_B[c]+ε) + β[c]  (C=16, ε=1e-05)",
+        "semantic": "批归一化：按通道统计量标准化并仿射",
+        "axes": "NCHW（逐通道）",
+        "tags": [
+          "norm",
+          "batchnorm"
+        ]
+      }
+    },
+    {
+      "id": "n3",
+      "name": "stem.2",
+      "op": "ReLU",
+      "kind": "activation",
+      "modulePath": "stem.2",
+      "depth": 1,
+      "inShapes": [
+        [
+          1,
+          16,
+          64,
+          64
+        ]
+      ],
+      "outShapes": [
+        [
+          1,
+          16,
+          64,
+          64
+        ]
+      ],
+      "params": {
+        "inplace": true
+      },
+      "numParams": 0,
+      "flops": 65536,
+      "tags": [
+        "elementwise"
+      ],
+      "groupId": "g3",
+      "source": {
+        "file": "samples/resnet_mini.py",
+        "line": 47,
+        "code": "nn.ReLU(inplace=True)"
+      },
+      "notes": [],
+      "metrics": {
+        "activationBytes": 262144,
+        "receptiveField": 3,
+        "macs": 32768
+      },
+      "meta": {
+        "formula": "y = max(x, 0)",
+        "semantic": "逐元素 ReLU 非线性（负值截断）",
+        "axes": "逐元素（任意轴）",
+        "tags": [
+          "activation",
+          "relu"
+        ]
+      }
+    },
+    {
+      "id": "n4",
+      "name": "layer1.0.shortcut.0",
+      "op": "Conv2d",
+      "kind": "conv",
+      "modulePath": "layer1.0.shortcut.0",
+      "depth": 3,
+      "inShapes": [
+        [
+          1,
+          16,
+          64,
+          64
+        ]
+      ],
+      "outShapes": [
+        [
+          1,
+          16,
+          64,
+          64
+        ]
+      ],
+      "params": {
+        "inChannels": 16,
+        "outChannels": 16,
+        "kernelSize": [
+          1,
+          1
+        ],
+        "stride": [
+          1,
+          1
+        ],
+        "padding": [
+          0,
+          0
+        ],
+        "dilation": [
+          1,
+          1
+        ],
+        "groups": 1,
+        "bias": false
+      },
+      "numParams": 256,
+      "flops": 2097152,
+      "tags": [
+        "spatial",
+        "weighted"
+      ],
+      "groupId": "g8",
+      "source": {
+        "file": "samples/resnet_mini.py",
+        "line": 28,
+        "code": "nn.Conv2d(in_channels, out_channels, kernel_size=1, stride=stride, bias=False)"
+      },
+      "notes": [],
+      "metrics": {
+        "activationBytes": 262144,
+        "receptiveField": 3,
+        "macs": 1048576
+      },
+      "meta": {
+        "formula": "y[n,o,h',w'] = Σ_{c,kh,kw} W[o,c,kh,kw]·x[n,c,h·s+kh-p,w·s+kw-p] + b[o]  (Cin=16→Cout=16, k=1x1, s=1x1, p=0x0)",
+        "semantic": "1×1 通道投影（逐像素线性混合）",
+        "axes": "NCHW",
+        "tags": [
+          "conv",
+          "spatial",
+          "pointwise"
+        ]
+      }
+    },
+    {
+      "id": "n5",
+      "name": "layer1.0.shortcut.1",
+      "op": "BatchNorm2d",
+      "kind": "norm",
+      "modulePath": "layer1.0.shortcut.1",
+      "depth": 3,
+      "inShapes": [
+        [
+          1,
+          16,
+          64,
+          64
+        ]
+      ],
+      "outShapes": [
+        [
+          1,
+          16,
+          64,
+          64
+        ]
+      ],
+      "params": {
+        "normalizedShape": [
+          16
+        ],
+        "eps": 1e-05,
+        "affine": true
+      },
+      "numParams": 32,
+      "flops": 262144,
+      "tags": [
+        "normalized"
+      ],
+      "groupId": "g8",
+      "source": {
+        "file": "samples/resnet_mini.py",
+        "line": 29,
+        "code": "nn.BatchNorm2d(out_channels)"
+      },
+      "notes": [],
+      "metrics": {
+        "activationBytes": 262144,
+        "receptiveField": 3,
+        "macs": 131072
+      },
+      "meta": {
+        "formula": "y[n,c,:] = γ[c]·(x[n,c,:]-μ_B[c])/√(σ²_B[c]+ε) + β[c]  (C=16, ε=1e-05)",
+        "semantic": "批归一化：按通道统计量标准化并仿射",
+        "axes": "NCHW（逐通道）",
+        "tags": [
+          "norm",
+          "batchnorm"
+        ]
+      }
+    },
+    {
+      "id": "n6",
+      "name": "layer1.0.conv1",
+      "op": "Conv2d",
+      "kind": "conv",
+      "modulePath": "layer1.0.conv1",
+      "depth": 2,
+      "inShapes": [
+        [
+          1,
+          16,
+          64,
+          64
+        ]
+      ],
+      "outShapes": [
+        [
+          1,
+          16,
+          64,
+          64
+        ]
+      ],
+      "params": {
+        "inChannels": 16,
+        "outChannels": 16,
+        "kernelSize": [
+          3,
+          3
+        ],
+        "stride": [
+          1,
+          1
+        ],
+        "padding": [
+          1,
+          1
+        ],
+        "dilation": [
+          1,
+          1
+        ],
+        "groups": 1,
+        "bias": false
+      },
+      "numParams": 2304,
+      "flops": 18874368,
+      "tags": [
+        "spatial",
+        "weighted"
+      ],
+      "groupId": "g4",
+      "source": {
+        "file": "samples/resnet_mini.py",
+        "line": 22,
+        "code": "nn.Conv2d(in_channels, out_channels, kernel_size=3, stride=stride, padding=1, bias=False)"
+      },
+      "notes": [],
+      "metrics": {
+        "activationBytes": 262144,
+        "receptiveField": 5,
+        "macs": 9437184
+      },
+      "meta": {
+        "formula": "y[n,o,h',w'] = Σ_{c,kh,kw} W[o,c,kh,kw]·x[n,c,h·s+kh-p,w·s+kw-p] + b[o]  (Cin=16→Cout=16, k=3x3, s=1x1, p=1x1)",
+        "semantic": "3x3 空间卷积（通道 16→16）",
+        "axes": "NCHW",
+        "tags": [
+          "conv",
+          "spatial"
+        ]
+      }
+    },
+    {
+      "id": "n7",
+      "name": "layer1.0.bn1",
+      "op": "BatchNorm2d",
+      "kind": "norm",
+      "modulePath": "layer1.0.bn1",
+      "depth": 2,
+      "inShapes": [
+        [
+          1,
+          16,
+          64,
+          64
+        ]
+      ],
+      "outShapes": [
+        [
+          1,
+          16,
+          64,
+          64
+        ]
+      ],
+      "params": {
+        "normalizedShape": [
+          16
+        ],
+        "eps": 1e-05,
+        "affine": true
+      },
+      "numParams": 32,
+      "flops": 262144,
+      "tags": [
+        "normalized"
+      ],
+      "groupId": "g4",
+      "source": {
+        "file": "samples/resnet_mini.py",
+        "line": 23,
+        "code": "nn.BatchNorm2d(out_channels)"
+      },
+      "notes": [],
+      "metrics": {
+        "activationBytes": 262144,
+        "receptiveField": 5,
+        "macs": 131072
+      },
+      "meta": {
+        "formula": "y[n,c,:] = γ[c]·(x[n,c,:]-μ_B[c])/√(σ²_B[c]+ε) + β[c]  (C=16, ε=1e-05)",
+        "semantic": "批归一化：按通道统计量标准化并仿射",
+        "axes": "NCHW（逐通道）",
+        "tags": [
+          "norm",
+          "batchnorm"
+        ]
+      }
+    },
+    {
+      "id": "n8",
+      "name": "layer1.0.relu",
+      "op": "ReLU",
+      "kind": "activation",
+      "modulePath": "layer1.0.relu",
+      "depth": 2,
+      "inShapes": [
+        [
+          1,
+          16,
+          64,
+          64
+        ]
+      ],
+      "outShapes": [
+        [
+          1,
+          16,
+          64,
+          64
+        ]
+      ],
+      "params": {
+        "inplace": true
+      },
+      "numParams": 0,
+      "flops": 65536,
+      "tags": [
+        "elementwise"
+      ],
+      "groupId": "g4",
+      "source": {
+        "file": "samples/resnet_mini.py",
+        "line": 24,
+        "code": "nn.ReLU(inplace=True)"
+      },
+      "notes": [],
+      "metrics": {
+        "activationBytes": 262144,
+        "receptiveField": 5,
+        "macs": 32768
+      },
+      "meta": {
+        "formula": "y = max(x, 0)",
+        "semantic": "逐元素 ReLU 非线性（负值截断）",
+        "axes": "逐元素（任意轴）",
+        "tags": [
+          "activation",
+          "relu"
+        ]
+      }
+    },
+    {
+      "id": "n9",
+      "name": "layer1.0.conv2",
+      "op": "Conv2d",
+      "kind": "conv",
+      "modulePath": "layer1.0.conv2",
+      "depth": 2,
+      "inShapes": [
+        [
+          1,
+          16,
+          64,
+          64
+        ]
+      ],
+      "outShapes": [
+        [
+          1,
+          16,
+          64,
+          64
+        ]
+      ],
+      "params": {
+        "inChannels": 16,
+        "outChannels": 16,
+        "kernelSize": [
+          3,
+          3
+        ],
+        "stride": [
+          1,
+          1
+        ],
+        "padding": [
+          1,
+          1
+        ],
+        "dilation": [
+          1,
+          1
+        ],
+        "groups": 1,
+        "bias": false
+      },
+      "numParams": 2304,
+      "flops": 18874368,
+      "tags": [
+        "spatial",
+        "weighted"
+      ],
+      "groupId": "g4",
+      "source": {
+        "file": "samples/resnet_mini.py",
+        "line": 25,
+        "code": "nn.Conv2d(out_channels, out_channels, kernel_size=3, padding=1, bias=False)"
+      },
+      "notes": [],
+      "metrics": {
+        "activationBytes": 262144,
+        "receptiveField": 7,
+        "macs": 9437184
+      },
+      "meta": {
+        "formula": "y[n,o,h',w'] = Σ_{c,kh,kw} W[o,c,kh,kw]·x[n,c,h·s+kh-p,w·s+kw-p] + b[o]  (Cin=16→Cout=16, k=3x3, s=1x1, p=1x1)",
+        "semantic": "3x3 空间卷积（通道 16→16）",
+        "axes": "NCHW",
+        "tags": [
+          "conv",
+          "spatial"
+        ]
+      }
+    },
+    {
+      "id": "n10",
+      "name": "layer1.0.bn2",
+      "op": "BatchNorm2d",
+      "kind": "norm",
+      "modulePath": "layer1.0.bn2",
+      "depth": 2,
+      "inShapes": [
+        [
+          1,
+          16,
+          64,
+          64
+        ]
+      ],
+      "outShapes": [
+        [
+          1,
+          16,
+          64,
+          64
+        ]
+      ],
+      "params": {
+        "normalizedShape": [
+          16
+        ],
+        "eps": 1e-05,
+        "affine": true
+      },
+      "numParams": 32,
+      "flops": 262144,
+      "tags": [
+        "normalized"
+      ],
+      "groupId": "g4",
+      "source": {
+        "file": "samples/resnet_mini.py",
+        "line": 26,
+        "code": "nn.BatchNorm2d(out_channels)"
+      },
+      "notes": [],
+      "metrics": {
+        "activationBytes": 262144,
+        "receptiveField": 7,
+        "macs": 131072
+      },
+      "meta": {
+        "formula": "y[n,c,:] = γ[c]·(x[n,c,:]-μ_B[c])/√(σ²_B[c]+ε) + β[c]  (C=16, ε=1e-05)",
+        "semantic": "批归一化：按通道统计量标准化并仿射",
+        "axes": "NCHW（逐通道）",
+        "tags": [
+          "norm",
+          "batchnorm"
+        ]
+      }
+    },
+    {
+      "id": "n11",
+      "name": "layer1.0.add",
+      "op": "add",
+      "kind": "add",
+      "modulePath": "layer1.0.add",
+      "depth": 2,
+      "inShapes": [
+        [
+          1,
+          16,
+          64,
+          64
+        ],
+        [
+          1,
+          16,
+          64,
+          64
+        ]
+      ],
+      "outShapes": [
+        [
+          1,
+          16,
+          64,
+          64
+        ]
+      ],
+      "params": {},
+      "numParams": 0,
+      "flops": 65536,
+      "tags": [
+        "merge",
+        "residual"
+      ],
+      "groupId": "g4",
+      "source": {
+        "file": "samples/resnet_mini.py",
+        "line": 36,
+        "code": "out + identity"
+      },
+      "notes": [
+        "Residual add"
+      ],
+      "metrics": {
+        "activationBytes": 262144,
+        "receptiveField": 7,
+        "macs": 32768
+      },
+      "meta": {
+        "formula": "y = x_1 + x_2",
+        "semantic": "逐元素相加（残差/分支融合）",
+        "axes": "NCHW",
+        "tags": [
+          "merge",
+          "add",
+          "residual"
+        ]
+      }
+    },
+    {
+      "id": "n12",
+      "name": "layer1.0.relu#2",
+      "op": "ReLU",
+      "kind": "activation",
+      "modulePath": "layer1.0.relu",
+      "depth": 2,
+      "inShapes": [
+        [
+          1,
+          16,
+          64,
+          64
+        ]
+      ],
+      "outShapes": [
+        [
+          1,
+          16,
+          64,
+          64
+        ]
+      ],
+      "params": {
+        "inplace": true
+      },
+      "numParams": 0,
+      "flops": 65536,
+      "tags": [
+        "elementwise"
+      ],
+      "groupId": "g4",
+      "source": {
+        "file": "samples/resnet_mini.py",
+        "line": 24,
+        "code": "nn.ReLU(inplace=True)"
+      },
+      "notes": [],
+      "metrics": {
+        "activationBytes": 262144,
+        "receptiveField": 7,
+        "macs": 32768
+      },
+      "meta": {
+        "formula": "y = max(x, 0)",
+        "semantic": "逐元素 ReLU 非线性（负值截断）",
+        "axes": "逐元素（任意轴）",
+        "tags": [
+          "activation",
+          "relu"
+        ]
+      }
+    },
+    {
+      "id": "n13",
+      "name": "layer1.1.shortcut.0",
+      "op": "Conv2d",
+      "kind": "conv",
+      "modulePath": "layer1.1.shortcut.0",
+      "depth": 3,
+      "inShapes": [
+        [
+          1,
+          16,
+          64,
+          64
+        ]
+      ],
+      "outShapes": [
+        [
+          1,
+          16,
+          64,
+          64
+        ]
+      ],
+      "params": {
+        "inChannels": 16,
+        "outChannels": 16,
+        "kernelSize": [
+          1,
+          1
+        ],
+        "stride": [
+          1,
+          1
+        ],
+        "padding": [
+          0,
+          0
+        ],
+        "dilation": [
+          1,
+          1
+        ],
+        "groups": 1,
+        "bias": false
+      },
+      "numParams": 256,
+      "flops": 2097152,
+      "tags": [
+        "spatial",
+        "weighted"
+      ],
+      "groupId": "g9",
+      "source": {
+        "file": "samples/resnet_mini.py",
+        "line": 28,
+        "code": "nn.Conv2d(in_channels, out_channels, kernel_size=1, stride=stride, bias=False)"
+      },
+      "notes": [],
+      "metrics": {
+        "activationBytes": 262144,
+        "receptiveField": 7,
+        "macs": 1048576
+      },
+      "meta": {
+        "formula": "y[n,o,h',w'] = Σ_{c,kh,kw} W[o,c,kh,kw]·x[n,c,h·s+kh-p,w·s+kw-p] + b[o]  (Cin=16→Cout=16, k=1x1, s=1x1, p=0x0)",
+        "semantic": "1×1 通道投影（逐像素线性混合）",
+        "axes": "NCHW",
+        "tags": [
+          "conv",
+          "spatial",
+          "pointwise"
+        ]
+      }
+    },
+    {
+      "id": "n14",
+      "name": "layer1.1.shortcut.1",
+      "op": "BatchNorm2d",
+      "kind": "norm",
+      "modulePath": "layer1.1.shortcut.1",
+      "depth": 3,
+      "inShapes": [
+        [
+          1,
+          16,
+          64,
+          64
+        ]
+      ],
+      "outShapes": [
+        [
+          1,
+          16,
+          64,
+          64
+        ]
+      ],
+      "params": {
+        "normalizedShape": [
+          16
+        ],
+        "eps": 1e-05,
+        "affine": true
+      },
+      "numParams": 32,
+      "flops": 262144,
+      "tags": [
+        "normalized"
+      ],
+      "groupId": "g9",
+      "source": {
+        "file": "samples/resnet_mini.py",
+        "line": 29,
+        "code": "nn.BatchNorm2d(out_channels)"
+      },
+      "notes": [],
+      "metrics": {
+        "activationBytes": 262144,
+        "receptiveField": 7,
+        "macs": 131072
+      },
+      "meta": {
+        "formula": "y[n,c,:] = γ[c]·(x[n,c,:]-μ_B[c])/√(σ²_B[c]+ε) + β[c]  (C=16, ε=1e-05)",
+        "semantic": "批归一化：按通道统计量标准化并仿射",
+        "axes": "NCHW（逐通道）",
+        "tags": [
+          "norm",
+          "batchnorm"
+        ]
+      }
+    },
+    {
+      "id": "n15",
+      "name": "layer1.1.conv1",
+      "op": "Conv2d",
+      "kind": "conv",
+      "modulePath": "layer1.1.conv1",
+      "depth": 2,
+      "inShapes": [
+        [
+          1,
+          16,
+          64,
+          64
+        ]
+      ],
+      "outShapes": [
+        [
+          1,
+          16,
+          64,
+          64
+        ]
+      ],
+      "params": {
+        "inChannels": 16,
+        "outChannels": 16,
+        "kernelSize": [
+          3,
+          3
+        ],
+        "stride": [
+          1,
+          1
+        ],
+        "padding": [
+          1,
+          1
+        ],
+        "dilation": [
+          1,
+          1
+        ],
+        "groups": 1,
+        "bias": false
+      },
+      "numParams": 2304,
+      "flops": 18874368,
+      "tags": [
+        "spatial",
+        "weighted"
+      ],
+      "groupId": "g5",
+      "source": {
+        "file": "samples/resnet_mini.py",
+        "line": 22,
+        "code": "nn.Conv2d(in_channels, out_channels, kernel_size=3, stride=stride, padding=1, bias=False)"
+      },
+      "notes": [],
+      "metrics": {
+        "activationBytes": 262144,
+        "receptiveField": 9,
+        "macs": 9437184
+      },
+      "meta": {
+        "formula": "y[n,o,h',w'] = Σ_{c,kh,kw} W[o,c,kh,kw]·x[n,c,h·s+kh-p,w·s+kw-p] + b[o]  (Cin=16→Cout=16, k=3x3, s=1x1, p=1x1)",
+        "semantic": "3x3 空间卷积（通道 16→16）",
+        "axes": "NCHW",
+        "tags": [
+          "conv",
+          "spatial"
+        ]
+      }
+    },
+    {
+      "id": "n16",
+      "name": "layer1.1.bn1",
+      "op": "BatchNorm2d",
+      "kind": "norm",
+      "modulePath": "layer1.1.bn1",
+      "depth": 2,
+      "inShapes": [
+        [
+          1,
+          16,
+          64,
+          64
+        ]
+      ],
+      "outShapes": [
+        [
+          1,
+          16,
+          64,
+          64
+        ]
+      ],
+      "params": {
+        "normalizedShape": [
+          16
+        ],
+        "eps": 1e-05,
+        "affine": true
+      },
+      "numParams": 32,
+      "flops": 262144,
+      "tags": [
+        "normalized"
+      ],
+      "groupId": "g5",
+      "source": {
+        "file": "samples/resnet_mini.py",
+        "line": 23,
+        "code": "nn.BatchNorm2d(out_channels)"
+      },
+      "notes": [],
+      "metrics": {
+        "activationBytes": 262144,
+        "receptiveField": 9,
+        "macs": 131072
+      },
+      "meta": {
+        "formula": "y[n,c,:] = γ[c]·(x[n,c,:]-μ_B[c])/√(σ²_B[c]+ε) + β[c]  (C=16, ε=1e-05)",
+        "semantic": "批归一化：按通道统计量标准化并仿射",
+        "axes": "NCHW（逐通道）",
+        "tags": [
+          "norm",
+          "batchnorm"
+        ]
+      }
+    },
+    {
+      "id": "n17",
+      "name": "layer1.1.relu",
+      "op": "ReLU",
+      "kind": "activation",
+      "modulePath": "layer1.1.relu",
+      "depth": 2,
+      "inShapes": [
+        [
+          1,
+          16,
+          64,
+          64
+        ]
+      ],
+      "outShapes": [
+        [
+          1,
+          16,
+          64,
+          64
+        ]
+      ],
+      "params": {
+        "inplace": true
+      },
+      "numParams": 0,
+      "flops": 65536,
+      "tags": [
+        "elementwise"
+      ],
+      "groupId": "g5",
+      "source": {
+        "file": "samples/resnet_mini.py",
+        "line": 24,
+        "code": "nn.ReLU(inplace=True)"
+      },
+      "notes": [],
+      "metrics": {
+        "activationBytes": 262144,
+        "receptiveField": 9,
+        "macs": 32768
+      },
+      "meta": {
+        "formula": "y = max(x, 0)",
+        "semantic": "逐元素 ReLU 非线性（负值截断）",
+        "axes": "逐元素（任意轴）",
+        "tags": [
+          "activation",
+          "relu"
+        ]
+      }
+    },
+    {
+      "id": "n18",
+      "name": "layer1.1.conv2",
+      "op": "Conv2d",
+      "kind": "conv",
+      "modulePath": "layer1.1.conv2",
+      "depth": 2,
+      "inShapes": [
+        [
+          1,
+          16,
+          64,
+          64
+        ]
+      ],
+      "outShapes": [
+        [
+          1,
+          16,
+          64,
+          64
+        ]
+      ],
+      "params": {
+        "inChannels": 16,
+        "outChannels": 16,
+        "kernelSize": [
+          3,
+          3
+        ],
+        "stride": [
+          1,
+          1
+        ],
+        "padding": [
+          1,
+          1
+        ],
+        "dilation": [
+          1,
+          1
+        ],
+        "groups": 1,
+        "bias": false
+      },
+      "numParams": 2304,
+      "flops": 18874368,
+      "tags": [
+        "spatial",
+        "weighted"
+      ],
+      "groupId": "g5",
+      "source": {
+        "file": "samples/resnet_mini.py",
+        "line": 25,
+        "code": "nn.Conv2d(out_channels, out_channels, kernel_size=3, padding=1, bias=False)"
+      },
+      "notes": [],
+      "metrics": {
+        "activationBytes": 262144,
+        "receptiveField": 11,
+        "macs": 9437184
+      },
+      "meta": {
+        "formula": "y[n,o,h',w'] = Σ_{c,kh,kw} W[o,c,kh,kw]·x[n,c,h·s+kh-p,w·s+kw-p] + b[o]  (Cin=16→Cout=16, k=3x3, s=1x1, p=1x1)",
+        "semantic": "3x3 空间卷积（通道 16→16）",
+        "axes": "NCHW",
+        "tags": [
+          "conv",
+          "spatial"
+        ]
+      }
+    },
+    {
+      "id": "n19",
+      "name": "layer1.1.bn2",
+      "op": "BatchNorm2d",
+      "kind": "norm",
+      "modulePath": "layer1.1.bn2",
+      "depth": 2,
+      "inShapes": [
+        [
+          1,
+          16,
+          64,
+          64
+        ]
+      ],
+      "outShapes": [
+        [
+          1,
+          16,
+          64,
+          64
+        ]
+      ],
+      "params": {
+        "normalizedShape": [
+          16
+        ],
+        "eps": 1e-05,
+        "affine": true
+      },
+      "numParams": 32,
+      "flops": 262144,
+      "tags": [
+        "normalized"
+      ],
+      "groupId": "g5",
+      "source": {
+        "file": "samples/resnet_mini.py",
+        "line": 26,
+        "code": "nn.BatchNorm2d(out_channels)"
+      },
+      "notes": [],
+      "metrics": {
+        "activationBytes": 262144,
+        "receptiveField": 11,
+        "macs": 131072
+      },
+      "meta": {
+        "formula": "y[n,c,:] = γ[c]·(x[n,c,:]-μ_B[c])/√(σ²_B[c]+ε) + β[c]  (C=16, ε=1e-05)",
+        "semantic": "批归一化：按通道统计量标准化并仿射",
+        "axes": "NCHW（逐通道）",
+        "tags": [
+          "norm",
+          "batchnorm"
+        ]
+      }
+    },
+    {
+      "id": "n20",
+      "name": "layer1.1.add",
+      "op": "add",
+      "kind": "add",
+      "modulePath": "layer1.1.add",
+      "depth": 2,
+      "inShapes": [
+        [
+          1,
+          16,
+          64,
+          64
+        ],
+        [
+          1,
+          16,
+          64,
+          64
+        ]
+      ],
+      "outShapes": [
+        [
+          1,
+          16,
+          64,
+          64
+        ]
+      ],
+      "params": {},
+      "numParams": 0,
+      "flops": 65536,
+      "tags": [
+        "merge",
+        "residual"
+      ],
+      "groupId": "g5",
+      "source": {
+        "file": "samples/resnet_mini.py",
+        "line": 36,
+        "code": "out + identity"
+      },
+      "notes": [
+        "Residual add"
+      ],
+      "metrics": {
+        "activationBytes": 262144,
+        "receptiveField": 11,
+        "macs": 32768
+      },
+      "meta": {
+        "formula": "y = x_1 + x_2",
+        "semantic": "逐元素相加（残差/分支融合）",
+        "axes": "NCHW",
+        "tags": [
+          "merge",
+          "add",
+          "residual"
+        ]
+      }
+    },
+    {
+      "id": "n21",
+      "name": "layer1.1.relu#2",
+      "op": "ReLU",
+      "kind": "activation",
+      "modulePath": "layer1.1.relu",
+      "depth": 2,
+      "inShapes": [
+        [
+          1,
+          16,
+          64,
+          64
+        ]
+      ],
+      "outShapes": [
+        [
+          1,
+          16,
+          64,
+          64
+        ]
+      ],
+      "params": {
+        "inplace": true
+      },
+      "numParams": 0,
+      "flops": 65536,
+      "tags": [
+        "elementwise"
+      ],
+      "groupId": "g5",
+      "source": {
+        "file": "samples/resnet_mini.py",
+        "line": 24,
+        "code": "nn.ReLU(inplace=True)"
+      },
+      "notes": [],
+      "metrics": {
+        "activationBytes": 262144,
+        "receptiveField": 11,
+        "macs": 32768
+      },
+      "meta": {
+        "formula": "y = max(x, 0)",
+        "semantic": "逐元素 ReLU 非线性（负值截断）",
+        "axes": "逐元素（任意轴）",
+        "tags": [
+          "activation",
+          "relu"
+        ]
+      }
+    },
+    {
+      "id": "n22",
+      "name": "layer2.0.shortcut.0",
+      "op": "Conv2d",
+      "kind": "conv",
+      "modulePath": "layer2.0.shortcut.0",
+      "depth": 3,
+      "inShapes": [
+        [
+          1,
+          16,
+          64,
+          64
+        ]
+      ],
+      "outShapes": [
+        [
+          1,
+          32,
+          32,
+          32
+        ]
+      ],
+      "params": {
+        "inChannels": 16,
+        "outChannels": 32,
+        "kernelSize": [
+          1,
+          1
+        ],
+        "stride": [
+          2,
+          2
+        ],
+        "padding": [
+          0,
+          0
+        ],
+        "dilation": [
+          1,
+          1
+        ],
+        "groups": 1,
+        "bias": false
+      },
+      "numParams": 512,
+      "flops": 1048576,
+      "tags": [
+        "spatial",
+        "weighted",
+        "upsample"
+      ],
+      "groupId": "g10",
+      "source": {
+        "file": "samples/resnet_mini.py",
+        "line": 28,
+        "code": "nn.Conv2d(in_channels, out_channels, kernel_size=1, stride=stride, bias=False)"
+      },
+      "notes": [],
+      "metrics": {
+        "activationBytes": 131072,
+        "receptiveField": 11,
+        "macs": 524288
+      },
+      "meta": {
+        "formula": "y[n,o,h',w'] = Σ_{c,kh,kw} W[o,c,kh,kw]·x[n,c,h·s+kh-p,w·s+kw-p] + b[o]  (Cin=16→Cout=32, k=1x1, s=2x2, p=0x0)",
+        "semantic": "1×1 通道投影（逐像素线性混合）",
+        "axes": "NCHW",
+        "tags": [
+          "conv",
+          "spatial",
+          "pointwise",
+          "downsample"
+        ]
+      }
+    },
+    {
+      "id": "n23",
+      "name": "layer2.0.shortcut.1",
+      "op": "BatchNorm2d",
+      "kind": "norm",
+      "modulePath": "layer2.0.shortcut.1",
+      "depth": 3,
+      "inShapes": [
+        [
+          1,
+          32,
+          32,
+          32
+        ]
+      ],
+      "outShapes": [
+        [
+          1,
+          32,
+          32,
+          32
+        ]
+      ],
+      "params": {
+        "normalizedShape": [
+          32
+        ],
+        "eps": 1e-05,
+        "affine": true
+      },
+      "numParams": 64,
+      "flops": 131072,
+      "tags": [
+        "normalized"
+      ],
+      "groupId": "g10",
+      "source": {
+        "file": "samples/resnet_mini.py",
+        "line": 29,
+        "code": "nn.BatchNorm2d(out_channels)"
+      },
+      "notes": [],
+      "metrics": {
+        "activationBytes": 131072,
+        "receptiveField": 11,
+        "macs": 65536
+      },
+      "meta": {
+        "formula": "y[n,c,:] = γ[c]·(x[n,c,:]-μ_B[c])/√(σ²_B[c]+ε) + β[c]  (C=32, ε=1e-05)",
+        "semantic": "批归一化：按通道统计量标准化并仿射",
+        "axes": "NCHW（逐通道）",
+        "tags": [
+          "norm",
+          "batchnorm"
+        ]
+      }
+    },
+    {
+      "id": "n24",
+      "name": "layer2.0.conv1",
+      "op": "Conv2d",
+      "kind": "conv",
+      "modulePath": "layer2.0.conv1",
+      "depth": 2,
+      "inShapes": [
+        [
+          1,
+          16,
+          64,
+          64
+        ]
+      ],
+      "outShapes": [
+        [
+          1,
+          32,
+          32,
+          32
+        ]
+      ],
+      "params": {
+        "inChannels": 16,
+        "outChannels": 32,
+        "kernelSize": [
+          3,
+          3
+        ],
+        "stride": [
+          2,
+          2
+        ],
+        "padding": [
+          1,
+          1
+        ],
+        "dilation": [
+          1,
+          1
+        ],
+        "groups": 1,
+        "bias": false
+      },
+      "numParams": 4608,
+      "flops": 9437184,
+      "tags": [
+        "spatial",
+        "weighted",
+        "upsample"
+      ],
+      "groupId": "g6",
+      "source": {
+        "file": "samples/resnet_mini.py",
+        "line": 22,
+        "code": "nn.Conv2d(in_channels, out_channels, kernel_size=3, stride=stride, padding=1, bias=False)"
+      },
+      "notes": [],
+      "metrics": {
+        "activationBytes": 131072,
+        "receptiveField": 13,
+        "macs": 4718592
+      },
+      "meta": {
+        "formula": "y[n,o,h',w'] = Σ_{c,kh,kw} W[o,c,kh,kw]·x[n,c,h·s+kh-p,w·s+kw-p] + b[o]  (Cin=16→Cout=32, k=3x3, s=2x2, p=1x1)",
+        "semantic": "3x3 步长卷积（空间下采样）",
+        "axes": "NCHW",
+        "tags": [
+          "conv",
+          "spatial",
+          "downsample"
+        ]
+      }
+    },
+    {
+      "id": "n25",
+      "name": "layer2.0.bn1",
+      "op": "BatchNorm2d",
+      "kind": "norm",
+      "modulePath": "layer2.0.bn1",
+      "depth": 2,
+      "inShapes": [
+        [
+          1,
+          32,
+          32,
+          32
+        ]
+      ],
+      "outShapes": [
+        [
+          1,
+          32,
+          32,
+          32
+        ]
+      ],
+      "params": {
+        "normalizedShape": [
+          32
+        ],
+        "eps": 1e-05,
+        "affine": true
+      },
+      "numParams": 64,
+      "flops": 131072,
+      "tags": [
+        "normalized"
+      ],
+      "groupId": "g6",
+      "source": {
+        "file": "samples/resnet_mini.py",
+        "line": 23,
+        "code": "nn.BatchNorm2d(out_channels)"
+      },
+      "notes": [],
+      "metrics": {
+        "activationBytes": 131072,
+        "receptiveField": 13,
+        "macs": 65536
+      },
+      "meta": {
+        "formula": "y[n,c,:] = γ[c]·(x[n,c,:]-μ_B[c])/√(σ²_B[c]+ε) + β[c]  (C=32, ε=1e-05)",
+        "semantic": "批归一化：按通道统计量标准化并仿射",
+        "axes": "NCHW（逐通道）",
+        "tags": [
+          "norm",
+          "batchnorm"
+        ]
+      }
+    },
+    {
+      "id": "n26",
+      "name": "layer2.0.relu",
+      "op": "ReLU",
+      "kind": "activation",
+      "modulePath": "layer2.0.relu",
+      "depth": 2,
+      "inShapes": [
+        [
+          1,
+          32,
+          32,
+          32
+        ]
+      ],
+      "outShapes": [
+        [
+          1,
+          32,
+          32,
+          32
+        ]
+      ],
+      "params": {
+        "inplace": true
+      },
+      "numParams": 0,
+      "flops": 32768,
+      "tags": [
+        "elementwise"
+      ],
+      "groupId": "g6",
+      "source": {
+        "file": "samples/resnet_mini.py",
+        "line": 24,
+        "code": "nn.ReLU(inplace=True)"
+      },
+      "notes": [],
+      "metrics": {
+        "activationBytes": 131072,
+        "receptiveField": 13,
+        "macs": 16384
+      },
+      "meta": {
+        "formula": "y = max(x, 0)",
+        "semantic": "逐元素 ReLU 非线性（负值截断）",
+        "axes": "逐元素（任意轴）",
+        "tags": [
+          "activation",
+          "relu"
+        ]
+      }
+    },
+    {
+      "id": "n27",
+      "name": "layer2.0.conv2",
+      "op": "Conv2d",
+      "kind": "conv",
+      "modulePath": "layer2.0.conv2",
+      "depth": 2,
+      "inShapes": [
+        [
+          1,
+          32,
+          32,
+          32
+        ]
+      ],
+      "outShapes": [
+        [
+          1,
+          32,
+          32,
+          32
+        ]
+      ],
+      "params": {
+        "inChannels": 32,
+        "outChannels": 32,
+        "kernelSize": [
+          3,
+          3
+        ],
+        "stride": [
+          1,
+          1
+        ],
+        "padding": [
+          1,
+          1
+        ],
+        "dilation": [
+          1,
+          1
+        ],
+        "groups": 1,
+        "bias": false
+      },
+      "numParams": 9216,
+      "flops": 18874368,
+      "tags": [
+        "spatial",
+        "weighted"
+      ],
+      "groupId": "g6",
+      "source": {
+        "file": "samples/resnet_mini.py",
+        "line": 25,
+        "code": "nn.Conv2d(out_channels, out_channels, kernel_size=3, padding=1, bias=False)"
+      },
+      "notes": [],
+      "metrics": {
+        "activationBytes": 131072,
+        "receptiveField": 17,
+        "macs": 9437184
+      },
+      "meta": {
+        "formula": "y[n,o,h',w'] = Σ_{c,kh,kw} W[o,c,kh,kw]·x[n,c,h·s+kh-p,w·s+kw-p] + b[o]  (Cin=32→Cout=32, k=3x3, s=1x1, p=1x1)",
+        "semantic": "3x3 空间卷积（通道 32→32）",
+        "axes": "NCHW",
+        "tags": [
+          "conv",
+          "spatial"
+        ]
+      }
+    },
+    {
+      "id": "n28",
+      "name": "layer2.0.bn2",
+      "op": "BatchNorm2d",
+      "kind": "norm",
+      "modulePath": "layer2.0.bn2",
+      "depth": 2,
+      "inShapes": [
+        [
+          1,
+          32,
+          32,
+          32
+        ]
+      ],
+      "outShapes": [
+        [
+          1,
+          32,
+          32,
+          32
+        ]
+      ],
+      "params": {
+        "normalizedShape": [
+          32
+        ],
+        "eps": 1e-05,
+        "affine": true
+      },
+      "numParams": 64,
+      "flops": 131072,
+      "tags": [
+        "normalized"
+      ],
+      "groupId": "g6",
+      "source": {
+        "file": "samples/resnet_mini.py",
+        "line": 26,
+        "code": "nn.BatchNorm2d(out_channels)"
+      },
+      "notes": [],
+      "metrics": {
+        "activationBytes": 131072,
+        "receptiveField": 17,
+        "macs": 65536
+      },
+      "meta": {
+        "formula": "y[n,c,:] = γ[c]·(x[n,c,:]-μ_B[c])/√(σ²_B[c]+ε) + β[c]  (C=32, ε=1e-05)",
+        "semantic": "批归一化：按通道统计量标准化并仿射",
+        "axes": "NCHW（逐通道）",
+        "tags": [
+          "norm",
+          "batchnorm"
+        ]
+      }
+    },
+    {
+      "id": "n29",
+      "name": "layer2.0.add",
+      "op": "add",
+      "kind": "add",
+      "modulePath": "layer2.0.add",
+      "depth": 2,
+      "inShapes": [
+        [
+          1,
+          32,
+          32,
+          32
+        ],
+        [
+          1,
+          32,
+          32,
+          32
+        ]
+      ],
+      "outShapes": [
+        [
+          1,
+          32,
+          32,
+          32
+        ]
+      ],
+      "params": {},
+      "numParams": 0,
+      "flops": 32768,
+      "tags": [
+        "merge",
+        "residual"
+      ],
+      "groupId": "g6",
+      "source": {
+        "file": "samples/resnet_mini.py",
+        "line": 36,
+        "code": "out + identity"
+      },
+      "notes": [
+        "Residual add"
+      ],
+      "metrics": {
+        "activationBytes": 131072,
+        "receptiveField": 17,
+        "macs": 16384
+      },
+      "meta": {
+        "formula": "y = x_1 + x_2",
+        "semantic": "逐元素相加（残差/分支融合）",
+        "axes": "NCHW",
+        "tags": [
+          "merge",
+          "add",
+          "residual"
+        ]
+      }
+    },
+    {
+      "id": "n30",
+      "name": "layer2.0.relu#2",
+      "op": "ReLU",
+      "kind": "activation",
+      "modulePath": "layer2.0.relu",
+      "depth": 2,
+      "inShapes": [
+        [
+          1,
+          32,
+          32,
+          32
+        ]
+      ],
+      "outShapes": [
+        [
+          1,
+          32,
+          32,
+          32
+        ]
+      ],
+      "params": {
+        "inplace": true
+      },
+      "numParams": 0,
+      "flops": 32768,
+      "tags": [
+        "elementwise"
+      ],
+      "groupId": "g6",
+      "source": {
+        "file": "samples/resnet_mini.py",
+        "line": 24,
+        "code": "nn.ReLU(inplace=True)"
+      },
+      "notes": [],
+      "metrics": {
+        "activationBytes": 131072,
+        "receptiveField": 17,
+        "macs": 16384
+      },
+      "meta": {
+        "formula": "y = max(x, 0)",
+        "semantic": "逐元素 ReLU 非线性（负值截断）",
+        "axes": "逐元素（任意轴）",
+        "tags": [
+          "activation",
+          "relu"
+        ]
+      }
+    },
+    {
+      "id": "n31",
+      "name": "layer2.1.shortcut.0",
+      "op": "Conv2d",
+      "kind": "conv",
+      "modulePath": "layer2.1.shortcut.0",
+      "depth": 3,
+      "inShapes": [
+        [
+          1,
+          32,
+          32,
+          32
+        ]
+      ],
+      "outShapes": [
+        [
+          1,
+          32,
+          32,
+          32
+        ]
+      ],
+      "params": {
+        "inChannels": 32,
+        "outChannels": 32,
+        "kernelSize": [
+          1,
+          1
+        ],
+        "stride": [
+          1,
+          1
+        ],
+        "padding": [
+          0,
+          0
+        ],
+        "dilation": [
+          1,
+          1
+        ],
+        "groups": 1,
+        "bias": false
+      },
+      "numParams": 1024,
+      "flops": 2097152,
+      "tags": [
+        "spatial",
+        "weighted"
+      ],
+      "groupId": "g11",
+      "source": {
+        "file": "samples/resnet_mini.py",
+        "line": 28,
+        "code": "nn.Conv2d(in_channels, out_channels, kernel_size=1, stride=stride, bias=False)"
+      },
+      "notes": [],
+      "metrics": {
+        "activationBytes": 131072,
+        "receptiveField": 17,
+        "macs": 1048576
+      },
+      "meta": {
+        "formula": "y[n,o,h',w'] = Σ_{c,kh,kw} W[o,c,kh,kw]·x[n,c,h·s+kh-p,w·s+kw-p] + b[o]  (Cin=32→Cout=32, k=1x1, s=1x1, p=0x0)",
+        "semantic": "1×1 通道投影（逐像素线性混合）",
+        "axes": "NCHW",
+        "tags": [
+          "conv",
+          "spatial",
+          "pointwise"
+        ]
+      }
+    },
+    {
+      "id": "n32",
+      "name": "layer2.1.shortcut.1",
+      "op": "BatchNorm2d",
+      "kind": "norm",
+      "modulePath": "layer2.1.shortcut.1",
+      "depth": 3,
+      "inShapes": [
+        [
+          1,
+          32,
+          32,
+          32
+        ]
+      ],
+      "outShapes": [
+        [
+          1,
+          32,
+          32,
+          32
+        ]
+      ],
+      "params": {
+        "normalizedShape": [
+          32
+        ],
+        "eps": 1e-05,
+        "affine": true
+      },
+      "numParams": 64,
+      "flops": 131072,
+      "tags": [
+        "normalized"
+      ],
+      "groupId": "g11",
+      "source": {
+        "file": "samples/resnet_mini.py",
+        "line": 29,
+        "code": "nn.BatchNorm2d(out_channels)"
+      },
+      "notes": [],
+      "metrics": {
+        "activationBytes": 131072,
+        "receptiveField": 17,
+        "macs": 65536
+      },
+      "meta": {
+        "formula": "y[n,c,:] = γ[c]·(x[n,c,:]-μ_B[c])/√(σ²_B[c]+ε) + β[c]  (C=32, ε=1e-05)",
+        "semantic": "批归一化：按通道统计量标准化并仿射",
+        "axes": "NCHW（逐通道）",
+        "tags": [
+          "norm",
+          "batchnorm"
+        ]
+      }
+    },
+    {
+      "id": "n33",
+      "name": "layer2.1.conv1",
+      "op": "Conv2d",
+      "kind": "conv",
+      "modulePath": "layer2.1.conv1",
+      "depth": 2,
+      "inShapes": [
+        [
+          1,
+          32,
+          32,
+          32
+        ]
+      ],
+      "outShapes": [
+        [
+          1,
+          32,
+          32,
+          32
+        ]
+      ],
+      "params": {
+        "inChannels": 32,
+        "outChannels": 32,
+        "kernelSize": [
+          3,
+          3
+        ],
+        "stride": [
+          1,
+          1
+        ],
+        "padding": [
+          1,
+          1
+        ],
+        "dilation": [
+          1,
+          1
+        ],
+        "groups": 1,
+        "bias": false
+      },
+      "numParams": 9216,
+      "flops": 18874368,
+      "tags": [
+        "spatial",
+        "weighted"
+      ],
+      "groupId": "g7",
+      "source": {
+        "file": "samples/resnet_mini.py",
+        "line": 22,
+        "code": "nn.Conv2d(in_channels, out_channels, kernel_size=3, stride=stride, padding=1, bias=False)"
+      },
+      "notes": [],
+      "metrics": {
+        "activationBytes": 131072,
+        "receptiveField": 21,
+        "macs": 9437184
+      },
+      "meta": {
+        "formula": "y[n,o,h',w'] = Σ_{c,kh,kw} W[o,c,kh,kw]·x[n,c,h·s+kh-p,w·s+kw-p] + b[o]  (Cin=32→Cout=32, k=3x3, s=1x1, p=1x1)",
+        "semantic": "3x3 空间卷积（通道 32→32）",
+        "axes": "NCHW",
+        "tags": [
+          "conv",
+          "spatial"
+        ]
+      }
+    },
+    {
+      "id": "n34",
+      "name": "layer2.1.bn1",
+      "op": "BatchNorm2d",
+      "kind": "norm",
+      "modulePath": "layer2.1.bn1",
+      "depth": 2,
+      "inShapes": [
+        [
+          1,
+          32,
+          32,
+          32
+        ]
+      ],
+      "outShapes": [
+        [
+          1,
+          32,
+          32,
+          32
+        ]
+      ],
+      "params": {
+        "normalizedShape": [
+          32
+        ],
+        "eps": 1e-05,
+        "affine": true
+      },
+      "numParams": 64,
+      "flops": 131072,
+      "tags": [
+        "normalized"
+      ],
+      "groupId": "g7",
+      "source": {
+        "file": "samples/resnet_mini.py",
+        "line": 23,
+        "code": "nn.BatchNorm2d(out_channels)"
+      },
+      "notes": [],
+      "metrics": {
+        "activationBytes": 131072,
+        "receptiveField": 21,
+        "macs": 65536
+      },
+      "meta": {
+        "formula": "y[n,c,:] = γ[c]·(x[n,c,:]-μ_B[c])/√(σ²_B[c]+ε) + β[c]  (C=32, ε=1e-05)",
+        "semantic": "批归一化：按通道统计量标准化并仿射",
+        "axes": "NCHW（逐通道）",
+        "tags": [
+          "norm",
+          "batchnorm"
+        ]
+      }
+    },
+    {
+      "id": "n35",
+      "name": "layer2.1.relu",
+      "op": "ReLU",
+      "kind": "activation",
+      "modulePath": "layer2.1.relu",
+      "depth": 2,
+      "inShapes": [
+        [
+          1,
+          32,
+          32,
+          32
+        ]
+      ],
+      "outShapes": [
+        [
+          1,
+          32,
+          32,
+          32
+        ]
+      ],
+      "params": {
+        "inplace": true
+      },
+      "numParams": 0,
+      "flops": 32768,
+      "tags": [
+        "elementwise"
+      ],
+      "groupId": "g7",
+      "source": {
+        "file": "samples/resnet_mini.py",
+        "line": 24,
+        "code": "nn.ReLU(inplace=True)"
+      },
+      "notes": [],
+      "metrics": {
+        "activationBytes": 131072,
+        "receptiveField": 21,
+        "macs": 16384
+      },
+      "meta": {
+        "formula": "y = max(x, 0)",
+        "semantic": "逐元素 ReLU 非线性（负值截断）",
+        "axes": "逐元素（任意轴）",
+        "tags": [
+          "activation",
+          "relu"
+        ]
+      }
+    },
+    {
+      "id": "n36",
+      "name": "layer2.1.conv2",
+      "op": "Conv2d",
+      "kind": "conv",
+      "modulePath": "layer2.1.conv2",
+      "depth": 2,
+      "inShapes": [
+        [
+          1,
+          32,
+          32,
+          32
+        ]
+      ],
+      "outShapes": [
+        [
+          1,
+          32,
+          32,
+          32
+        ]
+      ],
+      "params": {
+        "inChannels": 32,
+        "outChannels": 32,
+        "kernelSize": [
+          3,
+          3
+        ],
+        "stride": [
+          1,
+          1
+        ],
+        "padding": [
+          1,
+          1
+        ],
+        "dilation": [
+          1,
+          1
+        ],
+        "groups": 1,
+        "bias": false
+      },
+      "numParams": 9216,
+      "flops": 18874368,
+      "tags": [
+        "spatial",
+        "weighted"
+      ],
+      "groupId": "g7",
+      "source": {
+        "file": "samples/resnet_mini.py",
+        "line": 25,
+        "code": "nn.Conv2d(out_channels, out_channels, kernel_size=3, padding=1, bias=False)"
+      },
+      "notes": [],
+      "metrics": {
+        "activationBytes": 131072,
+        "receptiveField": 25,
+        "macs": 9437184
+      },
+      "meta": {
+        "formula": "y[n,o,h',w'] = Σ_{c,kh,kw} W[o,c,kh,kw]·x[n,c,h·s+kh-p,w·s+kw-p] + b[o]  (Cin=32→Cout=32, k=3x3, s=1x1, p=1x1)",
+        "semantic": "3x3 空间卷积（通道 32→32）",
+        "axes": "NCHW",
+        "tags": [
+          "conv",
+          "spatial"
+        ]
+      }
+    },
+    {
+      "id": "n37",
+      "name": "layer2.1.bn2",
+      "op": "BatchNorm2d",
+      "kind": "norm",
+      "modulePath": "layer2.1.bn2",
+      "depth": 2,
+      "inShapes": [
+        [
+          1,
+          32,
+          32,
+          32
+        ]
+      ],
+      "outShapes": [
+        [
+          1,
+          32,
+          32,
+          32
+        ]
+      ],
+      "params": {
+        "normalizedShape": [
+          32
+        ],
+        "eps": 1e-05,
+        "affine": true
+      },
+      "numParams": 64,
+      "flops": 131072,
+      "tags": [
+        "normalized"
+      ],
+      "groupId": "g7",
+      "source": {
+        "file": "samples/resnet_mini.py",
+        "line": 26,
+        "code": "nn.BatchNorm2d(out_channels)"
+      },
+      "notes": [],
+      "metrics": {
+        "activationBytes": 131072,
+        "receptiveField": 25,
+        "macs": 65536
+      },
+      "meta": {
+        "formula": "y[n,c,:] = γ[c]·(x[n,c,:]-μ_B[c])/√(σ²_B[c]+ε) + β[c]  (C=32, ε=1e-05)",
+        "semantic": "批归一化：按通道统计量标准化并仿射",
+        "axes": "NCHW（逐通道）",
+        "tags": [
+          "norm",
+          "batchnorm"
+        ]
+      }
+    },
+    {
+      "id": "n38",
+      "name": "layer2.1.add",
+      "op": "add",
+      "kind": "add",
+      "modulePath": "layer2.1.add",
+      "depth": 2,
+      "inShapes": [
+        [
+          1,
+          32,
+          32,
+          32
+        ],
+        [
+          1,
+          32,
+          32,
+          32
+        ]
+      ],
+      "outShapes": [
+        [
+          1,
+          32,
+          32,
+          32
+        ]
+      ],
+      "params": {},
+      "numParams": 0,
+      "flops": 32768,
+      "tags": [
+        "merge",
+        "residual"
+      ],
+      "groupId": "g7",
+      "source": {
+        "file": "samples/resnet_mini.py",
+        "line": 36,
+        "code": "out + identity"
+      },
+      "notes": [
+        "Residual add"
+      ],
+      "metrics": {
+        "activationBytes": 131072,
+        "receptiveField": 25,
+        "macs": 16384
+      },
+      "meta": {
+        "formula": "y = x_1 + x_2",
+        "semantic": "逐元素相加（残差/分支融合）",
+        "axes": "NCHW",
+        "tags": [
+          "merge",
+          "add",
+          "residual"
+        ]
+      }
+    },
+    {
+      "id": "n39",
+      "name": "layer2.1.relu#2",
+      "op": "ReLU",
+      "kind": "activation",
+      "modulePath": "layer2.1.relu",
+      "depth": 2,
+      "inShapes": [
+        [
+          1,
+          32,
+          32,
+          32
+        ]
+      ],
+      "outShapes": [
+        [
+          1,
+          32,
+          32,
+          32
+        ]
+      ],
+      "params": {
+        "inplace": true
+      },
+      "numParams": 0,
+      "flops": 32768,
+      "tags": [
+        "elementwise"
+      ],
+      "groupId": "g7",
+      "source": {
+        "file": "samples/resnet_mini.py",
+        "line": 24,
+        "code": "nn.ReLU(inplace=True)"
+      },
+      "notes": [],
+      "metrics": {
+        "activationBytes": 131072,
+        "receptiveField": 25,
+        "macs": 16384
+      },
+      "meta": {
+        "formula": "y = max(x, 0)",
+        "semantic": "逐元素 ReLU 非线性（负值截断）",
+        "axes": "逐元素（任意轴）",
+        "tags": [
+          "activation",
+          "relu"
+        ]
+      }
+    },
+    {
+      "id": "n40",
+      "name": "avgpool",
+      "op": "AdaptiveAvgPool2d",
+      "kind": "pool",
+      "modulePath": "avgpool",
+      "depth": 1,
+      "inShapes": [
+        [
+          1,
+          32,
+          32,
+          32
+        ]
+      ],
+      "outShapes": [
+        [
+          1,
+          32,
+          1,
+          1
+        ]
+      ],
+      "params": {
+        "type": "adaptive",
+        "outputSize": [
+          1,
+          1
+        ]
+      },
+      "numParams": 0,
+      "flops": 32768,
+      "tags": [
+        "downsample",
+        "global"
+      ],
+      "groupId": "g0",
+      "source": {
+        "file": "samples/resnet_mini.py",
+        "line": 57,
+        "code": "nn.AdaptiveAvgPool2d((1, 1))"
+      },
+      "notes": [],
+      "metrics": {
+        "activationBytes": 128,
+        "receptiveField": 25,
+        "macs": 16384
+      },
+      "meta": {
+        "formula": "y[n,c] = mean_{h,w} x[n,c,h,w]",
+        "semantic": "全局平均池化：空间维压成 1×1",
+        "axes": "NCHW → NC",
+        "tags": [
+          "pool",
+          "global"
+        ]
+      }
+    },
+    {
+      "id": "n41",
+      "name": "flatten",
+      "op": "torch.flatten",
+      "kind": "flatten",
+      "modulePath": "flatten",
+      "depth": 1,
+      "inShapes": [
+        [
+          1,
+          32,
+          1,
+          1
+        ]
+      ],
+      "outShapes": [
+        [
+          1,
+          32
+        ]
+      ],
+      "params": {
+        "startDim": 1
+      },
+      "numParams": 0,
+      "flops": 0,
+      "tags": [
+        "reshape"
+      ],
+      "groupId": "g0",
+      "source": {
+        "file": "samples/resnet_mini.py",
+        "line": 65,
+        "code": "torch.flatten(x, 1)"
+      },
+      "notes": [],
+      "metrics": {
+        "activationBytes": 128,
+        "receptiveField": 25,
+        "macs": 0
+      },
+      "meta": {
+        "formula": "y = reshape(x, (N, -1))  (start_dim=1)",
+        "semantic": "展平空间/通道维为特征向量",
+        "axes": "N×… → N×F",
+        "tags": [
+          "flatten",
+          "reshape"
+        ]
+      }
+    },
+    {
+      "id": "n42",
+      "name": "fc",
+      "op": "Linear",
+      "kind": "linear",
+      "modulePath": "fc",
+      "depth": 1,
+      "inShapes": [
+        [
+          1,
+          32
+        ]
+      ],
+      "outShapes": [
+        [
+          1,
+          10
+        ]
+      ],
+      "params": {
+        "inFeatures": 32,
+        "outFeatures": 10,
+        "bias": true
+      },
+      "numParams": 330,
+      "flops": 650,
+      "tags": [
+        "weighted"
+      ],
+      "groupId": "g0",
+      "source": {
+        "file": "samples/resnet_mini.py",
+        "line": 58,
+        "code": "nn.Linear(32, num_classes)"
+      },
+      "notes": [],
+      "metrics": {
+        "activationBytes": 40,
+        "receptiveField": 25,
+        "macs": 325
+      },
+      "meta": {
+        "formula": "y[..., o] = Σ_i x[..., i]·W[o, i] + b[o]  (in=32→out=10)",
+        "semantic": "全连接通道混合（特征维线性变换）",
+        "axes": "N×F / NLC",
+        "tags": [
+          "linear",
+          "channel_mix"
+        ]
+      }
+    },
+    {
+      "id": "n43",
+      "name": "output",
+      "op": "Output",
+      "kind": "output",
+      "modulePath": "",
+      "depth": 0,
+      "inShapes": [
+        [
+          1,
+          10
+        ]
+      ],
+      "outShapes": [
+        [
+          1,
+          10
+        ]
+      ],
+      "params": {},
+      "numParams": 0,
+      "flops": 0,
+      "tags": [
+        "boundary"
+      ],
+      "groupId": null,
+      "source": null,
+      "notes": [],
+      "metrics": {
+        "activationBytes": 40,
+        "receptiveField": 25,
+        "macs": 0
+      },
+      "meta": {
+        "formula": "y = Output((1, 10))",
+        "semantic": "网络输出张量",
+        "axes": "N×F",
+        "tags": [
+          "boundary",
+          "output"
+        ]
+      }
+    }
+  ],
+  "edges": [
+    {
+      "id": "e0",
+      "source": "n0",
+      "target": "n1",
+      "kind": "data",
+      "shapes": [
+        [
+          1,
+          3,
+          64,
+          64
+        ]
+      ],
+      "label": ""
+    },
+    {
+      "id": "e1",
+      "source": "n1",
+      "target": "n2",
+      "kind": "data",
+      "shapes": [
+        [
+          1,
+          16,
+          64,
+          64
+        ]
+      ],
+      "label": ""
+    },
+    {
+      "id": "e2",
+      "source": "n2",
+      "target": "n3",
+      "kind": "data",
+      "shapes": [
+        [
+          1,
+          16,
+          64,
+          64
+        ]
+      ],
+      "label": ""
+    },
+    {
+      "id": "e3",
+      "source": "n3",
+      "target": "n4",
+      "kind": "data",
+      "shapes": [
+        [
+          1,
+          16,
+          64,
+          64
+        ]
+      ],
+      "label": ""
+    },
+    {
+      "id": "e4",
+      "source": "n4",
+      "target": "n5",
+      "kind": "data",
+      "shapes": [
+        [
+          1,
+          16,
+          64,
+          64
+        ]
+      ],
+      "label": ""
+    },
+    {
+      "id": "e5",
+      "source": "n3",
+      "target": "n6",
+      "kind": "data",
+      "shapes": [
+        [
+          1,
+          16,
+          64,
+          64
+        ]
+      ],
+      "label": ""
+    },
+    {
+      "id": "e6",
+      "source": "n6",
+      "target": "n7",
+      "kind": "data",
+      "shapes": [
+        [
+          1,
+          16,
+          64,
+          64
+        ]
+      ],
+      "label": ""
+    },
+    {
+      "id": "e7",
+      "source": "n7",
+      "target": "n8",
+      "kind": "data",
+      "shapes": [
+        [
+          1,
+          16,
+          64,
+          64
+        ]
+      ],
+      "label": ""
+    },
+    {
+      "id": "e8",
+      "source": "n8",
+      "target": "n9",
+      "kind": "data",
+      "shapes": [
+        [
+          1,
+          16,
+          64,
+          64
+        ]
+      ],
+      "label": ""
+    },
+    {
+      "id": "e9",
+      "source": "n9",
+      "target": "n10",
+      "kind": "data",
+      "shapes": [
+        [
+          1,
+          16,
+          64,
+          64
+        ]
+      ],
+      "label": ""
+    },
+    {
+      "id": "e10",
+      "source": "n5",
+      "target": "n11",
+      "kind": "residual",
+      "shapes": [
+        [
+          1,
+          16,
+          64,
+          64
+        ]
+      ],
+      "label": "identity"
+    },
+    {
+      "id": "e11",
+      "source": "n10",
+      "target": "n11",
+      "kind": "data",
+      "shapes": [
+        [
+          1,
+          16,
+          64,
+          64
+        ]
+      ],
+      "label": ""
+    },
+    {
+      "id": "e12",
+      "source": "n11",
+      "target": "n12",
+      "kind": "data",
+      "shapes": [
+        [
+          1,
+          16,
+          64,
+          64
+        ]
+      ],
+      "label": ""
+    },
+    {
+      "id": "e13",
+      "source": "n12",
+      "target": "n13",
+      "kind": "data",
+      "shapes": [
+        [
+          1,
+          16,
+          64,
+          64
+        ]
+      ],
+      "label": ""
+    },
+    {
+      "id": "e14",
+      "source": "n13",
+      "target": "n14",
+      "kind": "data",
+      "shapes": [
+        [
+          1,
+          16,
+          64,
+          64
+        ]
+      ],
+      "label": ""
+    },
+    {
+      "id": "e15",
+      "source": "n12",
+      "target": "n15",
+      "kind": "data",
+      "shapes": [
+        [
+          1,
+          16,
+          64,
+          64
+        ]
+      ],
+      "label": ""
+    },
+    {
+      "id": "e16",
+      "source": "n15",
+      "target": "n16",
+      "kind": "data",
+      "shapes": [
+        [
+          1,
+          16,
+          64,
+          64
+        ]
+      ],
+      "label": ""
+    },
+    {
+      "id": "e17",
+      "source": "n16",
+      "target": "n17",
+      "kind": "data",
+      "shapes": [
+        [
+          1,
+          16,
+          64,
+          64
+        ]
+      ],
+      "label": ""
+    },
+    {
+      "id": "e18",
+      "source": "n17",
+      "target": "n18",
+      "kind": "data",
+      "shapes": [
+        [
+          1,
+          16,
+          64,
+          64
+        ]
+      ],
+      "label": ""
+    },
+    {
+      "id": "e19",
+      "source": "n18",
+      "target": "n19",
+      "kind": "data",
+      "shapes": [
+        [
+          1,
+          16,
+          64,
+          64
+        ]
+      ],
+      "label": ""
+    },
+    {
+      "id": "e20",
+      "source": "n14",
+      "target": "n20",
+      "kind": "residual",
+      "shapes": [
+        [
+          1,
+          16,
+          64,
+          64
+        ]
+      ],
+      "label": "identity"
+    },
+    {
+      "id": "e21",
+      "source": "n19",
+      "target": "n20",
+      "kind": "data",
+      "shapes": [
+        [
+          1,
+          16,
+          64,
+          64
+        ]
+      ],
+      "label": ""
+    },
+    {
+      "id": "e22",
+      "source": "n20",
+      "target": "n21",
+      "kind": "data",
+      "shapes": [
+        [
+          1,
+          16,
+          64,
+          64
+        ]
+      ],
+      "label": ""
+    },
+    {
+      "id": "e23",
+      "source": "n21",
+      "target": "n22",
+      "kind": "data",
+      "shapes": [
+        [
+          1,
+          16,
+          64,
+          64
+        ]
+      ],
+      "label": ""
+    },
+    {
+      "id": "e24",
+      "source": "n22",
+      "target": "n23",
+      "kind": "data",
+      "shapes": [
+        [
+          1,
+          32,
+          32,
+          32
+        ]
+      ],
+      "label": ""
+    },
+    {
+      "id": "e25",
+      "source": "n21",
+      "target": "n24",
+      "kind": "data",
+      "shapes": [
+        [
+          1,
+          16,
+          64,
+          64
+        ]
+      ],
+      "label": ""
+    },
+    {
+      "id": "e26",
+      "source": "n24",
+      "target": "n25",
+      "kind": "data",
+      "shapes": [
+        [
+          1,
+          32,
+          32,
+          32
+        ]
+      ],
+      "label": ""
+    },
+    {
+      "id": "e27",
+      "source": "n25",
+      "target": "n26",
+      "kind": "data",
+      "shapes": [
+        [
+          1,
+          32,
+          32,
+          32
+        ]
+      ],
+      "label": ""
+    },
+    {
+      "id": "e28",
+      "source": "n26",
+      "target": "n27",
+      "kind": "data",
+      "shapes": [
+        [
+          1,
+          32,
+          32,
+          32
+        ]
+      ],
+      "label": ""
+    },
+    {
+      "id": "e29",
+      "source": "n27",
+      "target": "n28",
+      "kind": "data",
+      "shapes": [
+        [
+          1,
+          32,
+          32,
+          32
+        ]
+      ],
+      "label": ""
+    },
+    {
+      "id": "e30",
+      "source": "n23",
+      "target": "n29",
+      "kind": "residual",
+      "shapes": [
+        [
+          1,
+          32,
+          32,
+          32
+        ]
+      ],
+      "label": "identity"
+    },
+    {
+      "id": "e31",
+      "source": "n28",
+      "target": "n29",
+      "kind": "data",
+      "shapes": [
+        [
+          1,
+          32,
+          32,
+          32
+        ]
+      ],
+      "label": ""
+    },
+    {
+      "id": "e32",
+      "source": "n29",
+      "target": "n30",
+      "kind": "data",
+      "shapes": [
+        [
+          1,
+          32,
+          32,
+          32
+        ]
+      ],
+      "label": ""
+    },
+    {
+      "id": "e33",
+      "source": "n30",
+      "target": "n31",
+      "kind": "data",
+      "shapes": [
+        [
+          1,
+          32,
+          32,
+          32
+        ]
+      ],
+      "label": ""
+    },
+    {
+      "id": "e34",
+      "source": "n31",
+      "target": "n32",
+      "kind": "data",
+      "shapes": [
+        [
+          1,
+          32,
+          32,
+          32
+        ]
+      ],
+      "label": ""
+    },
+    {
+      "id": "e35",
+      "source": "n30",
+      "target": "n33",
+      "kind": "data",
+      "shapes": [
+        [
+          1,
+          32,
+          32,
+          32
+        ]
+      ],
+      "label": ""
+    },
+    {
+      "id": "e36",
+      "source": "n33",
+      "target": "n34",
+      "kind": "data",
+      "shapes": [
+        [
+          1,
+          32,
+          32,
+          32
+        ]
+      ],
+      "label": ""
+    },
+    {
+      "id": "e37",
+      "source": "n34",
+      "target": "n35",
+      "kind": "data",
+      "shapes": [
+        [
+          1,
+          32,
+          32,
+          32
+        ]
+      ],
+      "label": ""
+    },
+    {
+      "id": "e38",
+      "source": "n35",
+      "target": "n36",
+      "kind": "data",
+      "shapes": [
+        [
+          1,
+          32,
+          32,
+          32
+        ]
+      ],
+      "label": ""
+    },
+    {
+      "id": "e39",
+      "source": "n36",
+      "target": "n37",
+      "kind": "data",
+      "shapes": [
+        [
+          1,
+          32,
+          32,
+          32
+        ]
+      ],
+      "label": ""
+    },
+    {
+      "id": "e40",
+      "source": "n32",
+      "target": "n38",
+      "kind": "residual",
+      "shapes": [
+        [
+          1,
+          32,
+          32,
+          32
+        ]
+      ],
+      "label": "identity"
+    },
+    {
+      "id": "e41",
+      "source": "n37",
+      "target": "n38",
+      "kind": "data",
+      "shapes": [
+        [
+          1,
+          32,
+          32,
+          32
+        ]
+      ],
+      "label": ""
+    },
+    {
+      "id": "e42",
+      "source": "n38",
+      "target": "n39",
+      "kind": "data",
+      "shapes": [
+        [
+          1,
+          32,
+          32,
+          32
+        ]
+      ],
+      "label": ""
+    },
+    {
+      "id": "e43",
+      "source": "n39",
+      "target": "n40",
+      "kind": "data",
+      "shapes": [
+        [
+          1,
+          32,
+          32,
+          32
+        ]
+      ],
+      "label": ""
+    },
+    {
+      "id": "e44",
+      "source": "n40",
+      "target": "n41",
+      "kind": "data",
+      "shapes": [
+        [
+          1,
+          32,
+          1,
+          1
+        ]
+      ],
+      "label": ""
+    },
+    {
+      "id": "e45",
+      "source": "n41",
+      "target": "n42",
+      "kind": "data",
+      "shapes": [
+        [
+          1,
+          32
+        ]
+      ],
+      "label": ""
+    },
+    {
+      "id": "e46",
+      "source": "n42",
+      "target": "n43",
+      "kind": "data",
+      "shapes": [
+        [
+          1,
+          10
+        ]
+      ],
+      "label": ""
+    }
+  ],
+  "groups": [
+    {
+      "id": "g0",
+      "name": "ResNetMini",
+      "label": "Res Net Mini",
+      "kind": "model",
+      "parentId": null,
+      "depth": 0,
+      "nodeIds": [
+        "n40",
+        "n41",
+        "n42"
+      ],
+      "childGroupIds": [
+        "g1",
+        "g2",
+        "g3"
+      ],
+      "numParams": 44890,
+      "flops": 155746954,
+      "source": {
+        "line": 39,
+        "code": "class ResNetMini(nn.Module): \"\"\"Stem + two residual stages (layer1 keeps resolution, layer2 downsamples).\"\"\" def __init__(self, num_classes: int = 10) -> None: super().__init__() self.stem = nn.Sequen",
+        "file": "samples/resnet_mini.py"
+      },
+      "meta": {
+        "pattern": {
+          "kind": "classifier_head",
+          "label": "Classifier Head",
+          "formula": "logits = W·x + b",
+          "confidence": 0.85,
+          "tags": [
+            "classifier_head",
+            "linear"
+          ]
+        }
+      }
+    },
+    {
+      "id": "g1",
+      "name": "layer1",
+      "label": "Layer 1",
+      "kind": "sequential",
+      "parentId": "g0",
+      "depth": 1,
+      "nodeIds": [],
+      "childGroupIds": [
+        "g4",
+        "g5"
+      ],
+      "numParams": 9920,
+      "flops": 81657856,
+      "source": {
+        "line": 39,
+        "code": "class ResNetMini(nn.Module): \"\"\"Stem + two residual stages (layer1 keeps resolution, layer2 downsamples).\"\"\" def __init__(self, num_classes: int = 10) -> None: super().__init__() self.stem = nn.Sequen",
+        "file": "samples/resnet_mini.py"
+      }
+    },
+    {
+      "id": "g2",
+      "name": "layer2",
+      "label": "Layer 2",
+      "kind": "sequential",
+      "parentId": "g0",
+      "depth": 1,
+      "nodeIds": [],
+      "childGroupIds": [
+        "g6",
+        "g7"
+      ],
+      "numParams": 34176,
+      "flops": 70189056,
+      "source": {
+        "line": 39,
+        "code": "class ResNetMini(nn.Module): \"\"\"Stem + two residual stages (layer1 keeps resolution, layer2 downsamples).\"\"\" def __init__(self, num_classes: int = 10) -> None: super().__init__() self.stem = nn.Sequen",
+        "file": "samples/resnet_mini.py"
+      }
+    },
+    {
+      "id": "g3",
+      "name": "stem",
+      "label": "Stem",
+      "kind": "sequential",
+      "parentId": "g0",
+      "depth": 1,
+      "nodeIds": [
+        "n1",
+        "n2",
+        "n3"
+      ],
+      "childGroupIds": [],
+      "numParams": 464,
+      "flops": 3866624,
+      "source": {
+        "line": 39,
+        "code": "class ResNetMini(nn.Module): \"\"\"Stem + two residual stages (layer1 keeps resolution, layer2 downsamples).\"\"\" def __init__(self, num_classes: int = 10) -> None: super().__init__() self.stem = nn.Sequen",
+        "file": "samples/resnet_mini.py"
+      },
+      "meta": {
+        "pattern": {
+          "kind": "conv_bn_act",
+          "label": "Conv-BN-Act",
+          "formula": "y = Act(BN(Conv(x)))",
+          "confidence": 0.9,
+          "tags": [
+            "conv",
+            "conv_bn_act",
+            "normalization",
+            "activation"
+          ]
+        }
+      }
+    },
+    {
+      "id": "g4",
+      "name": "layer1.0",
+      "label": "Layer 1 · Residual Block 1",
+      "kind": "residual_block",
+      "parentId": "g1",
+      "depth": 2,
+      "nodeIds": [
+        "n6",
+        "n7",
+        "n8",
+        "n9",
+        "n10",
+        "n11",
+        "n12"
+      ],
+      "childGroupIds": [
+        "g8"
+      ],
+      "numParams": 4960,
+      "flops": 40828928,
+      "source": {
+        "line": 13,
+        "code": "class BasicBlock(nn.Module): \"\"\"Two 3x3 convolutions with a 1x1 projection shortcut. The projection is always present (stride 1 keeps the identity mapping learnable) so the forward pass stays branch-f",
+        "file": "samples/resnet_mini.py"
+      },
+      "meta": {
+        "pattern": {
+          "kind": "residual_block",
+          "label": "Residual Block",
+          "formula": "y = F(x) + x",
+          "confidence": 0.95,
+          "tags": [
+            "residual",
+            "skip_connection"
+          ]
+        }
+      }
+    },
+    {
+      "id": "g5",
+      "name": "layer1.1",
+      "label": "Layer 1 · Residual Block 2",
+      "kind": "residual_block",
+      "parentId": "g1",
+      "depth": 2,
+      "nodeIds": [
+        "n15",
+        "n16",
+        "n17",
+        "n18",
+        "n19",
+        "n20",
+        "n21"
+      ],
+      "childGroupIds": [
+        "g9"
+      ],
+      "numParams": 4960,
+      "flops": 40828928,
+      "source": {
+        "line": 13,
+        "code": "class BasicBlock(nn.Module): \"\"\"Two 3x3 convolutions with a 1x1 projection shortcut. The projection is always present (stride 1 keeps the identity mapping learnable) so the forward pass stays branch-f",
+        "file": "samples/resnet_mini.py"
+      },
+      "meta": {
+        "pattern": {
+          "kind": "residual_block",
+          "label": "Residual Block",
+          "formula": "y = F(x) + x",
+          "confidence": 0.95,
+          "tags": [
+            "residual",
+            "skip_connection"
+          ]
+        }
+      }
+    },
+    {
+      "id": "g6",
+      "name": "layer2.0",
+      "label": "Layer 2 · Residual Block 1",
+      "kind": "residual_block",
+      "parentId": "g2",
+      "depth": 2,
+      "nodeIds": [
+        "n24",
+        "n25",
+        "n26",
+        "n27",
+        "n28",
+        "n29",
+        "n30"
+      ],
+      "childGroupIds": [
+        "g10"
+      ],
+      "numParams": 14528,
+      "flops": 29851648,
+      "source": {
+        "line": 13,
+        "code": "class BasicBlock(nn.Module): \"\"\"Two 3x3 convolutions with a 1x1 projection shortcut. The projection is always present (stride 1 keeps the identity mapping learnable) so the forward pass stays branch-f",
+        "file": "samples/resnet_mini.py"
+      },
+      "meta": {
+        "pattern": {
+          "kind": "residual_block",
+          "label": "Residual Block",
+          "formula": "y = F(x) + x",
+          "confidence": 0.95,
+          "tags": [
+            "residual",
+            "skip_connection"
+          ]
+        }
+      }
+    },
+    {
+      "id": "g7",
+      "name": "layer2.1",
+      "label": "Layer 2 · Residual Block 2",
+      "kind": "residual_block",
+      "parentId": "g2",
+      "depth": 2,
+      "nodeIds": [
+        "n33",
+        "n34",
+        "n35",
+        "n36",
+        "n37",
+        "n38",
+        "n39"
+      ],
+      "childGroupIds": [
+        "g11"
+      ],
+      "numParams": 19648,
+      "flops": 40337408,
+      "source": {
+        "line": 13,
+        "code": "class BasicBlock(nn.Module): \"\"\"Two 3x3 convolutions with a 1x1 projection shortcut. The projection is always present (stride 1 keeps the identity mapping learnable) so the forward pass stays branch-f",
+        "file": "samples/resnet_mini.py"
+      },
+      "meta": {
+        "pattern": {
+          "kind": "residual_block",
+          "label": "Residual Block",
+          "formula": "y = F(x) + x",
+          "confidence": 0.95,
+          "tags": [
+            "residual",
+            "skip_connection"
+          ]
+        }
+      }
+    },
+    {
+      "id": "g8",
+      "name": "layer1.0.shortcut",
+      "label": "Layer 1 · Residual Block 1 · Shortcut",
+      "kind": "sequential",
+      "parentId": "g4",
+      "depth": 3,
+      "nodeIds": [
+        "n4",
+        "n5"
+      ],
+      "childGroupIds": [],
+      "numParams": 288,
+      "flops": 2359296,
+      "source": {
+        "line": 39,
+        "code": "class ResNetMini(nn.Module): \"\"\"Stem + two residual stages (layer1 keeps resolution, layer2 downsamples).\"\"\" def __init__(self, num_classes: int = 10) -> None: super().__init__() self.stem = nn.Sequen",
+        "file": "samples/resnet_mini.py"
+      }
+    },
+    {
+      "id": "g9",
+      "name": "layer1.1.shortcut",
+      "label": "Layer 1 · Residual Block 2 · Shortcut",
+      "kind": "sequential",
+      "parentId": "g5",
+      "depth": 3,
+      "nodeIds": [
+        "n13",
+        "n14"
+      ],
+      "childGroupIds": [],
+      "numParams": 288,
+      "flops": 2359296,
+      "source": {
+        "line": 39,
+        "code": "class ResNetMini(nn.Module): \"\"\"Stem + two residual stages (layer1 keeps resolution, layer2 downsamples).\"\"\" def __init__(self, num_classes: int = 10) -> None: super().__init__() self.stem = nn.Sequen",
+        "file": "samples/resnet_mini.py"
+      }
+    },
+    {
+      "id": "g10",
+      "name": "layer2.0.shortcut",
+      "label": "Layer 2 · Residual Block 1 · Shortcut",
+      "kind": "sequential",
+      "parentId": "g6",
+      "depth": 3,
+      "nodeIds": [
+        "n22",
+        "n23"
+      ],
+      "childGroupIds": [],
+      "numParams": 576,
+      "flops": 1179648,
+      "source": {
+        "line": 39,
+        "code": "class ResNetMini(nn.Module): \"\"\"Stem + two residual stages (layer1 keeps resolution, layer2 downsamples).\"\"\" def __init__(self, num_classes: int = 10) -> None: super().__init__() self.stem = nn.Sequen",
+        "file": "samples/resnet_mini.py"
+      }
+    },
+    {
+      "id": "g11",
+      "name": "layer2.1.shortcut",
+      "label": "Layer 2 · Residual Block 2 · Shortcut",
+      "kind": "sequential",
+      "parentId": "g7",
+      "depth": 3,
+      "nodeIds": [
+        "n31",
+        "n32"
+      ],
+      "childGroupIds": [],
+      "numParams": 1088,
+      "flops": 2228224,
+      "source": {
+        "line": 39,
+        "code": "class ResNetMini(nn.Module): \"\"\"Stem + two residual stages (layer1 keeps resolution, layer2 downsamples).\"\"\" def __init__(self, num_classes: int = 10) -> None: super().__init__() self.stem = nn.Sequen",
+        "file": "samples/resnet_mini.py"
+      }
+    }
+  ]
+}

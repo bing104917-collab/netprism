@@ -1,0 +1,5366 @@
+{
+  "schemaVersion": "1.0",
+  "generator": {
+    "name": "netprism",
+    "version": "0.1.0"
+  },
+  "model": {
+    "name": "TinyGPT",
+    "framework": "pytorch",
+    "className": "TinyGPT",
+    "mode": "trace",
+    "source": {
+      "file": "samples/custom_attention.py",
+      "relPath": "custom_attention.py"
+    },
+    "inputSpec": [
+      {
+        "name": "tokens",
+        "shape": [
+          1,
+          16
+        ],
+        "dtype": "int64"
+      }
+    ],
+    "outputSpec": [
+      {
+        "name": "output",
+        "shape": [
+          1,
+          16,
+          128
+        ],
+        "dtype": "float32"
+      }
+    ],
+    "totalParams": 33920,
+    "trainableParams": 33920,
+    "totalFlops": 1017344,
+    "flopsApprox": true,
+    "numLayers": 60,
+    "warnings": [],
+    "metrics": {
+      "paramBytes": 135680,
+      "activationBytes": 202816,
+      "peakActivationBytes": 18432,
+      "maxReceptiveField": 1,
+      "macs": 508672
+    },
+    "meta": {
+      "family": "transformer_decoder",
+      "familyLabel": "Transformer Decoder",
+      "familyConfidence": 0.72,
+      "confidence": 0.72,
+      "algorithmTags": [
+        "transformer",
+        "decoder",
+        "attention",
+        "transformer_decoder",
+        "weight_tying",
+        "parameter_sharing",
+        "positional_encoding",
+        "sequence",
+        "norm",
+        "pre_norm",
+        "residual",
+        "self_attention",
+        "ffn",
+        "expansion",
+        "classifier_head",
+        "linear"
+      ],
+      "families": [
+        {
+          "id": "transformer_decoder",
+          "label": "Transformer Decoder",
+          "confidence": 0.72,
+          "evidence": [
+            "SPEC 兼容家族：gpt 的通用 Transformer 结构归入 transformer_decoder",
+            "必需组件 transformer_block: Transformer Block×2",
+            "可选组件 self_attention: Self Attention×2",
+            "可选组件 ffn: Feed-Forward Network×2",
+            "可选组件 normalization: 归一化层×5"
+          ]
+        },
+        {
+          "id": "gpt",
+          "label": "GPT",
+          "confidence": 0.57,
+          "evidence": [
+            "名称/类名命中别名 'gpt'",
+            "必需组件 transformer_block: Transformer Block×2",
+            "必需组件 self_attention: Self Attention×2",
+            "必需组件全部满足",
+            "可选组件 ffn: Feed-Forward Network×2"
+          ]
+        },
+        {
+          "id": "transformer_encoder",
+          "label": "Transformer Encoder",
+          "confidence": 0.49,
+          "evidence": [
+            "必需组件 transformer_block: Transformer Block×2",
+            "必需组件 self_attention: Self Attention×2",
+            "必需组件 ffn: Feed-Forward Network×2",
+            "必需组件全部满足",
+            "可选组件 normalization: 归一化层×5"
+          ]
+        }
+      ],
+      "patterns": [
+        {
+          "kind": "weight_tying",
+          "label": "Weight Tying",
+          "formula": "共享权重复用（W_head = W_embed）",
+          "nodeIds": [
+            "n1",
+            "n60"
+          ],
+          "groupIds": [
+            "g0"
+          ],
+          "confidence": 0.85,
+          "evidence": [
+            "Linear(32→128, bias=False) 与 Embedding(128,32) 维度转置一致",
+            "词嵌入矩阵与输出头共享权重"
+          ],
+          "tags": [
+            "weight_tying",
+            "parameter_sharing"
+          ],
+          "id": "p1"
+        },
+        {
+          "kind": "positional_encoding",
+          "label": "Positional Encoding",
+          "formula": "y = x + PE(pos, d)",
+          "nodeIds": [
+            "n2"
+          ],
+          "groupIds": [
+            "g0"
+          ],
+          "confidence": 0.85,
+          "evidence": [
+            "位置编码节点 ×1",
+            "向 token 表示注入顺序信息"
+          ],
+          "tags": [
+            "positional_encoding",
+            "sequence"
+          ],
+          "id": "p2"
+        },
+        {
+          "kind": "pre_norm",
+          "label": "Pre-Norm",
+          "formula": "x = x + F(LN(x))",
+          "nodeIds": [
+            "n5",
+            "n15",
+            "n17"
+          ],
+          "groupIds": [
+            "g2"
+          ],
+          "confidence": 0.9,
+          "evidence": [
+            "归一化层位于注意力子层之前（Pre-LN）",
+            "LayerNorm n5 → Attention n15"
+          ],
+          "tags": [
+            "norm",
+            "pre_norm"
+          ],
+          "id": "p3"
+        },
+        {
+          "kind": "transformer_block",
+          "label": "Transformer Block",
+          "formula": "x = x + MHA(LN(x)); x = x + FFN(LN(x))",
+          "nodeIds": [
+            "n5",
+            "n6",
+            "n7",
+            "n8",
+            "n9",
+            "n10",
+            "n11",
+            "n12",
+            "n13",
+            "n14",
+            "n15",
+            "n16",
+            "n17",
+            "n18",
+            "n19",
+            "n20",
+            "n21",
+            "n22",
+            "n23",
+            "n24",
+            "n25",
+            "n26",
+            "n27",
+            "n28",
+            "n29",
+            "n30",
+            "n31"
+          ],
+          "groupIds": [
+            "g2"
+          ],
+          "confidence": 0.95,
+          "evidence": [
+            "组内 3 个注意力节点",
+            "2 个残差 Add",
+            "2 个归一化层"
+          ],
+          "tags": [
+            "transformer",
+            "attention",
+            "residual"
+          ],
+          "id": "p4"
+        },
+        {
+          "kind": "self_attention",
+          "label": "Self Attention",
+          "formula": "softmax(Q·Kᵀ/√d)·V, Q/K/V 同源",
+          "nodeIds": [
+            "n9",
+            "n14",
+            "n15",
+            "n16",
+            "n17",
+            "n20"
+          ],
+          "groupIds": [
+            "g4"
+          ],
+          "confidence": 0.9,
+          "evidence": [
+            "Q/K/V 同源（共享同一输入投影）",
+            "numHeads=4"
+          ],
+          "tags": [
+            "attention",
+            "self_attention"
+          ],
+          "id": "p5"
+        },
+        {
+          "kind": "ffn",
+          "label": "Feed-Forward Network",
+          "formula": "y = W2·Act(W1·x)",
+          "nodeIds": [
+            "n26",
+            "n27",
+            "n28",
+            "n29"
+          ],
+          "groupIds": [
+            "g8"
+          ],
+          "confidence": 0.9,
+          "evidence": [
+            "Linear 32→128 → 激活 → Linear 128→32",
+            "隐藏维扩张 4.0×"
+          ],
+          "tags": [
+            "ffn",
+            "expansion"
+          ],
+          "id": "p6"
+        },
+        {
+          "kind": "pre_norm",
+          "label": "Pre-Norm",
+          "formula": "x = x + F(LN(x))",
+          "nodeIds": [
+            "n32",
+            "n42",
+            "n44"
+          ],
+          "groupIds": [
+            "g3"
+          ],
+          "confidence": 0.9,
+          "evidence": [
+            "归一化层位于注意力子层之前（Pre-LN）",
+            "LayerNorm n32 → Attention n42"
+          ],
+          "tags": [
+            "norm",
+            "pre_norm"
+          ],
+          "id": "p7"
+        },
+        {
+          "kind": "transformer_block",
+          "label": "Transformer Block",
+          "formula": "x = x + MHA(LN(x)); x = x + FFN(LN(x))",
+          "nodeIds": [
+            "n32",
+            "n33",
+            "n34",
+            "n35",
+            "n36",
+            "n37",
+            "n38",
+            "n39",
+            "n40",
+            "n41",
+            "n42",
+            "n43",
+            "n44",
+            "n45",
+            "n46",
+            "n47",
+            "n48",
+            "n49",
+            "n50",
+            "n51",
+            "n52",
+            "n53",
+            "n54",
+            "n55",
+            "n56",
+            "n57",
+            "n58"
+          ],
+          "groupIds": [
+            "g3"
+          ],
+          "confidence": 0.95,
+          "evidence": [
+            "组内 3 个注意力节点",
+            "2 个残差 Add",
+            "2 个归一化层"
+          ],
+          "tags": [
+            "transformer",
+            "attention",
+            "residual"
+          ],
+          "id": "p8"
+        },
+        {
+          "kind": "self_attention",
+          "label": "Self Attention",
+          "formula": "softmax(Q·Kᵀ/√d)·V, Q/K/V 同源",
+          "nodeIds": [
+            "n36",
+            "n41",
+            "n42",
+            "n43",
+            "n44",
+            "n47"
+          ],
+          "groupIds": [
+            "g6"
+          ],
+          "confidence": 0.9,
+          "evidence": [
+            "Q/K/V 同源（共享同一输入投影）",
+            "numHeads=4"
+          ],
+          "tags": [
+            "attention",
+            "self_attention"
+          ],
+          "id": "p9"
+        },
+        {
+          "kind": "ffn",
+          "label": "Feed-Forward Network",
+          "formula": "y = W2·Act(W1·x)",
+          "nodeIds": [
+            "n53",
+            "n54",
+            "n55",
+            "n56"
+          ],
+          "groupIds": [
+            "g9"
+          ],
+          "confidence": 0.9,
+          "evidence": [
+            "Linear 32→128 → 激活 → Linear 128→32",
+            "隐藏维扩张 4.0×"
+          ],
+          "tags": [
+            "ffn",
+            "expansion"
+          ],
+          "id": "p10"
+        },
+        {
+          "kind": "classifier_head",
+          "label": "Classifier Head",
+          "formula": "logits = W·x + b",
+          "nodeIds": [
+            "n60"
+          ],
+          "groupIds": [
+            "g0"
+          ],
+          "confidence": 0.85,
+          "evidence": [
+            "末端 Linear 输出 128 维 logits",
+            "序列输出（LM head）"
+          ],
+          "tags": [
+            "classifier_head",
+            "linear"
+          ],
+          "id": "p11"
+        }
+      ],
+      "pseudocode": [
+        "v0 = Input(1, 16)",
+        "v1 = Embedding(128,32)(v0)   # -> (1, 16, 32)",
+        "x = PositionalEmbedding(16,32)(v0)   # -> (1, 16, 32)",
+        "x = v1 + x   # -> (1, 16, 32)",
+        "x = Dropout(0.1)(x)   # -> (1, 16, 32)",
+        "x = TransformerBlock(32)(x)   # -> (1, 16, 32)",
+        "x = TransformerBlock(32)(x)   # -> (1, 16, 32)",
+        "x = LayerNorm(32)(x)   # -> (1, 16, 32)",
+        "logits = Linear(128)(x)   # -> (1, 16, 128)",
+        "return logits"
+      ],
+      "familyEvidence": [
+        "SPEC 兼容家族：gpt 的通用 Transformer 结构归入 transformer_decoder",
+        "必需组件 transformer_block: Transformer Block×2",
+        "可选组件 self_attention: Self Attention×2",
+        "可选组件 ffn: Feed-Forward Network×2",
+        "可选组件 normalization: 归一化层×5"
+      ]
+    }
+  },
+  "nodes": [
+    {
+      "id": "n0",
+      "name": "tokens",
+      "op": "Input",
+      "kind": "input",
+      "modulePath": "",
+      "depth": 0,
+      "inShapes": [],
+      "outShapes": [
+        [
+          1,
+          16
+        ]
+      ],
+      "params": {},
+      "numParams": 0,
+      "flops": 0,
+      "tags": [
+        "boundary"
+      ],
+      "groupId": null,
+      "source": null,
+      "notes": [],
+      "metrics": {
+        "activationBytes": 64,
+        "receptiveField": 1,
+        "macs": 0
+      },
+      "meta": {
+        "formula": "x = Input(1, 16)",
+        "semantic": "网络输入张量",
+        "axes": "N×F",
+        "tags": [
+          "boundary",
+          "input"
+        ]
+      }
+    },
+    {
+      "id": "n1",
+      "name": "token_emb",
+      "op": "Embedding",
+      "kind": "embedding",
+      "modulePath": "token_emb",
+      "depth": 1,
+      "inShapes": [
+        [
+          1,
+          16
+        ]
+      ],
+      "outShapes": [
+        [
+          1,
+          16,
+          32
+        ]
+      ],
+      "params": {
+        "numEmbeddings": 128,
+        "embeddingDim": 32
+      },
+      "numParams": 4096,
+      "flops": 0,
+      "tags": [
+        "token",
+        "weighted"
+      ],
+      "groupId": "g0",
+      "source": {
+        "file": "samples/custom_attention.py",
+        "line": 86,
+        "code": "nn.Embedding(vocab_size, dim)"
+      },
+      "notes": [],
+      "metrics": {
+        "activationBytes": 2048,
+        "receptiveField": 1,
+        "macs": 0
+      },
+      "meta": {
+        "formula": "y[..., d] = E[token, d]  (vocab=128, dim=32)",
+        "semantic": "词表查表获取嵌入向量",
+        "axes": "NLC (B,L,E)",
+        "tags": [
+          "embedding",
+          "token"
+        ]
+      }
+    },
+    {
+      "id": "n2",
+      "name": "pos_emb",
+      "op": "Embedding",
+      "kind": "embedding",
+      "modulePath": "pos_emb",
+      "depth": 1,
+      "inShapes": [
+        [
+          16
+        ]
+      ],
+      "outShapes": [
+        [
+          16,
+          32
+        ]
+      ],
+      "params": {
+        "numEmbeddings": 16,
+        "embeddingDim": 32
+      },
+      "numParams": 512,
+      "flops": 0,
+      "tags": [
+        "token",
+        "weighted"
+      ],
+      "groupId": "g0",
+      "source": {
+        "file": "samples/custom_attention.py",
+        "line": 87,
+        "code": "nn.Embedding(max_len, dim)"
+      },
+      "notes": [],
+      "metrics": {
+        "activationBytes": 2048,
+        "receptiveField": 1,
+        "macs": 0
+      },
+      "meta": {
+        "formula": "y[..., d] = E[token, d]  (vocab=16, dim=32)",
+        "semantic": "词表查表获取嵌入向量",
+        "axes": "NLC (B,L,E)",
+        "tags": [
+          "embedding",
+          "token"
+        ]
+      }
+    },
+    {
+      "id": "n3",
+      "name": "add",
+      "op": "add",
+      "kind": "add",
+      "modulePath": "add",
+      "depth": 1,
+      "inShapes": [
+        [
+          1,
+          16,
+          32
+        ],
+        [
+          16,
+          32
+        ]
+      ],
+      "outShapes": [
+        [
+          1,
+          16,
+          32
+        ]
+      ],
+      "params": {},
+      "numParams": 0,
+      "flops": 512,
+      "tags": [
+        "merge",
+        "residual"
+      ],
+      "groupId": "g0",
+      "source": {
+        "file": "samples/custom_attention.py",
+        "line": 96,
+        "code": "self.token_emb(tokens) + self.pos_emb(pos)"
+      },
+      "notes": [
+        "Residual add"
+      ],
+      "metrics": {
+        "activationBytes": 2048,
+        "receptiveField": 1,
+        "macs": 256
+      },
+      "meta": {
+        "formula": "y = x_1 + x_2",
+        "semantic": "逐元素相加（残差/分支融合）",
+        "axes": "NCW",
+        "tags": [
+          "merge",
+          "add",
+          "residual"
+        ]
+      }
+    },
+    {
+      "id": "n4",
+      "name": "drop",
+      "op": "Dropout",
+      "kind": "dropout",
+      "modulePath": "drop",
+      "depth": 1,
+      "inShapes": [
+        [
+          1,
+          16,
+          32
+        ]
+      ],
+      "outShapes": [
+        [
+          1,
+          16,
+          32
+        ]
+      ],
+      "params": {
+        "p": 0.1
+      },
+      "numParams": 0,
+      "flops": 0,
+      "tags": [
+        "regularization"
+      ],
+      "groupId": "g0",
+      "source": {
+        "file": "samples/custom_attention.py",
+        "line": 88,
+        "code": "nn.Dropout(dropout)"
+      },
+      "notes": [],
+      "metrics": {
+        "activationBytes": 2048,
+        "receptiveField": 1,
+        "macs": 0
+      },
+      "meta": {
+        "formula": "y = x ⊙ mask/(1-p),  p=0.1",
+        "semantic": "训练期随机失活（推理期恒等）",
+        "axes": null,
+        "tags": [
+          "dropout",
+          "regularization"
+        ]
+      }
+    },
+    {
+      "id": "n5",
+      "name": "blocks.0.ln1",
+      "op": "LayerNorm",
+      "kind": "norm",
+      "modulePath": "blocks.0.ln1",
+      "depth": 2,
+      "inShapes": [
+        [
+          1,
+          16,
+          32
+        ]
+      ],
+      "outShapes": [
+        [
+          1,
+          16,
+          32
+        ]
+      ],
+      "params": {
+        "normalizedShape": [
+          32
+        ],
+        "eps": 1e-05,
+        "affine": true
+      },
+      "numParams": 64,
+      "flops": 2048,
+      "tags": [
+        "normalized"
+      ],
+      "groupId": "g2",
+      "source": {
+        "file": "samples/custom_attention.py",
+        "line": 68,
+        "code": "nn.LayerNorm(dim)"
+      },
+      "notes": [],
+      "metrics": {
+        "activationBytes": 2048,
+        "receptiveField": 1,
+        "macs": 1024
+      },
+      "meta": {
+        "formula": "y[..., d] = γ[d]·(x[..., d]-μ)/√(σ²+ε) + β[d]  (E=32, ε=1e-05)",
+        "semantic": "层归一化：对每个样本最后一维标准化",
+        "axes": "最后一维 E",
+        "tags": [
+          "norm",
+          "layernorm"
+        ]
+      }
+    },
+    {
+      "id": "n6",
+      "name": "blocks.0.attn.qkv",
+      "op": "Linear",
+      "kind": "linear",
+      "modulePath": "blocks.0.attn.qkv",
+      "depth": 3,
+      "inShapes": [
+        [
+          1,
+          16,
+          32
+        ]
+      ],
+      "outShapes": [
+        [
+          1,
+          16,
+          96
+        ]
+      ],
+      "params": {
+        "inFeatures": 32,
+        "outFeatures": 96,
+        "bias": false
+      },
+      "numParams": 3072,
+      "flops": 98304,
+      "tags": [
+        "weighted"
+      ],
+      "groupId": "g4",
+      "source": {
+        "file": "samples/custom_attention.py",
+        "line": 25,
+        "code": "nn.Linear(dim, 3 * dim, bias=False)"
+      },
+      "notes": [],
+      "metrics": {
+        "activationBytes": 6144,
+        "receptiveField": 1,
+        "macs": 49152
+      },
+      "meta": {
+        "formula": "y[..., o] = Σ_i x[..., i]·W[o, i]  (in=32→out=96)",
+        "semantic": "全连接通道混合（特征维线性变换）",
+        "axes": "N×F / NLC",
+        "tags": [
+          "linear",
+          "channel_mix"
+        ]
+      }
+    },
+    {
+      "id": "n7",
+      "name": "blocks.0.attn.chunk",
+      "op": "chunk",
+      "kind": "reshape",
+      "modulePath": "blocks.0.attn.chunk",
+      "depth": 3,
+      "inShapes": [
+        [
+          1,
+          16,
+          96
+        ]
+      ],
+      "outShapes": [
+        [
+          1,
+          16,
+          32
+        ],
+        [
+          1,
+          16,
+          32
+        ],
+        [
+          1,
+          16,
+          32
+        ]
+      ],
+      "params": {
+        "chunks": 3,
+        "dim": -1
+      },
+      "numParams": 0,
+      "flops": 0,
+      "tags": [
+        "reshape"
+      ],
+      "groupId": "g4",
+      "source": {
+        "file": "samples/custom_attention.py",
+        "line": 31,
+        "code": "def forward(self, x):"
+      },
+      "notes": [],
+      "metrics": {
+        "activationBytes": 2048,
+        "receptiveField": 1,
+        "macs": 0
+      },
+      "meta": {
+        "formula": "y_1..y_k = split(x, k, dim=-1)",
+        "semantic": "沿指定轴切分为多路张量",
+        "axes": "任意",
+        "tags": [
+          "reshape",
+          "chunk"
+        ]
+      }
+    },
+    {
+      "id": "n8",
+      "name": "blocks.0.attn.view",
+      "op": "view",
+      "kind": "reshape",
+      "modulePath": "blocks.0.attn.view",
+      "depth": 3,
+      "inShapes": [
+        [
+          1,
+          16,
+          32
+        ]
+      ],
+      "outShapes": [
+        [
+          1,
+          16,
+          4,
+          8
+        ]
+      ],
+      "params": {
+        "shape": [
+          1,
+          16,
+          4,
+          8
+        ]
+      },
+      "numParams": 0,
+      "flops": 0,
+      "tags": [
+        "reshape"
+      ],
+      "groupId": "g4",
+      "source": {
+        "file": "samples/custom_attention.py",
+        "line": 29,
+        "code": "causal.view(1, 1, max_len, max_len)"
+      },
+      "notes": [],
+      "metrics": {
+        "activationBytes": 2048,
+        "receptiveField": 1,
+        "macs": 0
+      },
+      "meta": {
+        "formula": "y = reshape(x, shape)",
+        "semantic": "改变张量形状，不改变元素顺序",
+        "axes": "任意",
+        "tags": [
+          "reshape",
+          "view"
+        ]
+      }
+    },
+    {
+      "id": "n9",
+      "name": "blocks.0.attn.transpose",
+      "op": "transpose",
+      "kind": "reshape",
+      "modulePath": "blocks.0.attn.transpose",
+      "depth": 3,
+      "inShapes": [
+        [
+          1,
+          16,
+          4,
+          8
+        ]
+      ],
+      "outShapes": [
+        [
+          1,
+          4,
+          16,
+          8
+        ]
+      ],
+      "params": {
+        "dims": [
+          1,
+          2
+        ]
+      },
+      "numParams": 0,
+      "flops": 0,
+      "tags": [
+        "reshape"
+      ],
+      "groupId": "g4",
+      "source": {
+        "file": "samples/custom_attention.py",
+        "line": 34,
+        "code": "q.view(batch, seq, self.num_heads, self.head_dim).transpose(1, 2)"
+      },
+      "notes": [],
+      "metrics": {
+        "activationBytes": 2048,
+        "receptiveField": 1,
+        "macs": 0
+      },
+      "meta": {
+        "formula": "y = permute(x, axes)",
+        "semantic": "转置/换轴，调整张量内存布局",
+        "axes": "任意",
+        "tags": [
+          "reshape",
+          "transpose"
+        ]
+      }
+    },
+    {
+      "id": "n10",
+      "name": "blocks.0.attn.view#2",
+      "op": "view",
+      "kind": "reshape",
+      "modulePath": "blocks.0.attn.view",
+      "depth": 3,
+      "inShapes": [
+        [
+          1,
+          16,
+          32
+        ]
+      ],
+      "outShapes": [
+        [
+          1,
+          16,
+          4,
+          8
+        ]
+      ],
+      "params": {
+        "shape": [
+          1,
+          16,
+          4,
+          8
+        ]
+      },
+      "numParams": 0,
+      "flops": 0,
+      "tags": [
+        "reshape"
+      ],
+      "groupId": "g4",
+      "source": {
+        "file": "samples/custom_attention.py",
+        "line": 34,
+        "code": "q.view(batch, seq, self.num_heads, self.head_dim)"
+      },
+      "notes": [],
+      "metrics": {
+        "activationBytes": 2048,
+        "receptiveField": 1,
+        "macs": 0
+      },
+      "meta": {
+        "formula": "y = reshape(x, shape)",
+        "semantic": "改变张量形状，不改变元素顺序",
+        "axes": "任意",
+        "tags": [
+          "reshape",
+          "view"
+        ]
+      }
+    },
+    {
+      "id": "n11",
+      "name": "blocks.0.attn.transpose#2",
+      "op": "transpose",
+      "kind": "reshape",
+      "modulePath": "blocks.0.attn.transpose",
+      "depth": 3,
+      "inShapes": [
+        [
+          1,
+          16,
+          4,
+          8
+        ]
+      ],
+      "outShapes": [
+        [
+          1,
+          4,
+          16,
+          8
+        ]
+      ],
+      "params": {
+        "dims": [
+          1,
+          2
+        ]
+      },
+      "numParams": 0,
+      "flops": 0,
+      "tags": [
+        "reshape"
+      ],
+      "groupId": "g4",
+      "source": {
+        "file": "samples/custom_attention.py",
+        "line": 35,
+        "code": "k.view(batch, seq, self.num_heads, self.head_dim).transpose(1, 2)"
+      },
+      "notes": [],
+      "metrics": {
+        "activationBytes": 2048,
+        "receptiveField": 1,
+        "macs": 0
+      },
+      "meta": {
+        "formula": "y = permute(x, axes)",
+        "semantic": "转置/换轴，调整张量内存布局",
+        "axes": "任意",
+        "tags": [
+          "reshape",
+          "transpose"
+        ]
+      }
+    },
+    {
+      "id": "n12",
+      "name": "blocks.0.attn.view#3",
+      "op": "view",
+      "kind": "reshape",
+      "modulePath": "blocks.0.attn.view",
+      "depth": 3,
+      "inShapes": [
+        [
+          1,
+          16,
+          32
+        ]
+      ],
+      "outShapes": [
+        [
+          1,
+          16,
+          4,
+          8
+        ]
+      ],
+      "params": {
+        "shape": [
+          1,
+          16,
+          4,
+          8
+        ]
+      },
+      "numParams": 0,
+      "flops": 0,
+      "tags": [
+        "reshape"
+      ],
+      "groupId": "g4",
+      "source": {
+        "file": "samples/custom_attention.py",
+        "line": 35,
+        "code": "k.view(batch, seq, self.num_heads, self.head_dim)"
+      },
+      "notes": [],
+      "metrics": {
+        "activationBytes": 2048,
+        "receptiveField": 1,
+        "macs": 0
+      },
+      "meta": {
+        "formula": "y = reshape(x, shape)",
+        "semantic": "改变张量形状，不改变元素顺序",
+        "axes": "任意",
+        "tags": [
+          "reshape",
+          "view"
+        ]
+      }
+    },
+    {
+      "id": "n13",
+      "name": "blocks.0.attn.transpose#3",
+      "op": "transpose",
+      "kind": "reshape",
+      "modulePath": "blocks.0.attn.transpose",
+      "depth": 3,
+      "inShapes": [
+        [
+          1,
+          16,
+          4,
+          8
+        ]
+      ],
+      "outShapes": [
+        [
+          1,
+          4,
+          16,
+          8
+        ]
+      ],
+      "params": {
+        "dims": [
+          1,
+          2
+        ]
+      },
+      "numParams": 0,
+      "flops": 0,
+      "tags": [
+        "reshape"
+      ],
+      "groupId": "g4",
+      "source": {
+        "file": "samples/custom_attention.py",
+        "line": 36,
+        "code": "v.view(batch, seq, self.num_heads, self.head_dim).transpose(1, 2)"
+      },
+      "notes": [],
+      "metrics": {
+        "activationBytes": 2048,
+        "receptiveField": 1,
+        "macs": 0
+      },
+      "meta": {
+        "formula": "y = permute(x, axes)",
+        "semantic": "转置/换轴，调整张量内存布局",
+        "axes": "任意",
+        "tags": [
+          "reshape",
+          "transpose"
+        ]
+      }
+    },
+    {
+      "id": "n14",
+      "name": "blocks.0.attn.transpose#4",
+      "op": "transpose",
+      "kind": "reshape",
+      "modulePath": "blocks.0.attn.transpose",
+      "depth": 3,
+      "inShapes": [
+        [
+          1,
+          4,
+          16,
+          8
+        ]
+      ],
+      "outShapes": [
+        [
+          1,
+          4,
+          8,
+          16
+        ]
+      ],
+      "params": {
+        "dims": [
+          -2,
+          -1
+        ]
+      },
+      "numParams": 0,
+      "flops": 0,
+      "tags": [
+        "reshape"
+      ],
+      "groupId": "g4",
+      "source": {
+        "file": "samples/custom_attention.py",
+        "line": 37,
+        "code": "k.transpose(-2, -1)"
+      },
+      "notes": [],
+      "metrics": {
+        "activationBytes": 2048,
+        "receptiveField": 1,
+        "macs": 0
+      },
+      "meta": {
+        "formula": "y = permute(x, axes)",
+        "semantic": "转置/换轴，调整张量内存布局",
+        "axes": "任意",
+        "tags": [
+          "reshape",
+          "transpose"
+        ]
+      }
+    },
+    {
+      "id": "n15",
+      "name": "blocks.0.attn.matmul",
+      "op": "matmul",
+      "kind": "attention",
+      "modulePath": "blocks.0.attn.matmul",
+      "depth": 3,
+      "inShapes": [
+        [
+          1,
+          4,
+          16,
+          8
+        ],
+        [
+          1,
+          4,
+          8,
+          16
+        ]
+      ],
+      "outShapes": [
+        [
+          1,
+          4,
+          16,
+          16
+        ]
+      ],
+      "params": {
+        "numHeads": 4,
+        "headDim": 8,
+        "embedDim": 32
+      },
+      "numParams": 0,
+      "flops": 16384,
+      "tags": [
+        "attention",
+        "weighted"
+      ],
+      "groupId": "g4",
+      "source": {
+        "file": "samples/custom_attention.py",
+        "line": 37,
+        "code": "q @ k.transpose(-2, -1)"
+      },
+      "notes": [],
+      "metrics": {
+        "activationBytes": 4096,
+        "receptiveField": 1,
+        "macs": 8192
+      },
+      "meta": {
+        "formula": "s[b,h,i,j] = Σ_d Q[b,h,i,d]·K[b,h,j,d]",
+        "semantic": "注意力打分：Q·Kᵀ 缩放点积",
+        "axes": "BHLL / BHLD",
+        "tags": [
+          "attention",
+          "matmul"
+        ]
+      }
+    },
+    {
+      "id": "n16",
+      "name": "blocks.0.attn.mul",
+      "op": "mul",
+      "kind": "custom",
+      "modulePath": "blocks.0.attn.mul",
+      "depth": 3,
+      "inShapes": [
+        [
+          1,
+          4,
+          16,
+          16
+        ]
+      ],
+      "outShapes": [
+        [
+          1,
+          4,
+          16,
+          16
+        ]
+      ],
+      "params": {},
+      "numParams": 0,
+      "flops": 1024,
+      "tags": [
+        "custom"
+      ],
+      "groupId": "g4",
+      "source": {
+        "file": "samples/custom_attention.py",
+        "line": 31,
+        "code": "def forward(self, x):"
+      },
+      "notes": [],
+      "metrics": {
+        "activationBytes": 4096,
+        "receptiveField": 1,
+        "macs": 512
+      },
+      "meta": {
+        "formula": "y = x_1 ⊙ x_2",
+        "semantic": "逐元素相乘（门控/缩放）",
+        "axes": "NCHW",
+        "tags": [
+          "custom",
+          "mul"
+        ]
+      }
+    },
+    {
+      "id": "n17",
+      "name": "blocks.0.attn.masked_fill",
+      "op": "masked_fill",
+      "kind": "attention",
+      "modulePath": "blocks.0.attn.masked_fill",
+      "depth": 3,
+      "inShapes": [
+        [
+          1,
+          4,
+          16,
+          16
+        ],
+        [
+          1,
+          1,
+          16,
+          16
+        ]
+      ],
+      "outShapes": [
+        [
+          1,
+          4,
+          16,
+          16
+        ]
+      ],
+      "params": {
+        "numHeads": 4,
+        "headDim": 8,
+        "embedDim": 32
+      },
+      "numParams": 0,
+      "flops": 1024,
+      "tags": [
+        "attention",
+        "weighted"
+      ],
+      "groupId": "g4",
+      "source": {
+        "file": "samples/custom_attention.py",
+        "line": 39,
+        "code": "scores.masked_fill(self.causal_mask, float(\"-inf\"))"
+      },
+      "notes": [],
+      "metrics": {
+        "activationBytes": 4096,
+        "receptiveField": 1,
+        "macs": 512
+      },
+      "meta": {
+        "formula": "y = masked_fill(scores, mask, -inf)",
+        "semantic": "注意力掩码：屏蔽填充位或未来位置",
+        "axes": "BHLL",
+        "tags": [
+          "attention",
+          "causal_mask"
+        ]
+      }
+    },
+    {
+      "id": "n18",
+      "name": "blocks.0.attn.softmax",
+      "op": "F.softmax",
+      "kind": "softmax",
+      "modulePath": "blocks.0.attn.softmax",
+      "depth": 3,
+      "inShapes": [
+        [
+          1,
+          4,
+          16,
+          16
+        ]
+      ],
+      "outShapes": [
+        [
+          1,
+          4,
+          16,
+          16
+        ]
+      ],
+      "params": {
+        "dim": -1
+      },
+      "numParams": 0,
+      "flops": 4096,
+      "tags": [
+        "normalized"
+      ],
+      "groupId": "g4",
+      "source": {
+        "file": "samples/custom_attention.py",
+        "line": 40,
+        "code": "F.softmax(scores, dim=-1)"
+      },
+      "notes": [],
+      "metrics": {
+        "activationBytes": 4096,
+        "receptiveField": 1,
+        "macs": 2048
+      },
+      "meta": {
+        "formula": "y[..., i] = exp(x[..., i]) / Σ_j exp(x[..., j])  (dim=-1)",
+        "semantic": "沿指定轴归一化为概率分布",
+        "axes": "dim=-1",
+        "tags": [
+          "softmax",
+          "normalization"
+        ]
+      }
+    },
+    {
+      "id": "n19",
+      "name": "blocks.0.attn.attn_drop",
+      "op": "Dropout",
+      "kind": "dropout",
+      "modulePath": "blocks.0.attn.attn_drop",
+      "depth": 3,
+      "inShapes": [
+        [
+          1,
+          4,
+          16,
+          16
+        ]
+      ],
+      "outShapes": [
+        [
+          1,
+          4,
+          16,
+          16
+        ]
+      ],
+      "params": {
+        "p": 0.1
+      },
+      "numParams": 0,
+      "flops": 0,
+      "tags": [
+        "regularization"
+      ],
+      "groupId": "g4",
+      "source": {
+        "file": "samples/custom_attention.py",
+        "line": 27,
+        "code": "nn.Dropout(dropout)"
+      },
+      "notes": [],
+      "metrics": {
+        "activationBytes": 4096,
+        "receptiveField": 1,
+        "macs": 0
+      },
+      "meta": {
+        "formula": "y = x ⊙ mask/(1-p),  p=0.1",
+        "semantic": "训练期随机失活（推理期恒等）",
+        "axes": null,
+        "tags": [
+          "dropout",
+          "regularization"
+        ]
+      }
+    },
+    {
+      "id": "n20",
+      "name": "blocks.0.attn.matmul#2",
+      "op": "matmul",
+      "kind": "attention",
+      "modulePath": "blocks.0.attn.matmul",
+      "depth": 3,
+      "inShapes": [
+        [
+          1,
+          4,
+          16,
+          16
+        ],
+        [
+          1,
+          4,
+          16,
+          8
+        ]
+      ],
+      "outShapes": [
+        [
+          1,
+          4,
+          16,
+          8
+        ]
+      ],
+      "params": {
+        "numHeads": 4,
+        "headDim": 8,
+        "embedDim": 32
+      },
+      "numParams": 0,
+      "flops": 16384,
+      "tags": [
+        "attention",
+        "weighted"
+      ],
+      "groupId": "g4",
+      "source": {
+        "file": "samples/custom_attention.py",
+        "line": 41,
+        "code": "self.attn_drop(weights) @ v"
+      },
+      "notes": [],
+      "metrics": {
+        "activationBytes": 2048,
+        "receptiveField": 1,
+        "macs": 8192
+      },
+      "meta": {
+        "formula": "y[b,h,i,d] = Σ_j P[b,h,i,j]·V[b,h,j,d]",
+        "semantic": "注意力加权求和：P·V",
+        "axes": "BHLL / BHLD",
+        "tags": [
+          "attention",
+          "matmul"
+        ]
+      }
+    },
+    {
+      "id": "n21",
+      "name": "blocks.0.attn.transpose#5",
+      "op": "transpose",
+      "kind": "reshape",
+      "modulePath": "blocks.0.attn.transpose",
+      "depth": 3,
+      "inShapes": [
+        [
+          1,
+          4,
+          16,
+          8
+        ]
+      ],
+      "outShapes": [
+        [
+          1,
+          16,
+          4,
+          8
+        ]
+      ],
+      "params": {
+        "dims": [
+          1,
+          2
+        ]
+      },
+      "numParams": 0,
+      "flops": 0,
+      "tags": [
+        "reshape"
+      ],
+      "groupId": "g4",
+      "source": {
+        "file": "samples/custom_attention.py",
+        "line": 42,
+        "code": "out.transpose(1, 2)"
+      },
+      "notes": [],
+      "metrics": {
+        "activationBytes": 2048,
+        "receptiveField": 1,
+        "macs": 0
+      },
+      "meta": {
+        "formula": "y = permute(x, axes)",
+        "semantic": "转置/换轴，调整张量内存布局",
+        "axes": "任意",
+        "tags": [
+          "reshape",
+          "transpose"
+        ]
+      }
+    },
+    {
+      "id": "n22",
+      "name": "blocks.0.attn.view#4",
+      "op": "view",
+      "kind": "reshape",
+      "modulePath": "blocks.0.attn.view",
+      "depth": 3,
+      "inShapes": [
+        [
+          1,
+          16,
+          4,
+          8
+        ]
+      ],
+      "outShapes": [
+        [
+          1,
+          16,
+          32
+        ]
+      ],
+      "params": {
+        "shape": [
+          1,
+          16,
+          32
+        ]
+      },
+      "numParams": 0,
+      "flops": 0,
+      "tags": [
+        "reshape"
+      ],
+      "groupId": "g4",
+      "source": {
+        "file": "samples/custom_attention.py",
+        "line": 36,
+        "code": "v.view(batch, seq, self.num_heads, self.head_dim)"
+      },
+      "notes": [],
+      "metrics": {
+        "activationBytes": 2048,
+        "receptiveField": 1,
+        "macs": 0
+      },
+      "meta": {
+        "formula": "y = reshape(x, shape)",
+        "semantic": "改变张量形状，不改变元素顺序",
+        "axes": "任意",
+        "tags": [
+          "reshape",
+          "view"
+        ]
+      }
+    },
+    {
+      "id": "n23",
+      "name": "blocks.0.attn.proj",
+      "op": "Linear",
+      "kind": "linear",
+      "modulePath": "blocks.0.attn.proj",
+      "depth": 3,
+      "inShapes": [
+        [
+          1,
+          16,
+          32
+        ]
+      ],
+      "outShapes": [
+        [
+          1,
+          16,
+          32
+        ]
+      ],
+      "params": {
+        "inFeatures": 32,
+        "outFeatures": 32,
+        "bias": false
+      },
+      "numParams": 1024,
+      "flops": 32768,
+      "tags": [
+        "weighted"
+      ],
+      "groupId": "g4",
+      "source": {
+        "file": "samples/custom_attention.py",
+        "line": 26,
+        "code": "nn.Linear(dim, dim, bias=False)"
+      },
+      "notes": [],
+      "metrics": {
+        "activationBytes": 2048,
+        "receptiveField": 1,
+        "macs": 16384
+      },
+      "meta": {
+        "formula": "y[..., o] = Σ_i x[..., i]·W[o, i]  (in=32→out=32)",
+        "semantic": "全连接通道混合（特征维线性变换）",
+        "axes": "N×F / NLC",
+        "tags": [
+          "linear",
+          "channel_mix"
+        ]
+      }
+    },
+    {
+      "id": "n24",
+      "name": "blocks.0.add",
+      "op": "add",
+      "kind": "add",
+      "modulePath": "blocks.0.add",
+      "depth": 2,
+      "inShapes": [
+        [
+          1,
+          16,
+          32
+        ],
+        [
+          1,
+          16,
+          32
+        ]
+      ],
+      "outShapes": [
+        [
+          1,
+          16,
+          32
+        ]
+      ],
+      "params": {},
+      "numParams": 0,
+      "flops": 512,
+      "tags": [
+        "merge",
+        "residual"
+      ],
+      "groupId": "g2",
+      "source": {
+        "file": "samples/custom_attention.py",
+        "line": 74,
+        "code": "x + self.attn(self.ln1(x))"
+      },
+      "notes": [
+        "Residual add"
+      ],
+      "metrics": {
+        "activationBytes": 2048,
+        "receptiveField": 1,
+        "macs": 256
+      },
+      "meta": {
+        "formula": "y = x_1 + x_2",
+        "semantic": "逐元素相加（残差/分支融合）",
+        "axes": "NCW",
+        "tags": [
+          "merge",
+          "add",
+          "residual"
+        ]
+      }
+    },
+    {
+      "id": "n25",
+      "name": "blocks.0.ln2",
+      "op": "LayerNorm",
+      "kind": "norm",
+      "modulePath": "blocks.0.ln2",
+      "depth": 2,
+      "inShapes": [
+        [
+          1,
+          16,
+          32
+        ]
+      ],
+      "outShapes": [
+        [
+          1,
+          16,
+          32
+        ]
+      ],
+      "params": {
+        "normalizedShape": [
+          32
+        ],
+        "eps": 1e-05,
+        "affine": true
+      },
+      "numParams": 64,
+      "flops": 2048,
+      "tags": [
+        "normalized"
+      ],
+      "groupId": "g2",
+      "source": {
+        "file": "samples/custom_attention.py",
+        "line": 70,
+        "code": "nn.LayerNorm(dim)"
+      },
+      "notes": [],
+      "metrics": {
+        "activationBytes": 2048,
+        "receptiveField": 1,
+        "macs": 1024
+      },
+      "meta": {
+        "formula": "y[..., d] = γ[d]·(x[..., d]-μ)/√(σ²+ε) + β[d]  (E=32, ε=1e-05)",
+        "semantic": "层归一化：对每个样本最后一维标准化",
+        "axes": "最后一维 E",
+        "tags": [
+          "norm",
+          "layernorm"
+        ]
+      }
+    },
+    {
+      "id": "n26",
+      "name": "blocks.0.ffn.net.0",
+      "op": "Linear",
+      "kind": "linear",
+      "modulePath": "blocks.0.ffn.net.0",
+      "depth": 4,
+      "inShapes": [
+        [
+          1,
+          16,
+          32
+        ]
+      ],
+      "outShapes": [
+        [
+          1,
+          16,
+          128
+        ]
+      ],
+      "params": {
+        "inFeatures": 32,
+        "outFeatures": 128,
+        "bias": true
+      },
+      "numParams": 4224,
+      "flops": 133120,
+      "tags": [
+        "weighted"
+      ],
+      "groupId": "g8",
+      "source": {
+        "file": "samples/custom_attention.py",
+        "line": 52,
+        "code": "nn.Linear(dim, dim * mult)"
+      },
+      "notes": [],
+      "metrics": {
+        "activationBytes": 8192,
+        "receptiveField": 1,
+        "macs": 66560
+      },
+      "meta": {
+        "formula": "y[..., o] = Σ_i x[..., i]·W[o, i] + b[o]  (in=32→out=128)",
+        "semantic": "全连接通道混合（特征维线性变换）",
+        "axes": "N×F / NLC",
+        "tags": [
+          "linear",
+          "channel_mix"
+        ]
+      }
+    },
+    {
+      "id": "n27",
+      "name": "blocks.0.ffn.net.1",
+      "op": "GELU",
+      "kind": "activation",
+      "modulePath": "blocks.0.ffn.net.1",
+      "depth": 4,
+      "inShapes": [
+        [
+          1,
+          16,
+          128
+        ]
+      ],
+      "outShapes": [
+        [
+          1,
+          16,
+          128
+        ]
+      ],
+      "params": {},
+      "numParams": 0,
+      "flops": 2048,
+      "tags": [
+        "elementwise"
+      ],
+      "groupId": "g8",
+      "source": {
+        "file": "samples/custom_attention.py",
+        "line": 53,
+        "code": "nn.GELU()"
+      },
+      "notes": [],
+      "metrics": {
+        "activationBytes": 8192,
+        "receptiveField": 1,
+        "macs": 1024
+      },
+      "meta": {
+        "formula": "y = x·Φ(x)",
+        "semantic": "GELU：高斯误差线性单元",
+        "axes": "逐元素（任意轴）",
+        "tags": [
+          "activation",
+          "gelu"
+        ]
+      }
+    },
+    {
+      "id": "n28",
+      "name": "blocks.0.ffn.net.2",
+      "op": "Dropout",
+      "kind": "dropout",
+      "modulePath": "blocks.0.ffn.net.2",
+      "depth": 4,
+      "inShapes": [
+        [
+          1,
+          16,
+          128
+        ]
+      ],
+      "outShapes": [
+        [
+          1,
+          16,
+          128
+        ]
+      ],
+      "params": {
+        "p": 0.1
+      },
+      "numParams": 0,
+      "flops": 0,
+      "tags": [
+        "regularization"
+      ],
+      "groupId": "g8",
+      "source": {
+        "file": "samples/custom_attention.py",
+        "line": 54,
+        "code": "nn.Dropout(dropout)"
+      },
+      "notes": [],
+      "metrics": {
+        "activationBytes": 8192,
+        "receptiveField": 1,
+        "macs": 0
+      },
+      "meta": {
+        "formula": "y = x ⊙ mask/(1-p),  p=0.1",
+        "semantic": "训练期随机失活（推理期恒等）",
+        "axes": null,
+        "tags": [
+          "dropout",
+          "regularization"
+        ]
+      }
+    },
+    {
+      "id": "n29",
+      "name": "blocks.0.ffn.net.3",
+      "op": "Linear",
+      "kind": "linear",
+      "modulePath": "blocks.0.ffn.net.3",
+      "depth": 4,
+      "inShapes": [
+        [
+          1,
+          16,
+          128
+        ]
+      ],
+      "outShapes": [
+        [
+          1,
+          16,
+          32
+        ]
+      ],
+      "params": {
+        "inFeatures": 128,
+        "outFeatures": 32,
+        "bias": true
+      },
+      "numParams": 4128,
+      "flops": 131584,
+      "tags": [
+        "weighted"
+      ],
+      "groupId": "g8",
+      "source": {
+        "file": "samples/custom_attention.py",
+        "line": 55,
+        "code": "nn.Linear(dim * mult, dim)"
+      },
+      "notes": [],
+      "metrics": {
+        "activationBytes": 2048,
+        "receptiveField": 1,
+        "macs": 65792
+      },
+      "meta": {
+        "formula": "y[..., o] = Σ_i x[..., i]·W[o, i] + b[o]  (in=128→out=32)",
+        "semantic": "全连接通道混合（特征维线性变换）",
+        "axes": "N×F / NLC",
+        "tags": [
+          "linear",
+          "channel_mix"
+        ]
+      }
+    },
+    {
+      "id": "n30",
+      "name": "blocks.0.ffn.net.4",
+      "op": "Dropout",
+      "kind": "dropout",
+      "modulePath": "blocks.0.ffn.net.4",
+      "depth": 4,
+      "inShapes": [
+        [
+          1,
+          16,
+          32
+        ]
+      ],
+      "outShapes": [
+        [
+          1,
+          16,
+          32
+        ]
+      ],
+      "params": {
+        "p": 0.1
+      },
+      "numParams": 0,
+      "flops": 0,
+      "tags": [
+        "regularization"
+      ],
+      "groupId": "g8",
+      "source": {
+        "file": "samples/custom_attention.py",
+        "line": 56,
+        "code": "nn.Dropout(dropout)"
+      },
+      "notes": [],
+      "metrics": {
+        "activationBytes": 2048,
+        "receptiveField": 1,
+        "macs": 0
+      },
+      "meta": {
+        "formula": "y = x ⊙ mask/(1-p),  p=0.1",
+        "semantic": "训练期随机失活（推理期恒等）",
+        "axes": null,
+        "tags": [
+          "dropout",
+          "regularization"
+        ]
+      }
+    },
+    {
+      "id": "n31",
+      "name": "blocks.0.add#2",
+      "op": "add",
+      "kind": "add",
+      "modulePath": "blocks.0.add",
+      "depth": 2,
+      "inShapes": [
+        [
+          1,
+          16,
+          32
+        ],
+        [
+          1,
+          16,
+          32
+        ]
+      ],
+      "outShapes": [
+        [
+          1,
+          16,
+          32
+        ]
+      ],
+      "params": {},
+      "numParams": 0,
+      "flops": 512,
+      "tags": [
+        "merge",
+        "residual"
+      ],
+      "groupId": "g2",
+      "source": {
+        "file": "samples/custom_attention.py",
+        "line": 75,
+        "code": "x + self.ffn(self.ln2(x))"
+      },
+      "notes": [
+        "Residual add"
+      ],
+      "metrics": {
+        "activationBytes": 2048,
+        "receptiveField": 1,
+        "macs": 256
+      },
+      "meta": {
+        "formula": "y = x_1 + x_2",
+        "semantic": "逐元素相加（残差/分支融合）",
+        "axes": "NCW",
+        "tags": [
+          "merge",
+          "add",
+          "residual"
+        ]
+      }
+    },
+    {
+      "id": "n32",
+      "name": "blocks.1.ln1",
+      "op": "LayerNorm",
+      "kind": "norm",
+      "modulePath": "blocks.1.ln1",
+      "depth": 2,
+      "inShapes": [
+        [
+          1,
+          16,
+          32
+        ]
+      ],
+      "outShapes": [
+        [
+          1,
+          16,
+          32
+        ]
+      ],
+      "params": {
+        "normalizedShape": [
+          32
+        ],
+        "eps": 1e-05,
+        "affine": true
+      },
+      "numParams": 64,
+      "flops": 2048,
+      "tags": [
+        "normalized"
+      ],
+      "groupId": "g3",
+      "source": {
+        "file": "samples/custom_attention.py",
+        "line": 68,
+        "code": "nn.LayerNorm(dim)"
+      },
+      "notes": [],
+      "metrics": {
+        "activationBytes": 2048,
+        "receptiveField": 1,
+        "macs": 1024
+      },
+      "meta": {
+        "formula": "y[..., d] = γ[d]·(x[..., d]-μ)/√(σ²+ε) + β[d]  (E=32, ε=1e-05)",
+        "semantic": "层归一化：对每个样本最后一维标准化",
+        "axes": "最后一维 E",
+        "tags": [
+          "norm",
+          "layernorm"
+        ]
+      }
+    },
+    {
+      "id": "n33",
+      "name": "blocks.1.attn.qkv",
+      "op": "Linear",
+      "kind": "linear",
+      "modulePath": "blocks.1.attn.qkv",
+      "depth": 3,
+      "inShapes": [
+        [
+          1,
+          16,
+          32
+        ]
+      ],
+      "outShapes": [
+        [
+          1,
+          16,
+          96
+        ]
+      ],
+      "params": {
+        "inFeatures": 32,
+        "outFeatures": 96,
+        "bias": false
+      },
+      "numParams": 3072,
+      "flops": 98304,
+      "tags": [
+        "weighted"
+      ],
+      "groupId": "g6",
+      "source": {
+        "file": "samples/custom_attention.py",
+        "line": 25,
+        "code": "nn.Linear(dim, 3 * dim, bias=False)"
+      },
+      "notes": [],
+      "metrics": {
+        "activationBytes": 6144,
+        "receptiveField": 1,
+        "macs": 49152
+      },
+      "meta": {
+        "formula": "y[..., o] = Σ_i x[..., i]·W[o, i]  (in=32→out=96)",
+        "semantic": "全连接通道混合（特征维线性变换）",
+        "axes": "N×F / NLC",
+        "tags": [
+          "linear",
+          "channel_mix"
+        ]
+      }
+    },
+    {
+      "id": "n34",
+      "name": "blocks.1.attn.chunk",
+      "op": "chunk",
+      "kind": "reshape",
+      "modulePath": "blocks.1.attn.chunk",
+      "depth": 3,
+      "inShapes": [
+        [
+          1,
+          16,
+          96
+        ]
+      ],
+      "outShapes": [
+        [
+          1,
+          16,
+          32
+        ],
+        [
+          1,
+          16,
+          32
+        ],
+        [
+          1,
+          16,
+          32
+        ]
+      ],
+      "params": {
+        "chunks": 3,
+        "dim": -1
+      },
+      "numParams": 0,
+      "flops": 0,
+      "tags": [
+        "reshape"
+      ],
+      "groupId": "g6",
+      "source": {
+        "file": "samples/custom_attention.py",
+        "line": 31,
+        "code": "def forward(self, x):"
+      },
+      "notes": [],
+      "metrics": {
+        "activationBytes": 2048,
+        "receptiveField": 1,
+        "macs": 0
+      },
+      "meta": {
+        "formula": "y_1..y_k = split(x, k, dim=-1)",
+        "semantic": "沿指定轴切分为多路张量",
+        "axes": "任意",
+        "tags": [
+          "reshape",
+          "chunk"
+        ]
+      }
+    },
+    {
+      "id": "n35",
+      "name": "blocks.1.attn.view",
+      "op": "view",
+      "kind": "reshape",
+      "modulePath": "blocks.1.attn.view",
+      "depth": 3,
+      "inShapes": [
+        [
+          1,
+          16,
+          32
+        ]
+      ],
+      "outShapes": [
+        [
+          1,
+          16,
+          4,
+          8
+        ]
+      ],
+      "params": {
+        "shape": [
+          1,
+          16,
+          4,
+          8
+        ]
+      },
+      "numParams": 0,
+      "flops": 0,
+      "tags": [
+        "reshape"
+      ],
+      "groupId": "g6",
+      "source": {
+        "file": "samples/custom_attention.py",
+        "line": 29,
+        "code": "causal.view(1, 1, max_len, max_len)"
+      },
+      "notes": [],
+      "metrics": {
+        "activationBytes": 2048,
+        "receptiveField": 1,
+        "macs": 0
+      },
+      "meta": {
+        "formula": "y = reshape(x, shape)",
+        "semantic": "改变张量形状，不改变元素顺序",
+        "axes": "任意",
+        "tags": [
+          "reshape",
+          "view"
+        ]
+      }
+    },
+    {
+      "id": "n36",
+      "name": "blocks.1.attn.transpose",
+      "op": "transpose",
+      "kind": "reshape",
+      "modulePath": "blocks.1.attn.transpose",
+      "depth": 3,
+      "inShapes": [
+        [
+          1,
+          16,
+          4,
+          8
+        ]
+      ],
+      "outShapes": [
+        [
+          1,
+          4,
+          16,
+          8
+        ]
+      ],
+      "params": {
+        "dims": [
+          1,
+          2
+        ]
+      },
+      "numParams": 0,
+      "flops": 0,
+      "tags": [
+        "reshape"
+      ],
+      "groupId": "g6",
+      "source": {
+        "file": "samples/custom_attention.py",
+        "line": 34,
+        "code": "q.view(batch, seq, self.num_heads, self.head_dim).transpose(1, 2)"
+      },
+      "notes": [],
+      "metrics": {
+        "activationBytes": 2048,
+        "receptiveField": 1,
+        "macs": 0
+      },
+      "meta": {
+        "formula": "y = permute(x, axes)",
+        "semantic": "转置/换轴，调整张量内存布局",
+        "axes": "任意",
+        "tags": [
+          "reshape",
+          "transpose"
+        ]
+      }
+    },
+    {
+      "id": "n37",
+      "name": "blocks.1.attn.view#2",
+      "op": "view",
+      "kind": "reshape",
+      "modulePath": "blocks.1.attn.view",
+      "depth": 3,
+      "inShapes": [
+        [
+          1,
+          16,
+          32
+        ]
+      ],
+      "outShapes": [
+        [
+          1,
+          16,
+          4,
+          8
+        ]
+      ],
+      "params": {
+        "shape": [
+          1,
+          16,
+          4,
+          8
+        ]
+      },
+      "numParams": 0,
+      "flops": 0,
+      "tags": [
+        "reshape"
+      ],
+      "groupId": "g6",
+      "source": {
+        "file": "samples/custom_attention.py",
+        "line": 34,
+        "code": "q.view(batch, seq, self.num_heads, self.head_dim)"
+      },
+      "notes": [],
+      "metrics": {
+        "activationBytes": 2048,
+        "receptiveField": 1,
+        "macs": 0
+      },
+      "meta": {
+        "formula": "y = reshape(x, shape)",
+        "semantic": "改变张量形状，不改变元素顺序",
+        "axes": "任意",
+        "tags": [
+          "reshape",
+          "view"
+        ]
+      }
+    },
+    {
+      "id": "n38",
+      "name": "blocks.1.attn.transpose#2",
+      "op": "transpose",
+      "kind": "reshape",
+      "modulePath": "blocks.1.attn.transpose",
+      "depth": 3,
+      "inShapes": [
+        [
+          1,
+          16,
+          4,
+          8
+        ]
+      ],
+      "outShapes": [
+        [
+          1,
+          4,
+          16,
+          8
+        ]
+      ],
+      "params": {
+        "dims": [
+          1,
+          2
+        ]
+      },
+      "numParams": 0,
+      "flops": 0,
+      "tags": [
+        "reshape"
+      ],
+      "groupId": "g6",
+      "source": {
+        "file": "samples/custom_attention.py",
+        "line": 35,
+        "code": "k.view(batch, seq, self.num_heads, self.head_dim).transpose(1, 2)"
+      },
+      "notes": [],
+      "metrics": {
+        "activationBytes": 2048,
+        "receptiveField": 1,
+        "macs": 0
+      },
+      "meta": {
+        "formula": "y = permute(x, axes)",
+        "semantic": "转置/换轴，调整张量内存布局",
+        "axes": "任意",
+        "tags": [
+          "reshape",
+          "transpose"
+        ]
+      }
+    },
+    {
+      "id": "n39",
+      "name": "blocks.1.attn.view#3",
+      "op": "view",
+      "kind": "reshape",
+      "modulePath": "blocks.1.attn.view",
+      "depth": 3,
+      "inShapes": [
+        [
+          1,
+          16,
+          32
+        ]
+      ],
+      "outShapes": [
+        [
+          1,
+          16,
+          4,
+          8
+        ]
+      ],
+      "params": {
+        "shape": [
+          1,
+          16,
+          4,
+          8
+        ]
+      },
+      "numParams": 0,
+      "flops": 0,
+      "tags": [
+        "reshape"
+      ],
+      "groupId": "g6",
+      "source": {
+        "file": "samples/custom_attention.py",
+        "line": 35,
+        "code": "k.view(batch, seq, self.num_heads, self.head_dim)"
+      },
+      "notes": [],
+      "metrics": {
+        "activationBytes": 2048,
+        "receptiveField": 1,
+        "macs": 0
+      },
+      "meta": {
+        "formula": "y = reshape(x, shape)",
+        "semantic": "改变张量形状，不改变元素顺序",
+        "axes": "任意",
+        "tags": [
+          "reshape",
+          "view"
+        ]
+      }
+    },
+    {
+      "id": "n40",
+      "name": "blocks.1.attn.transpose#3",
+      "op": "transpose",
+      "kind": "reshape",
+      "modulePath": "blocks.1.attn.transpose",
+      "depth": 3,
+      "inShapes": [
+        [
+          1,
+          16,
+          4,
+          8
+        ]
+      ],
+      "outShapes": [
+        [
+          1,
+          4,
+          16,
+          8
+        ]
+      ],
+      "params": {
+        "dims": [
+          1,
+          2
+        ]
+      },
+      "numParams": 0,
+      "flops": 0,
+      "tags": [
+        "reshape"
+      ],
+      "groupId": "g6",
+      "source": {
+        "file": "samples/custom_attention.py",
+        "line": 36,
+        "code": "v.view(batch, seq, self.num_heads, self.head_dim).transpose(1, 2)"
+      },
+      "notes": [],
+      "metrics": {
+        "activationBytes": 2048,
+        "receptiveField": 1,
+        "macs": 0
+      },
+      "meta": {
+        "formula": "y = permute(x, axes)",
+        "semantic": "转置/换轴，调整张量内存布局",
+        "axes": "任意",
+        "tags": [
+          "reshape",
+          "transpose"
+        ]
+      }
+    },
+    {
+      "id": "n41",
+      "name": "blocks.1.attn.transpose#4",
+      "op": "transpose",
+      "kind": "reshape",
+      "modulePath": "blocks.1.attn.transpose",
+      "depth": 3,
+      "inShapes": [
+        [
+          1,
+          4,
+          16,
+          8
+        ]
+      ],
+      "outShapes": [
+        [
+          1,
+          4,
+          8,
+          16
+        ]
+      ],
+      "params": {
+        "dims": [
+          -2,
+          -1
+        ]
+      },
+      "numParams": 0,
+      "flops": 0,
+      "tags": [
+        "reshape"
+      ],
+      "groupId": "g6",
+      "source": {
+        "file": "samples/custom_attention.py",
+        "line": 37,
+        "code": "k.transpose(-2, -1)"
+      },
+      "notes": [],
+      "metrics": {
+        "activationBytes": 2048,
+        "receptiveField": 1,
+        "macs": 0
+      },
+      "meta": {
+        "formula": "y = permute(x, axes)",
+        "semantic": "转置/换轴，调整张量内存布局",
+        "axes": "任意",
+        "tags": [
+          "reshape",
+          "transpose"
+        ]
+      }
+    },
+    {
+      "id": "n42",
+      "name": "blocks.1.attn.matmul",
+      "op": "matmul",
+      "kind": "attention",
+      "modulePath": "blocks.1.attn.matmul",
+      "depth": 3,
+      "inShapes": [
+        [
+          1,
+          4,
+          16,
+          8
+        ],
+        [
+          1,
+          4,
+          8,
+          16
+        ]
+      ],
+      "outShapes": [
+        [
+          1,
+          4,
+          16,
+          16
+        ]
+      ],
+      "params": {
+        "numHeads": 4,
+        "headDim": 8,
+        "embedDim": 32
+      },
+      "numParams": 0,
+      "flops": 16384,
+      "tags": [
+        "attention",
+        "weighted"
+      ],
+      "groupId": "g6",
+      "source": {
+        "file": "samples/custom_attention.py",
+        "line": 37,
+        "code": "q @ k.transpose(-2, -1)"
+      },
+      "notes": [],
+      "metrics": {
+        "activationBytes": 4096,
+        "receptiveField": 1,
+        "macs": 8192
+      },
+      "meta": {
+        "formula": "s[b,h,i,j] = Σ_d Q[b,h,i,d]·K[b,h,j,d]",
+        "semantic": "注意力打分：Q·Kᵀ 缩放点积",
+        "axes": "BHLL / BHLD",
+        "tags": [
+          "attention",
+          "matmul"
+        ]
+      }
+    },
+    {
+      "id": "n43",
+      "name": "blocks.1.attn.mul",
+      "op": "mul",
+      "kind": "custom",
+      "modulePath": "blocks.1.attn.mul",
+      "depth": 3,
+      "inShapes": [
+        [
+          1,
+          4,
+          16,
+          16
+        ]
+      ],
+      "outShapes": [
+        [
+          1,
+          4,
+          16,
+          16
+        ]
+      ],
+      "params": {},
+      "numParams": 0,
+      "flops": 1024,
+      "tags": [
+        "custom"
+      ],
+      "groupId": "g6",
+      "source": {
+        "file": "samples/custom_attention.py",
+        "line": 31,
+        "code": "def forward(self, x):"
+      },
+      "notes": [],
+      "metrics": {
+        "activationBytes": 4096,
+        "receptiveField": 1,
+        "macs": 512
+      },
+      "meta": {
+        "formula": "y = x_1 ⊙ x_2",
+        "semantic": "逐元素相乘（门控/缩放）",
+        "axes": "NCHW",
+        "tags": [
+          "custom",
+          "mul"
+        ]
+      }
+    },
+    {
+      "id": "n44",
+      "name": "blocks.1.attn.masked_fill",
+      "op": "masked_fill",
+      "kind": "attention",
+      "modulePath": "blocks.1.attn.masked_fill",
+      "depth": 3,
+      "inShapes": [
+        [
+          1,
+          4,
+          16,
+          16
+        ],
+        [
+          1,
+          1,
+          16,
+          16
+        ]
+      ],
+      "outShapes": [
+        [
+          1,
+          4,
+          16,
+          16
+        ]
+      ],
+      "params": {
+        "numHeads": 4,
+        "headDim": 8,
+        "embedDim": 32
+      },
+      "numParams": 0,
+      "flops": 1024,
+      "tags": [
+        "attention",
+        "weighted"
+      ],
+      "groupId": "g6",
+      "source": {
+        "file": "samples/custom_attention.py",
+        "line": 39,
+        "code": "scores.masked_fill(self.causal_mask, float(\"-inf\"))"
+      },
+      "notes": [],
+      "metrics": {
+        "activationBytes": 4096,
+        "receptiveField": 1,
+        "macs": 512
+      },
+      "meta": {
+        "formula": "y = masked_fill(scores, mask, -inf)",
+        "semantic": "注意力掩码：屏蔽填充位或未来位置",
+        "axes": "BHLL",
+        "tags": [
+          "attention",
+          "causal_mask"
+        ]
+      }
+    },
+    {
+      "id": "n45",
+      "name": "blocks.1.attn.softmax",
+      "op": "F.softmax",
+      "kind": "softmax",
+      "modulePath": "blocks.1.attn.softmax",
+      "depth": 3,
+      "inShapes": [
+        [
+          1,
+          4,
+          16,
+          16
+        ]
+      ],
+      "outShapes": [
+        [
+          1,
+          4,
+          16,
+          16
+        ]
+      ],
+      "params": {
+        "dim": -1
+      },
+      "numParams": 0,
+      "flops": 4096,
+      "tags": [
+        "normalized"
+      ],
+      "groupId": "g6",
+      "source": {
+        "file": "samples/custom_attention.py",
+        "line": 40,
+        "code": "F.softmax(scores, dim=-1)"
+      },
+      "notes": [],
+      "metrics": {
+        "activationBytes": 4096,
+        "receptiveField": 1,
+        "macs": 2048
+      },
+      "meta": {
+        "formula": "y[..., i] = exp(x[..., i]) / Σ_j exp(x[..., j])  (dim=-1)",
+        "semantic": "沿指定轴归一化为概率分布",
+        "axes": "dim=-1",
+        "tags": [
+          "softmax",
+          "normalization"
+        ]
+      }
+    },
+    {
+      "id": "n46",
+      "name": "blocks.1.attn.attn_drop",
+      "op": "Dropout",
+      "kind": "dropout",
+      "modulePath": "blocks.1.attn.attn_drop",
+      "depth": 3,
+      "inShapes": [
+        [
+          1,
+          4,
+          16,
+          16
+        ]
+      ],
+      "outShapes": [
+        [
+          1,
+          4,
+          16,
+          16
+        ]
+      ],
+      "params": {
+        "p": 0.1
+      },
+      "numParams": 0,
+      "flops": 0,
+      "tags": [
+        "regularization"
+      ],
+      "groupId": "g6",
+      "source": {
+        "file": "samples/custom_attention.py",
+        "line": 27,
+        "code": "nn.Dropout(dropout)"
+      },
+      "notes": [],
+      "metrics": {
+        "activationBytes": 4096,
+        "receptiveField": 1,
+        "macs": 0
+      },
+      "meta": {
+        "formula": "y = x ⊙ mask/(1-p),  p=0.1",
+        "semantic": "训练期随机失活（推理期恒等）",
+        "axes": null,
+        "tags": [
+          "dropout",
+          "regularization"
+        ]
+      }
+    },
+    {
+      "id": "n47",
+      "name": "blocks.1.attn.matmul#2",
+      "op": "matmul",
+      "kind": "attention",
+      "modulePath": "blocks.1.attn.matmul",
+      "depth": 3,
+      "inShapes": [
+        [
+          1,
+          4,
+          16,
+          16
+        ],
+        [
+          1,
+          4,
+          16,
+          8
+        ]
+      ],
+      "outShapes": [
+        [
+          1,
+          4,
+          16,
+          8
+        ]
+      ],
+      "params": {
+        "numHeads": 4,
+        "headDim": 8,
+        "embedDim": 32
+      },
+      "numParams": 0,
+      "flops": 16384,
+      "tags": [
+        "attention",
+        "weighted"
+      ],
+      "groupId": "g6",
+      "source": {
+        "file": "samples/custom_attention.py",
+        "line": 41,
+        "code": "self.attn_drop(weights) @ v"
+      },
+      "notes": [],
+      "metrics": {
+        "activationBytes": 2048,
+        "receptiveField": 1,
+        "macs": 8192
+      },
+      "meta": {
+        "formula": "y[b,h,i,d] = Σ_j P[b,h,i,j]·V[b,h,j,d]",
+        "semantic": "注意力加权求和：P·V",
+        "axes": "BHLL / BHLD",
+        "tags": [
+          "attention",
+          "matmul"
+        ]
+      }
+    },
+    {
+      "id": "n48",
+      "name": "blocks.1.attn.transpose#5",
+      "op": "transpose",
+      "kind": "reshape",
+      "modulePath": "blocks.1.attn.transpose",
+      "depth": 3,
+      "inShapes": [
+        [
+          1,
+          4,
+          16,
+          8
+        ]
+      ],
+      "outShapes": [
+        [
+          1,
+          16,
+          4,
+          8
+        ]
+      ],
+      "params": {
+        "dims": [
+          1,
+          2
+        ]
+      },
+      "numParams": 0,
+      "flops": 0,
+      "tags": [
+        "reshape"
+      ],
+      "groupId": "g6",
+      "source": {
+        "file": "samples/custom_attention.py",
+        "line": 42,
+        "code": "out.transpose(1, 2)"
+      },
+      "notes": [],
+      "metrics": {
+        "activationBytes": 2048,
+        "receptiveField": 1,
+        "macs": 0
+      },
+      "meta": {
+        "formula": "y = permute(x, axes)",
+        "semantic": "转置/换轴，调整张量内存布局",
+        "axes": "任意",
+        "tags": [
+          "reshape",
+          "transpose"
+        ]
+      }
+    },
+    {
+      "id": "n49",
+      "name": "blocks.1.attn.view#4",
+      "op": "view",
+      "kind": "reshape",
+      "modulePath": "blocks.1.attn.view",
+      "depth": 3,
+      "inShapes": [
+        [
+          1,
+          16,
+          4,
+          8
+        ]
+      ],
+      "outShapes": [
+        [
+          1,
+          16,
+          32
+        ]
+      ],
+      "params": {
+        "shape": [
+          1,
+          16,
+          32
+        ]
+      },
+      "numParams": 0,
+      "flops": 0,
+      "tags": [
+        "reshape"
+      ],
+      "groupId": "g6",
+      "source": {
+        "file": "samples/custom_attention.py",
+        "line": 36,
+        "code": "v.view(batch, seq, self.num_heads, self.head_dim)"
+      },
+      "notes": [],
+      "metrics": {
+        "activationBytes": 2048,
+        "receptiveField": 1,
+        "macs": 0
+      },
+      "meta": {
+        "formula": "y = reshape(x, shape)",
+        "semantic": "改变张量形状，不改变元素顺序",
+        "axes": "任意",
+        "tags": [
+          "reshape",
+          "view"
+        ]
+      }
+    },
+    {
+      "id": "n50",
+      "name": "blocks.1.attn.proj",
+      "op": "Linear",
+      "kind": "linear",
+      "modulePath": "blocks.1.attn.proj",
+      "depth": 3,
+      "inShapes": [
+        [
+          1,
+          16,
+          32
+        ]
+      ],
+      "outShapes": [
+        [
+          1,
+          16,
+          32
+        ]
+      ],
+      "params": {
+        "inFeatures": 32,
+        "outFeatures": 32,
+        "bias": false
+      },
+      "numParams": 1024,
+      "flops": 32768,
+      "tags": [
+        "weighted"
+      ],
+      "groupId": "g6",
+      "source": {
+        "file": "samples/custom_attention.py",
+        "line": 26,
+        "code": "nn.Linear(dim, dim, bias=False)"
+      },
+      "notes": [],
+      "metrics": {
+        "activationBytes": 2048,
+        "receptiveField": 1,
+        "macs": 16384
+      },
+      "meta": {
+        "formula": "y[..., o] = Σ_i x[..., i]·W[o, i]  (in=32→out=32)",
+        "semantic": "全连接通道混合（特征维线性变换）",
+        "axes": "N×F / NLC",
+        "tags": [
+          "linear",
+          "channel_mix"
+        ]
+      }
+    },
+    {
+      "id": "n51",
+      "name": "blocks.1.add",
+      "op": "add",
+      "kind": "add",
+      "modulePath": "blocks.1.add",
+      "depth": 2,
+      "inShapes": [
+        [
+          1,
+          16,
+          32
+        ],
+        [
+          1,
+          16,
+          32
+        ]
+      ],
+      "outShapes": [
+        [
+          1,
+          16,
+          32
+        ]
+      ],
+      "params": {},
+      "numParams": 0,
+      "flops": 512,
+      "tags": [
+        "merge",
+        "residual"
+      ],
+      "groupId": "g3",
+      "source": {
+        "file": "samples/custom_attention.py",
+        "line": 74,
+        "code": "x + self.attn(self.ln1(x))"
+      },
+      "notes": [
+        "Residual add"
+      ],
+      "metrics": {
+        "activationBytes": 2048,
+        "receptiveField": 1,
+        "macs": 256
+      },
+      "meta": {
+        "formula": "y = x_1 + x_2",
+        "semantic": "逐元素相加（残差/分支融合）",
+        "axes": "NCW",
+        "tags": [
+          "merge",
+          "add",
+          "residual"
+        ]
+      }
+    },
+    {
+      "id": "n52",
+      "name": "blocks.1.ln2",
+      "op": "LayerNorm",
+      "kind": "norm",
+      "modulePath": "blocks.1.ln2",
+      "depth": 2,
+      "inShapes": [
+        [
+          1,
+          16,
+          32
+        ]
+      ],
+      "outShapes": [
+        [
+          1,
+          16,
+          32
+        ]
+      ],
+      "params": {
+        "normalizedShape": [
+          32
+        ],
+        "eps": 1e-05,
+        "affine": true
+      },
+      "numParams": 64,
+      "flops": 2048,
+      "tags": [
+        "normalized"
+      ],
+      "groupId": "g3",
+      "source": {
+        "file": "samples/custom_attention.py",
+        "line": 70,
+        "code": "nn.LayerNorm(dim)"
+      },
+      "notes": [],
+      "metrics": {
+        "activationBytes": 2048,
+        "receptiveField": 1,
+        "macs": 1024
+      },
+      "meta": {
+        "formula": "y[..., d] = γ[d]·(x[..., d]-μ)/√(σ²+ε) + β[d]  (E=32, ε=1e-05)",
+        "semantic": "层归一化：对每个样本最后一维标准化",
+        "axes": "最后一维 E",
+        "tags": [
+          "norm",
+          "layernorm"
+        ]
+      }
+    },
+    {
+      "id": "n53",
+      "name": "blocks.1.ffn.net.0",
+      "op": "Linear",
+      "kind": "linear",
+      "modulePath": "blocks.1.ffn.net.0",
+      "depth": 4,
+      "inShapes": [
+        [
+          1,
+          16,
+          32
+        ]
+      ],
+      "outShapes": [
+        [
+          1,
+          16,
+          128
+        ]
+      ],
+      "params": {
+        "inFeatures": 32,
+        "outFeatures": 128,
+        "bias": true
+      },
+      "numParams": 4224,
+      "flops": 133120,
+      "tags": [
+        "weighted"
+      ],
+      "groupId": "g9",
+      "source": {
+        "file": "samples/custom_attention.py",
+        "line": 52,
+        "code": "nn.Linear(dim, dim * mult)"
+      },
+      "notes": [],
+      "metrics": {
+        "activationBytes": 8192,
+        "receptiveField": 1,
+        "macs": 66560
+      },
+      "meta": {
+        "formula": "y[..., o] = Σ_i x[..., i]·W[o, i] + b[o]  (in=32→out=128)",
+        "semantic": "全连接通道混合（特征维线性变换）",
+        "axes": "N×F / NLC",
+        "tags": [
+          "linear",
+          "channel_mix"
+        ]
+      }
+    },
+    {
+      "id": "n54",
+      "name": "blocks.1.ffn.net.1",
+      "op": "GELU",
+      "kind": "activation",
+      "modulePath": "blocks.1.ffn.net.1",
+      "depth": 4,
+      "inShapes": [
+        [
+          1,
+          16,
+          128
+        ]
+      ],
+      "outShapes": [
+        [
+          1,
+          16,
+          128
+        ]
+      ],
+      "params": {},
+      "numParams": 0,
+      "flops": 2048,
+      "tags": [
+        "elementwise"
+      ],
+      "groupId": "g9",
+      "source": {
+        "file": "samples/custom_attention.py",
+        "line": 53,
+        "code": "nn.GELU()"
+      },
+      "notes": [],
+      "metrics": {
+        "activationBytes": 8192,
+        "receptiveField": 1,
+        "macs": 1024
+      },
+      "meta": {
+        "formula": "y = x·Φ(x)",
+        "semantic": "GELU：高斯误差线性单元",
+        "axes": "逐元素（任意轴）",
+        "tags": [
+          "activation",
+          "gelu"
+        ]
+      }
+    },
+    {
+      "id": "n55",
+      "name": "blocks.1.ffn.net.2",
+      "op": "Dropout",
+      "kind": "dropout",
+      "modulePath": "blocks.1.ffn.net.2",
+      "depth": 4,
+      "inShapes": [
+        [
+          1,
+          16,
+          128
+        ]
+      ],
+      "outShapes": [
+        [
+          1,
+          16,
+          128
+        ]
+      ],
+      "params": {
+        "p": 0.1
+      },
+      "numParams": 0,
+      "flops": 0,
+      "tags": [
+        "regularization"
+      ],
+      "groupId": "g9",
+      "source": {
+        "file": "samples/custom_attention.py",
+        "line": 54,
+        "code": "nn.Dropout(dropout)"
+      },
+      "notes": [],
+      "metrics": {
+        "activationBytes": 8192,
+        "receptiveField": 1,
+        "macs": 0
+      },
+      "meta": {
+        "formula": "y = x ⊙ mask/(1-p),  p=0.1",
+        "semantic": "训练期随机失活（推理期恒等）",
+        "axes": null,
+        "tags": [
+          "dropout",
+          "regularization"
+        ]
+      }
+    },
+    {
+      "id": "n56",
+      "name": "blocks.1.ffn.net.3",
+      "op": "Linear",
+      "kind": "linear",
+      "modulePath": "blocks.1.ffn.net.3",
+      "depth": 4,
+      "inShapes": [
+        [
+          1,
+          16,
+          128
+        ]
+      ],
+      "outShapes": [
+        [
+          1,
+          16,
+          32
+        ]
+      ],
+      "params": {
+        "inFeatures": 128,
+        "outFeatures": 32,
+        "bias": true
+      },
+      "numParams": 4128,
+      "flops": 131584,
+      "tags": [
+        "weighted"
+      ],
+      "groupId": "g9",
+      "source": {
+        "file": "samples/custom_attention.py",
+        "line": 55,
+        "code": "nn.Linear(dim * mult, dim)"
+      },
+      "notes": [],
+      "metrics": {
+        "activationBytes": 2048,
+        "receptiveField": 1,
+        "macs": 65792
+      },
+      "meta": {
+        "formula": "y[..., o] = Σ_i x[..., i]·W[o, i] + b[o]  (in=128→out=32)",
+        "semantic": "全连接通道混合（特征维线性变换）",
+        "axes": "N×F / NLC",
+        "tags": [
+          "linear",
+          "channel_mix"
+        ]
+      }
+    },
+    {
+      "id": "n57",
+      "name": "blocks.1.ffn.net.4",
+      "op": "Dropout",
+      "kind": "dropout",
+      "modulePath": "blocks.1.ffn.net.4",
+      "depth": 4,
+      "inShapes": [
+        [
+          1,
+          16,
+          32
+        ]
+      ],
+      "outShapes": [
+        [
+          1,
+          16,
+          32
+        ]
+      ],
+      "params": {
+        "p": 0.1
+      },
+      "numParams": 0,
+      "flops": 0,
+      "tags": [
+        "regularization"
+      ],
+      "groupId": "g9",
+      "source": {
+        "file": "samples/custom_attention.py",
+        "line": 56,
+        "code": "nn.Dropout(dropout)"
+      },
+      "notes": [],
+      "metrics": {
+        "activationBytes": 2048,
+        "receptiveField": 1,
+        "macs": 0
+      },
+      "meta": {
+        "formula": "y = x ⊙ mask/(1-p),  p=0.1",
+        "semantic": "训练期随机失活（推理期恒等）",
+        "axes": null,
+        "tags": [
+          "dropout",
+          "regularization"
+        ]
+      }
+    },
+    {
+      "id": "n58",
+      "name": "blocks.1.add#2",
+      "op": "add",
+      "kind": "add",
+      "modulePath": "blocks.1.add",
+      "depth": 2,
+      "inShapes": [
+        [
+          1,
+          16,
+          32
+        ],
+        [
+          1,
+          16,
+          32
+        ]
+      ],
+      "outShapes": [
+        [
+          1,
+          16,
+          32
+        ]
+      ],
+      "params": {},
+      "numParams": 0,
+      "flops": 512,
+      "tags": [
+        "merge",
+        "residual"
+      ],
+      "groupId": "g3",
+      "source": {
+        "file": "samples/custom_attention.py",
+        "line": 75,
+        "code": "x + self.ffn(self.ln2(x))"
+      },
+      "notes": [
+        "Residual add"
+      ],
+      "metrics": {
+        "activationBytes": 2048,
+        "receptiveField": 1,
+        "macs": 256
+      },
+      "meta": {
+        "formula": "y = x_1 + x_2",
+        "semantic": "逐元素相加（残差/分支融合）",
+        "axes": "NCW",
+        "tags": [
+          "merge",
+          "add",
+          "residual"
+        ]
+      }
+    },
+    {
+      "id": "n59",
+      "name": "ln_f",
+      "op": "LayerNorm",
+      "kind": "norm",
+      "modulePath": "ln_f",
+      "depth": 1,
+      "inShapes": [
+        [
+          1,
+          16,
+          32
+        ]
+      ],
+      "outShapes": [
+        [
+          1,
+          16,
+          32
+        ]
+      ],
+      "params": {
+        "normalizedShape": [
+          32
+        ],
+        "eps": 1e-05,
+        "affine": true
+      },
+      "numParams": 64,
+      "flops": 2048,
+      "tags": [
+        "normalized"
+      ],
+      "groupId": "g0",
+      "source": {
+        "file": "samples/custom_attention.py",
+        "line": 90,
+        "code": "nn.LayerNorm(dim)"
+      },
+      "notes": [],
+      "metrics": {
+        "activationBytes": 2048,
+        "receptiveField": 1,
+        "macs": 1024
+      },
+      "meta": {
+        "formula": "y[..., d] = γ[d]·(x[..., d]-μ)/√(σ²+ε) + β[d]  (E=32, ε=1e-05)",
+        "semantic": "层归一化：对每个样本最后一维标准化",
+        "axes": "最后一维 E",
+        "tags": [
+          "norm",
+          "layernorm"
+        ]
+      }
+    },
+    {
+      "id": "n60",
+      "name": "head",
+      "op": "Linear",
+      "kind": "linear",
+      "modulePath": "head",
+      "depth": 1,
+      "inShapes": [
+        [
+          1,
+          16,
+          32
+        ]
+      ],
+      "outShapes": [
+        [
+          1,
+          16,
+          128
+        ]
+      ],
+      "params": {
+        "inFeatures": 32,
+        "outFeatures": 128,
+        "bias": false
+      },
+      "numParams": 4096,
+      "flops": 131072,
+      "tags": [
+        "weighted"
+      ],
+      "groupId": "g0",
+      "source": {
+        "file": "samples/custom_attention.py",
+        "line": 91,
+        "code": "nn.Linear(dim, vocab_size, bias=False)"
+      },
+      "notes": [],
+      "metrics": {
+        "activationBytes": 8192,
+        "receptiveField": 1,
+        "macs": 65536
+      },
+      "meta": {
+        "formula": "y[..., o] = Σ_i x[..., i]·W[o, i]  (in=32→out=128)",
+        "semantic": "全连接通道混合（特征维线性变换）",
+        "axes": "N×F / NLC",
+        "tags": [
+          "linear",
+          "channel_mix"
+        ]
+      }
+    },
+    {
+      "id": "n61",
+      "name": "output",
+      "op": "Output",
+      "kind": "output",
+      "modulePath": "",
+      "depth": 0,
+      "inShapes": [
+        [
+          1,
+          16,
+          128
+        ]
+      ],
+      "outShapes": [
+        [
+          1,
+          16,
+          128
+        ]
+      ],
+      "params": {},
+      "numParams": 0,
+      "flops": 0,
+      "tags": [
+        "boundary"
+      ],
+      "groupId": null,
+      "source": null,
+      "notes": [],
+      "metrics": {
+        "activationBytes": 8192,
+        "receptiveField": 1,
+        "macs": 0
+      },
+      "meta": {
+        "formula": "y = Output((1, 16, 128))",
+        "semantic": "网络输出张量",
+        "axes": "NCW",
+        "tags": [
+          "boundary",
+          "output"
+        ]
+      }
+    }
+  ],
+  "edges": [
+    {
+      "id": "e0",
+      "source": "n0",
+      "target": "n1",
+      "kind": "data",
+      "shapes": [
+        [
+          1,
+          16
+        ]
+      ],
+      "label": ""
+    },
+    {
+      "id": "e1",
+      "source": "n0",
+      "target": "n2",
+      "kind": "data",
+      "shapes": [
+        [
+          1,
+          16
+        ]
+      ],
+      "label": ""
+    },
+    {
+      "id": "e2",
+      "source": "n1",
+      "target": "n3",
+      "kind": "residual",
+      "shapes": [
+        [
+          1,
+          16,
+          32
+        ]
+      ],
+      "label": "identity"
+    },
+    {
+      "id": "e3",
+      "source": "n2",
+      "target": "n3",
+      "kind": "data",
+      "shapes": [
+        [
+          16,
+          32
+        ]
+      ],
+      "label": ""
+    },
+    {
+      "id": "e4",
+      "source": "n3",
+      "target": "n4",
+      "kind": "data",
+      "shapes": [
+        [
+          1,
+          16,
+          32
+        ]
+      ],
+      "label": ""
+    },
+    {
+      "id": "e5",
+      "source": "n4",
+      "target": "n5",
+      "kind": "data",
+      "shapes": [
+        [
+          1,
+          16,
+          32
+        ]
+      ],
+      "label": ""
+    },
+    {
+      "id": "e6",
+      "source": "n5",
+      "target": "n6",
+      "kind": "data",
+      "shapes": [
+        [
+          1,
+          16,
+          32
+        ]
+      ],
+      "label": ""
+    },
+    {
+      "id": "e7",
+      "source": "n6",
+      "target": "n7",
+      "kind": "attention",
+      "shapes": [
+        [
+          1,
+          16,
+          96
+        ]
+      ],
+      "label": ""
+    },
+    {
+      "id": "e8",
+      "source": "n5",
+      "target": "n8",
+      "kind": "data",
+      "shapes": [
+        [
+          1,
+          16,
+          32
+        ]
+      ],
+      "label": ""
+    },
+    {
+      "id": "e9",
+      "source": "n7",
+      "target": "n8",
+      "kind": "attention",
+      "shapes": [
+        [
+          1,
+          16,
+          32
+        ],
+        [
+          1,
+          16,
+          32
+        ],
+        [
+          1,
+          16,
+          32
+        ]
+      ],
+      "label": ""
+    },
+    {
+      "id": "e10",
+      "source": "n8",
+      "target": "n9",
+      "kind": "attention",
+      "shapes": [
+        [
+          1,
+          16,
+          4,
+          8
+        ]
+      ],
+      "label": ""
+    },
+    {
+      "id": "e11",
+      "source": "n5",
+      "target": "n10",
+      "kind": "data",
+      "shapes": [
+        [
+          1,
+          16,
+          32
+        ]
+      ],
+      "label": ""
+    },
+    {
+      "id": "e12",
+      "source": "n7",
+      "target": "n10",
+      "kind": "attention",
+      "shapes": [
+        [
+          1,
+          16,
+          32
+        ],
+        [
+          1,
+          16,
+          32
+        ],
+        [
+          1,
+          16,
+          32
+        ]
+      ],
+      "label": ""
+    },
+    {
+      "id": "e13",
+      "source": "n10",
+      "target": "n11",
+      "kind": "attention",
+      "shapes": [
+        [
+          1,
+          16,
+          4,
+          8
+        ]
+      ],
+      "label": ""
+    },
+    {
+      "id": "e14",
+      "source": "n5",
+      "target": "n12",
+      "kind": "data",
+      "shapes": [
+        [
+          1,
+          16,
+          32
+        ]
+      ],
+      "label": ""
+    },
+    {
+      "id": "e15",
+      "source": "n7",
+      "target": "n12",
+      "kind": "attention",
+      "shapes": [
+        [
+          1,
+          16,
+          32
+        ],
+        [
+          1,
+          16,
+          32
+        ],
+        [
+          1,
+          16,
+          32
+        ]
+      ],
+      "label": ""
+    },
+    {
+      "id": "e16",
+      "source": "n12",
+      "target": "n13",
+      "kind": "attention",
+      "shapes": [
+        [
+          1,
+          16,
+          4,
+          8
+        ]
+      ],
+      "label": ""
+    },
+    {
+      "id": "e17",
+      "source": "n11",
+      "target": "n14",
+      "kind": "attention",
+      "shapes": [
+        [
+          1,
+          4,
+          16,
+          8
+        ]
+      ],
+      "label": ""
+    },
+    {
+      "id": "e18",
+      "source": "n9",
+      "target": "n15",
+      "kind": "attention",
+      "shapes": [
+        [
+          1,
+          4,
+          16,
+          8
+        ]
+      ],
+      "label": ""
+    },
+    {
+      "id": "e19",
+      "source": "n14",
+      "target": "n15",
+      "kind": "attention",
+      "shapes": [
+        [
+          1,
+          4,
+          8,
+          16
+        ]
+      ],
+      "label": ""
+    },
+    {
+      "id": "e20",
+      "source": "n15",
+      "target": "n16",
+      "kind": "attention",
+      "shapes": [
+        [
+          1,
+          4,
+          16,
+          16
+        ]
+      ],
+      "label": ""
+    },
+    {
+      "id": "e21",
+      "source": "n16",
+      "target": "n17",
+      "kind": "attention",
+      "shapes": [
+        [
+          1,
+          4,
+          16,
+          16
+        ]
+      ],
+      "label": ""
+    },
+    {
+      "id": "e22",
+      "source": "n17",
+      "target": "n18",
+      "kind": "attention",
+      "shapes": [
+        [
+          1,
+          4,
+          16,
+          16
+        ]
+      ],
+      "label": ""
+    },
+    {
+      "id": "e23",
+      "source": "n18",
+      "target": "n19",
+      "kind": "attention",
+      "shapes": [
+        [
+          1,
+          4,
+          16,
+          16
+        ]
+      ],
+      "label": ""
+    },
+    {
+      "id": "e24",
+      "source": "n13",
+      "target": "n20",
+      "kind": "attention",
+      "shapes": [
+        [
+          1,
+          4,
+          16,
+          8
+        ]
+      ],
+      "label": ""
+    },
+    {
+      "id": "e25",
+      "source": "n19",
+      "target": "n20",
+      "kind": "attention",
+      "shapes": [
+        [
+          1,
+          4,
+          16,
+          16
+        ]
+      ],
+      "label": ""
+    },
+    {
+      "id": "e26",
+      "source": "n20",
+      "target": "n21",
+      "kind": "attention",
+      "shapes": [
+        [
+          1,
+          4,
+          16,
+          8
+        ]
+      ],
+      "label": ""
+    },
+    {
+      "id": "e27",
+      "source": "n5",
+      "target": "n22",
+      "kind": "data",
+      "shapes": [
+        [
+          1,
+          16,
+          32
+        ]
+      ],
+      "label": ""
+    },
+    {
+      "id": "e28",
+      "source": "n21",
+      "target": "n22",
+      "kind": "attention",
+      "shapes": [
+        [
+          1,
+          16,
+          4,
+          8
+        ]
+      ],
+      "label": ""
+    },
+    {
+      "id": "e29",
+      "source": "n22",
+      "target": "n23",
+      "kind": "attention",
+      "shapes": [
+        [
+          1,
+          16,
+          32
+        ]
+      ],
+      "label": ""
+    },
+    {
+      "id": "e30",
+      "source": "n4",
+      "target": "n24",
+      "kind": "residual",
+      "shapes": [
+        [
+          1,
+          16,
+          32
+        ]
+      ],
+      "label": "identity"
+    },
+    {
+      "id": "e31",
+      "source": "n23",
+      "target": "n24",
+      "kind": "data",
+      "shapes": [
+        [
+          1,
+          16,
+          32
+        ]
+      ],
+      "label": ""
+    },
+    {
+      "id": "e32",
+      "source": "n24",
+      "target": "n25",
+      "kind": "data",
+      "shapes": [
+        [
+          1,
+          16,
+          32
+        ]
+      ],
+      "label": ""
+    },
+    {
+      "id": "e33",
+      "source": "n25",
+      "target": "n26",
+      "kind": "data",
+      "shapes": [
+        [
+          1,
+          16,
+          32
+        ]
+      ],
+      "label": ""
+    },
+    {
+      "id": "e34",
+      "source": "n26",
+      "target": "n27",
+      "kind": "data",
+      "shapes": [
+        [
+          1,
+          16,
+          128
+        ]
+      ],
+      "label": ""
+    },
+    {
+      "id": "e35",
+      "source": "n27",
+      "target": "n28",
+      "kind": "data",
+      "shapes": [
+        [
+          1,
+          16,
+          128
+        ]
+      ],
+      "label": ""
+    },
+    {
+      "id": "e36",
+      "source": "n28",
+      "target": "n29",
+      "kind": "data",
+      "shapes": [
+        [
+          1,
+          16,
+          128
+        ]
+      ],
+      "label": ""
+    },
+    {
+      "id": "e37",
+      "source": "n29",
+      "target": "n30",
+      "kind": "data",
+      "shapes": [
+        [
+          1,
+          16,
+          32
+        ]
+      ],
+      "label": ""
+    },
+    {
+      "id": "e38",
+      "source": "n24",
+      "target": "n31",
+      "kind": "residual",
+      "shapes": [
+        [
+          1,
+          16,
+          32
+        ]
+      ],
+      "label": "identity"
+    },
+    {
+      "id": "e39",
+      "source": "n30",
+      "target": "n31",
+      "kind": "data",
+      "shapes": [
+        [
+          1,
+          16,
+          32
+        ]
+      ],
+      "label": ""
+    },
+    {
+      "id": "e40",
+      "source": "n31",
+      "target": "n32",
+      "kind": "data",
+      "shapes": [
+        [
+          1,
+          16,
+          32
+        ]
+      ],
+      "label": ""
+    },
+    {
+      "id": "e41",
+      "source": "n32",
+      "target": "n33",
+      "kind": "data",
+      "shapes": [
+        [
+          1,
+          16,
+          32
+        ]
+      ],
+      "label": ""
+    },
+    {
+      "id": "e42",
+      "source": "n33",
+      "target": "n34",
+      "kind": "attention",
+      "shapes": [
+        [
+          1,
+          16,
+          96
+        ]
+      ],
+      "label": ""
+    },
+    {
+      "id": "e43",
+      "source": "n32",
+      "target": "n35",
+      "kind": "data",
+      "shapes": [
+        [
+          1,
+          16,
+          32
+        ]
+      ],
+      "label": ""
+    },
+    {
+      "id": "e44",
+      "source": "n34",
+      "target": "n35",
+      "kind": "attention",
+      "shapes": [
+        [
+          1,
+          16,
+          32
+        ],
+        [
+          1,
+          16,
+          32
+        ],
+        [
+          1,
+          16,
+          32
+        ]
+      ],
+      "label": ""
+    },
+    {
+      "id": "e45",
+      "source": "n35",
+      "target": "n36",
+      "kind": "attention",
+      "shapes": [
+        [
+          1,
+          16,
+          4,
+          8
+        ]
+      ],
+      "label": ""
+    },
+    {
+      "id": "e46",
+      "source": "n32",
+      "target": "n37",
+      "kind": "data",
+      "shapes": [
+        [
+          1,
+          16,
+          32
+        ]
+      ],
+      "label": ""
+    },
+    {
+      "id": "e47",
+      "source": "n34",
+      "target": "n37",
+      "kind": "attention",
+      "shapes": [
+        [
+          1,
+          16,
+          32
+        ],
+        [
+          1,
+          16,
+          32
+        ],
+        [
+          1,
+          16,
+          32
+        ]
+      ],
+      "label": ""
+    },
+    {
+      "id": "e48",
+      "source": "n37",
+      "target": "n38",
+      "kind": "attention",
+      "shapes": [
+        [
+          1,
+          16,
+          4,
+          8
+        ]
+      ],
+      "label": ""
+    },
+    {
+      "id": "e49",
+      "source": "n32",
+      "target": "n39",
+      "kind": "data",
+      "shapes": [
+        [
+          1,
+          16,
+          32
+        ]
+      ],
+      "label": ""
+    },
+    {
+      "id": "e50",
+      "source": "n34",
+      "target": "n39",
+      "kind": "attention",
+      "shapes": [
+        [
+          1,
+          16,
+          32
+        ],
+        [
+          1,
+          16,
+          32
+        ],
+        [
+          1,
+          16,
+          32
+        ]
+      ],
+      "label": ""
+    },
+    {
+      "id": "e51",
+      "source": "n39",
+      "target": "n40",
+      "kind": "attention",
+      "shapes": [
+        [
+          1,
+          16,
+          4,
+          8
+        ]
+      ],
+      "label": ""
+    },
+    {
+      "id": "e52",
+      "source": "n38",
+      "target": "n41",
+      "kind": "attention",
+      "shapes": [
+        [
+          1,
+          4,
+          16,
+          8
+        ]
+      ],
+      "label": ""
+    },
+    {
+      "id": "e53",
+      "source": "n36",
+      "target": "n42",
+      "kind": "attention",
+      "shapes": [
+        [
+          1,
+          4,
+          16,
+          8
+        ]
+      ],
+      "label": ""
+    },
+    {
+      "id": "e54",
+      "source": "n41",
+      "target": "n42",
+      "kind": "attention",
+      "shapes": [
+        [
+          1,
+          4,
+          8,
+          16
+        ]
+      ],
+      "label": ""
+    },
+    {
+      "id": "e55",
+      "source": "n42",
+      "target": "n43",
+      "kind": "attention",
+      "shapes": [
+        [
+          1,
+          4,
+          16,
+          16
+        ]
+      ],
+      "label": ""
+    },
+    {
+      "id": "e56",
+      "source": "n43",
+      "target": "n44",
+      "kind": "attention",
+      "shapes": [
+        [
+          1,
+          4,
+          16,
+          16
+        ]
+      ],
+      "label": ""
+    },
+    {
+      "id": "e57",
+      "source": "n44",
+      "target": "n45",
+      "kind": "attention",
+      "shapes": [
+        [
+          1,
+          4,
+          16,
+          16
+        ]
+      ],
+      "label": ""
+    },
+    {
+      "id": "e58",
+      "source": "n45",
+      "target": "n46",
+      "kind": "attention",
+      "shapes": [
+        [
+          1,
+          4,
+          16,
+          16
+        ]
+      ],
+      "label": ""
+    },
+    {
+      "id": "e59",
+      "source": "n40",
+      "target": "n47",
+      "kind": "attention",
+      "shapes": [
+        [
+          1,
+          4,
+          16,
+          8
+        ]
+      ],
+      "label": ""
+    },
+    {
+      "id": "e60",
+      "source": "n46",
+      "target": "n47",
+      "kind": "attention",
+      "shapes": [
+        [
+          1,
+          4,
+          16,
+          16
+        ]
+      ],
+      "label": ""
+    },
+    {
+      "id": "e61",
+      "source": "n47",
+      "target": "n48",
+      "kind": "attention",
+      "shapes": [
+        [
+          1,
+          4,
+          16,
+          8
+        ]
+      ],
+      "label": ""
+    },
+    {
+      "id": "e62",
+      "source": "n32",
+      "target": "n49",
+      "kind": "data",
+      "shapes": [
+        [
+          1,
+          16,
+          32
+        ]
+      ],
+      "label": ""
+    },
+    {
+      "id": "e63",
+      "source": "n48",
+      "target": "n49",
+      "kind": "attention",
+      "shapes": [
+        [
+          1,
+          16,
+          4,
+          8
+        ]
+      ],
+      "label": ""
+    },
+    {
+      "id": "e64",
+      "source": "n49",
+      "target": "n50",
+      "kind": "attention",
+      "shapes": [
+        [
+          1,
+          16,
+          32
+        ]
+      ],
+      "label": ""
+    },
+    {
+      "id": "e65",
+      "source": "n31",
+      "target": "n51",
+      "kind": "residual",
+      "shapes": [
+        [
+          1,
+          16,
+          32
+        ]
+      ],
+      "label": "identity"
+    },
+    {
+      "id": "e66",
+      "source": "n50",
+      "target": "n51",
+      "kind": "data",
+      "shapes": [
+        [
+          1,
+          16,
+          32
+        ]
+      ],
+      "label": ""
+    },
+    {
+      "id": "e67",
+      "source": "n51",
+      "target": "n52",
+      "kind": "data",
+      "shapes": [
+        [
+          1,
+          16,
+          32
+        ]
+      ],
+      "label": ""
+    },
+    {
+      "id": "e68",
+      "source": "n52",
+      "target": "n53",
+      "kind": "data",
+      "shapes": [
+        [
+          1,
+          16,
+          32
+        ]
+      ],
+      "label": ""
+    },
+    {
+      "id": "e69",
+      "source": "n53",
+      "target": "n54",
+      "kind": "data",
+      "shapes": [
+        [
+          1,
+          16,
+          128
+        ]
+      ],
+      "label": ""
+    },
+    {
+      "id": "e70",
+      "source": "n54",
+      "target": "n55",
+      "kind": "data",
+      "shapes": [
+        [
+          1,
+          16,
+          128
+        ]
+      ],
+      "label": ""
+    },
+    {
+      "id": "e71",
+      "source": "n55",
+      "target": "n56",
+      "kind": "data",
+      "shapes": [
+        [
+          1,
+          16,
+          128
+        ]
+      ],
+      "label": ""
+    },
+    {
+      "id": "e72",
+      "source": "n56",
+      "target": "n57",
+      "kind": "data",
+      "shapes": [
+        [
+          1,
+          16,
+          32
+        ]
+      ],
+      "label": ""
+    },
+    {
+      "id": "e73",
+      "source": "n51",
+      "target": "n58",
+      "kind": "residual",
+      "shapes": [
+        [
+          1,
+          16,
+          32
+        ]
+      ],
+      "label": "identity"
+    },
+    {
+      "id": "e74",
+      "source": "n57",
+      "target": "n58",
+      "kind": "data",
+      "shapes": [
+        [
+          1,
+          16,
+          32
+        ]
+      ],
+      "label": ""
+    },
+    {
+      "id": "e75",
+      "source": "n58",
+      "target": "n59",
+      "kind": "data",
+      "shapes": [
+        [
+          1,
+          16,
+          32
+        ]
+      ],
+      "label": ""
+    },
+    {
+      "id": "e76",
+      "source": "n59",
+      "target": "n60",
+      "kind": "data",
+      "shapes": [
+        [
+          1,
+          16,
+          32
+        ]
+      ],
+      "label": ""
+    },
+    {
+      "id": "e77",
+      "source": "n60",
+      "target": "n61",
+      "kind": "data",
+      "shapes": [
+        [
+          1,
+          16,
+          128
+        ]
+      ],
+      "label": ""
+    }
+  ],
+  "groups": [
+    {
+      "id": "g0",
+      "name": "TinyGPT",
+      "label": "Tiny GPT",
+      "kind": "model",
+      "parentId": null,
+      "depth": 0,
+      "nodeIds": [
+        "n1",
+        "n2",
+        "n3",
+        "n4",
+        "n59",
+        "n60"
+      ],
+      "childGroupIds": [
+        "g1"
+      ],
+      "numParams": 33920,
+      "flops": 1017344,
+      "source": {
+        "line": 78,
+        "code": "class TinyGPT(nn.Module): \"\"\"Decoder-only language model: embeddings, N pre-LN blocks, LM head.\"\"\" def __init__( self, vocab_size: int = 128, dim: int = 32, num_heads: int = 4, num_layers: int = 2, ma",
+        "file": "samples/custom_attention.py"
+      },
+      "meta": {
+        "pattern": {
+          "kind": "weight_tying",
+          "label": "Weight Tying",
+          "formula": "共享权重复用（W_head = W_embed）",
+          "confidence": 0.85,
+          "tags": [
+            "weight_tying",
+            "parameter_sharing"
+          ]
+        }
+      }
+    },
+    {
+      "id": "g1",
+      "name": "blocks",
+      "label": "Transformer Blocks",
+      "kind": "module",
+      "parentId": "g0",
+      "depth": 1,
+      "nodeIds": [],
+      "childGroupIds": [
+        "g2",
+        "g3"
+      ],
+      "numParams": 25152,
+      "flops": 883712,
+      "source": {
+        "line": 78,
+        "code": "class TinyGPT(nn.Module): \"\"\"Decoder-only language model: embeddings, N pre-LN blocks, LM head.\"\"\" def __init__( self, vocab_size: int = 128, dim: int = 32, num_heads: int = 4, num_layers: int = 2, ma",
+        "file": "samples/custom_attention.py"
+      }
+    },
+    {
+      "id": "g2",
+      "name": "blocks.0",
+      "label": "Transformer Block 1",
+      "kind": "transformer_block",
+      "parentId": "g1",
+      "depth": 2,
+      "nodeIds": [
+        "n5",
+        "n24",
+        "n25",
+        "n31"
+      ],
+      "childGroupIds": [
+        "g4",
+        "g5"
+      ],
+      "numParams": 12576,
+      "flops": 441856,
+      "source": {
+        "line": 63,
+        "code": "class Block(nn.Module): \"\"\"Pre-LN block: attention and FFN, each wrapped in a residual connection.\"\"\" def __init__(self, dim: int, num_heads: int, dropout: float = 0.1) -> None: super().__init__() sel",
+        "file": "samples/custom_attention.py"
+      },
+      "meta": {
+        "pattern": {
+          "kind": "transformer_block",
+          "label": "Transformer Block",
+          "formula": "x = x + MHA(LN(x)); x = x + FFN(LN(x))",
+          "confidence": 0.95,
+          "tags": [
+            "transformer",
+            "attention",
+            "residual"
+          ]
+        }
+      }
+    },
+    {
+      "id": "g3",
+      "name": "blocks.1",
+      "label": "Transformer Block 2",
+      "kind": "transformer_block",
+      "parentId": "g1",
+      "depth": 2,
+      "nodeIds": [
+        "n32",
+        "n51",
+        "n52",
+        "n58"
+      ],
+      "childGroupIds": [
+        "g6",
+        "g7"
+      ],
+      "numParams": 12576,
+      "flops": 441856,
+      "source": {
+        "line": 63,
+        "code": "class Block(nn.Module): \"\"\"Pre-LN block: attention and FFN, each wrapped in a residual connection.\"\"\" def __init__(self, dim: int, num_heads: int, dropout: float = 0.1) -> None: super().__init__() sel",
+        "file": "samples/custom_attention.py"
+      },
+      "meta": {
+        "pattern": {
+          "kind": "transformer_block",
+          "label": "Transformer Block",
+          "formula": "x = x + MHA(LN(x)); x = x + FFN(LN(x))",
+          "confidence": 0.95,
+          "tags": [
+            "transformer",
+            "attention",
+            "residual"
+          ]
+        }
+      }
+    },
+    {
+      "id": "g4",
+      "name": "blocks.0.attn",
+      "label": "Block 1 · Attention",
+      "kind": "attention_block",
+      "parentId": "g2",
+      "depth": 3,
+      "nodeIds": [
+        "n6",
+        "n7",
+        "n8",
+        "n9",
+        "n10",
+        "n11",
+        "n12",
+        "n13",
+        "n14",
+        "n15",
+        "n16",
+        "n17",
+        "n18",
+        "n19",
+        "n20",
+        "n21",
+        "n22",
+        "n23"
+      ],
+      "childGroupIds": [],
+      "numParams": 4096,
+      "flops": 169984,
+      "source": {
+        "line": 18,
+        "code": "class SelfAttention(nn.Module): \"\"\"Multi-head causal self-attention (no nn.MultiheadAttention).\"\"\" def __init__(self, dim: int, num_heads: int, dropout: float = 0.1, max_len: int = 16) -> None: super(",
+        "file": "samples/custom_attention.py"
+      },
+      "meta": {
+        "pattern": {
+          "kind": "self_attention",
+          "label": "Self Attention",
+          "formula": "softmax(Q·Kᵀ/√d)·V, Q/K/V 同源",
+          "confidence": 0.9,
+          "tags": [
+            "attention",
+            "self_attention"
+          ]
+        }
+      }
+    },
+    {
+      "id": "g5",
+      "name": "blocks.0.ffn",
+      "label": "Block 1 · Feed Forward",
+      "kind": "ffn_block",
+      "parentId": "g2",
+      "depth": 3,
+      "nodeIds": [],
+      "childGroupIds": [
+        "g8"
+      ],
+      "numParams": 8352,
+      "flops": 266752,
+      "source": {
+        "line": 46,
+        "code": "class FeedForward(nn.Module): \"\"\"Position-wise FFN: expand 4x, GELU, project back.\"\"\" def __init__(self, dim: int, mult: int = 4, dropout: float = 0.1) -> None: super().__init__() self.net = nn.Sequen",
+        "file": "samples/custom_attention.py"
+      }
+    },
+    {
+      "id": "g6",
+      "name": "blocks.1.attn",
+      "label": "Block 2 · Attention",
+      "kind": "attention_block",
+      "parentId": "g3",
+      "depth": 3,
+      "nodeIds": [
+        "n33",
+        "n34",
+        "n35",
+        "n36",
+        "n37",
+        "n38",
+        "n39",
+        "n40",
+        "n41",
+        "n42",
+        "n43",
+        "n44",
+        "n45",
+        "n46",
+        "n47",
+        "n48",
+        "n49",
+        "n50"
+      ],
+      "childGroupIds": [],
+      "numParams": 4096,
+      "flops": 169984,
+      "source": {
+        "line": 18,
+        "code": "class SelfAttention(nn.Module): \"\"\"Multi-head causal self-attention (no nn.MultiheadAttention).\"\"\" def __init__(self, dim: int, num_heads: int, dropout: float = 0.1, max_len: int = 16) -> None: super(",
+        "file": "samples/custom_attention.py"
+      },
+      "meta": {
+        "pattern": {
+          "kind": "self_attention",
+          "label": "Self Attention",
+          "formula": "softmax(Q·Kᵀ/√d)·V, Q/K/V 同源",
+          "confidence": 0.9,
+          "tags": [
+            "attention",
+            "self_attention"
+          ]
+        }
+      }
+    },
+    {
+      "id": "g7",
+      "name": "blocks.1.ffn",
+      "label": "Block 2 · Feed Forward",
+      "kind": "ffn_block",
+      "parentId": "g3",
+      "depth": 3,
+      "nodeIds": [],
+      "childGroupIds": [
+        "g9"
+      ],
+      "numParams": 8352,
+      "flops": 266752,
+      "source": {
+        "line": 46,
+        "code": "class FeedForward(nn.Module): \"\"\"Position-wise FFN: expand 4x, GELU, project back.\"\"\" def __init__(self, dim: int, mult: int = 4, dropout: float = 0.1) -> None: super().__init__() self.net = nn.Sequen",
+        "file": "samples/custom_attention.py"
+      }
+    },
+    {
+      "id": "g8",
+      "name": "blocks.0.ffn.net",
+      "label": "Block 1 · Feed Forward · MLP",
+      "kind": "mlp",
+      "parentId": "g5",
+      "depth": 4,
+      "nodeIds": [
+        "n26",
+        "n27",
+        "n28",
+        "n29",
+        "n30"
+      ],
+      "childGroupIds": [],
+      "numParams": 8352,
+      "flops": 266752,
+      "source": {
+        "line": 78,
+        "code": "class TinyGPT(nn.Module): \"\"\"Decoder-only language model: embeddings, N pre-LN blocks, LM head.\"\"\" def __init__( self, vocab_size: int = 128, dim: int = 32, num_heads: int = 4, num_layers: int = 2, ma",
+        "file": "samples/custom_attention.py"
+      },
+      "meta": {
+        "pattern": {
+          "kind": "ffn",
+          "label": "Feed-Forward Network",
+          "formula": "y = W2·Act(W1·x)",
+          "confidence": 0.9,
+          "tags": [
+            "ffn",
+            "expansion"
+          ]
+        }
+      }
+    },
+    {
+      "id": "g9",
+      "name": "blocks.1.ffn.net",
+      "label": "Block 2 · Feed Forward · MLP",
+      "kind": "mlp",
+      "parentId": "g7",
+      "depth": 4,
+      "nodeIds": [
+        "n53",
+        "n54",
+        "n55",
+        "n56",
+        "n57"
+      ],
+      "childGroupIds": [],
+      "numParams": 8352,
+      "flops": 266752,
+      "source": {
+        "line": 78,
+        "code": "class TinyGPT(nn.Module): \"\"\"Decoder-only language model: embeddings, N pre-LN blocks, LM head.\"\"\" def __init__( self, vocab_size: int = 128, dim: int = 32, num_heads: int = 4, num_layers: int = 2, ma",
+        "file": "samples/custom_attention.py"
+      },
+      "meta": {
+        "pattern": {
+          "kind": "ffn",
+          "label": "Feed-Forward Network",
+          "formula": "y = W2·Act(W1·x)",
+          "confidence": 0.9,
+          "tags": [
+            "ffn",
+            "expansion"
+          ]
+        }
+      }
+    }
+  ]
+}

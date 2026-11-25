@@ -1,0 +1,72 @@
+[
+  {
+    "file": "tiny_cnn.keras",
+    "format": "keras",
+    "bytes": 959
+  },
+  {
+    "file": "tiny_mlp.keras",
+    "format": "keras",
+    "bytes": 732
+  },
+  {
+    "file": "tiny_rescnn.keras",
+    "format": "keras",
+    "bytes": 1025
+  },
+  {
+    "file": "tiny_attention.keras",
+    "format": "keras",
+    "bytes": 928
+  },
+  {
+    "file": "vggmini.onnx",
+    "format": "onnx",
+    "bytes": 271186
+  },
+  {
+    "file": "resnetmini.onnx",
+    "format": "onnx",
+    "bytes": 190835
+  },
+  {
+    "file": "mlp.onnx",
+    "format": "onnx",
+    "bytes": 70384
+  },
+  {
+    "file": "vggmini_traced.pt",
+    "format": "pt",
+    "bytes": 315280
+  },
+  {
+    "file": "resnetmini_traced.pt",
+    "format": "pt",
+    "bytes": 272859
+  },
+  {
+    "file": "mlp_traced.pt",
+    "format": "pt",
+    "bytes": 82472
+  },
+  {
+    "file": "tiny_transformer_traced.pt",
+    "format": "pt",
+    "bytes": 173361
+  },
+  {
+    "file": "broken.onnx",
+    "format": "onnx",
+    "bytes": 45
+  },
+  {
+    "file": "broken.keras",
+    "format": "keras",
+    "bytes": 33
+  },
+  {
+    "file": "mlp_state_dict.pt",
+    "format": "pt",
+    "bytes": 72041
+  }
+]

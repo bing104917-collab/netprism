@@ -1,0 +1,1042 @@
+{
+  "schemaVersion": "1.0",
+  "generator": {
+    "name": "netprism",
+    "version": "0.1.0"
+  },
+  "model": {
+    "name": "DynamicNet",
+    "framework": "pytorch",
+    "className": "DynamicNet",
+    "mode": "trace",
+    "source": {
+      "file": "samples/dynamic_control.py",
+      "relPath": "dynamic_control.py"
+    },
+    "inputSpec": [
+      {
+        "name": "input",
+        "shape": [
+          1,
+          3,
+          64,
+          64
+        ],
+        "dtype": "float32"
+      }
+    ],
+    "outputSpec": [
+      {
+        "name": "output",
+        "shape": [
+          1,
+          10
+        ],
+        "dtype": "float32"
+      }
+    ],
+    "totalParams": 7562,
+    "trainableParams": 7562,
+    "totalFlops": 13535914,
+    "flopsApprox": false,
+    "numLayers": 9,
+    "warnings": [
+      "FX symbolic tracing failed (TraceError: symbolically traced variables cannot be used as inputs to control flow); fell back to eager hook tracing: nodes follow execution order, residual/skip links may be missing.",
+      "Functional ops (flatten/cat/relu in forward) are not captured by the hook fallback."
+    ],
+    "metrics": {
+      "paramBytes": 30248,
+      "activationBytes": 1163600,
+      "peakActivationBytes": 524288,
+      "maxReceptiveField": 8,
+      "macs": 6767957
+    },
+    "meta": {
+      "family": "vgg",
+      "familyLabel": "VGG",
+      "familyConfidence": 0.57,
+      "confidence": 0.57,
+      "algorithmTags": [
+        "cnn",
+        "vgg",
+        "conv",
+        "conv_bn_act",
+        "normalization",
+        "activation",
+        "global_pool",
+        "pool",
+        "classifier_head",
+        "linear"
+      ],
+      "families": [
+        {
+          "id": "vgg",
+          "label": "VGG",
+          "confidence": 0.57,
+          "evidence": [
+            "必需组件 plain_conv: 卷积层×2",
+            "必需组件全部满足",
+            "可选组件 normalization: 归一化层",
+            "可选组件 classification_head: Classifier Head",
+            "可选组件 global_pool: 全局池化×1"
+          ]
+        },
+        {
+          "id": "cnn",
+          "label": "CNN",
+          "confidence": 0.5,
+          "evidence": [
+            "必需组件 conv_bn_act: Conv-BN-Act",
+            "必需组件全部满足",
+            "可选组件 plain_conv: 卷积层×2",
+            "可选组件 normalization: 归一化层",
+            "可选组件 classification_head: Classifier Head"
+          ]
+        },
+        {
+          "id": "lenet",
+          "label": "LeNet-5",
+          "confidence": 0.46,
+          "evidence": [
+            "必需组件 plain_conv: 卷积层×2",
+            "必需组件 classification_head: Classifier Head",
+            "必需组件全部满足",
+            "签名算子匹配 4/4"
+          ]
+        }
+      ],
+      "patterns": [
+        {
+          "kind": "conv_bn_act",
+          "label": "Conv-BN-Act",
+          "formula": "y = Act(BN(Conv(x)))",
+          "nodeIds": [
+            "n1",
+            "n2",
+            "n3"
+          ],
+          "groupIds": [
+            "g1"
+          ],
+          "confidence": 0.9,
+          "evidence": [
+            "1 条 Conv→Norm→Act 链",
+            "例如 n1→n2→n3"
+          ],
+          "tags": [
+            "conv",
+            "conv_bn_act",
+            "normalization",
+            "activation"
+          ],
+          "id": "p1"
+        },
+        {
+          "kind": "global_pool",
+          "label": "Global Pool",
+          "formula": "y = mean_{h,w}(x)",
+          "nodeIds": [
+            "n7"
+          ],
+          "groupIds": [
+            "g1"
+          ],
+          "confidence": 0.9,
+          "evidence": [
+            "全局池化 ×1",
+            "空间维压缩为 1×1 后进入分类头"
+          ],
+          "tags": [
+            "global_pool",
+            "pool"
+          ],
+          "id": "p2"
+        },
+        {
+          "kind": "classifier_head",
+          "label": "Classifier Head",
+          "formula": "logits = W·x + b",
+          "nodeIds": [
+            "n9"
+          ],
+          "groupIds": [
+            "g0"
+          ],
+          "confidence": 0.85,
+          "evidence": [
+            "末端 Linear 输出 10 维 logits"
+          ],
+          "tags": [
+            "classifier_head",
+            "linear"
+          ],
+          "id": "p3"
+        }
+      ],
+      "pseudocode": [
+        "x = Input(1, 3, 64, 64)",
+        "x = Conv2d(16,3x3,p1x1)(x)   # -> (1, 16, 64, 64)",
+        "x = BatchNorm(16)(x)   # -> (1, 16, 64, 64)",
+        "x = ReLU()(x)   # -> (1, 16, 64, 64)",
+        "x = MaxPool(2x2,s2x2)(x)   # -> (1, 16, 32, 32)",
+        "x = Conv2d(32,3x3,p1x1)(x)   # -> (1, 32, 32, 32)",
+        "x = ReLU()(x)   # -> (1, 32, 32, 32)",
+        "x = GlobalAvgPool()(x)   # -> (1, 32, 1, 1)",
+        "x = Linear(32)(x)   # -> (1, 32)",
+        "logits = Linear(10)(x)   # -> (1, 10)",
+        "return logits"
+      ],
+      "familyEvidence": [
+        "必需组件 plain_conv: 卷积层×2",
+        "必需组件全部满足",
+        "可选组件 normalization: 归一化层",
+        "可选组件 classification_head: Classifier Head",
+        "可选组件 global_pool: 全局池化×1"
+      ]
+    }
+  },
+  "nodes": [
+    {
+      "id": "n0",
+      "name": "input",
+      "op": "Input",
+      "kind": "input",
+      "modulePath": "",
+      "depth": 0,
+      "inShapes": [],
+      "outShapes": [
+        [
+          1,
+          3,
+          64,
+          64
+        ]
+      ],
+      "params": {},
+      "numParams": 0,
+      "flops": 0,
+      "tags": [
+        "boundary"
+      ],
+      "groupId": null,
+      "source": null,
+      "notes": [],
+      "metrics": {
+        "activationBytes": 49152,
+        "receptiveField": 1,
+        "macs": 0
+      },
+      "meta": {
+        "formula": "x = Input(1, 3, 64, 64)",
+        "semantic": "网络输入张量",
+        "axes": "NCHW",
+        "tags": [
+          "boundary",
+          "input"
+        ]
+      }
+    },
+    {
+      "id": "n1",
+      "name": "features.0",
+      "op": "Conv2d",
+      "kind": "conv",
+      "modulePath": "features.0",
+      "depth": 1,
+      "inShapes": [
+        [
+          1,
+          3,
+          64,
+          64
+        ]
+      ],
+      "outShapes": [
+        [
+          1,
+          16,
+          64,
+          64
+        ]
+      ],
+      "params": {
+        "inChannels": 3,
+        "outChannels": 16,
+        "kernelSize": [
+          3,
+          3
+        ],
+        "stride": [
+          1,
+          1
+        ],
+        "padding": [
+          1,
+          1
+        ],
+        "dilation": [
+          1,
+          1
+        ],
+        "groups": 1,
+        "bias": true
+      },
+      "numParams": 448,
+      "flops": 3604480,
+      "tags": [
+        "spatial",
+        "weighted",
+        "upsample"
+      ],
+      "groupId": "g1",
+      "source": {
+        "file": "samples/dynamic_control.py",
+        "line": 23,
+        "code": "nn.Conv2d(3, 16, kernel_size=3, padding=1)"
+      },
+      "notes": [],
+      "metrics": {
+        "activationBytes": 262144,
+        "receptiveField": 3,
+        "macs": 1802240
+      },
+      "meta": {
+        "formula": "y[n,o,h',w'] = Σ_{c,kh,kw} W[o,c,kh,kw]·x[n,c,h·s+kh-p,w·s+kw-p] + b[o]  (Cin=3→Cout=16, k=3x3, s=1x1, p=1x1)",
+        "semantic": "3x3 空间卷积（通道 3→16）",
+        "axes": "NCHW",
+        "tags": [
+          "conv",
+          "spatial"
+        ]
+      }
+    },
+    {
+      "id": "n2",
+      "name": "features.1",
+      "op": "BatchNorm2d",
+      "kind": "norm",
+      "modulePath": "features.1",
+      "depth": 1,
+      "inShapes": [
+        [
+          1,
+          16,
+          64,
+          64
+        ]
+      ],
+      "outShapes": [
+        [
+          1,
+          16,
+          64,
+          64
+        ]
+      ],
+      "params": {
+        "normalizedShape": [
+          16
+        ],
+        "eps": 1e-05,
+        "affine": true
+      },
+      "numParams": 32,
+      "flops": 262144,
+      "tags": [
+        "normalized"
+      ],
+      "groupId": "g1",
+      "source": {
+        "file": "samples/dynamic_control.py",
+        "line": 24,
+        "code": "nn.BatchNorm2d(16)"
+      },
+      "notes": [],
+      "metrics": {
+        "activationBytes": 262144,
+        "receptiveField": 3,
+        "macs": 131072
+      },
+      "meta": {
+        "formula": "y[n,c,:] = γ[c]·(x[n,c,:]-μ_B[c])/√(σ²_B[c]+ε) + β[c]  (C=16, ε=1e-05)",
+        "semantic": "批归一化：按通道统计量标准化并仿射",
+        "axes": "NCHW（逐通道）",
+        "tags": [
+          "norm",
+          "batchnorm"
+        ]
+      }
+    },
+    {
+      "id": "n3",
+      "name": "features.2",
+      "op": "ReLU",
+      "kind": "activation",
+      "modulePath": "features.2",
+      "depth": 1,
+      "inShapes": [
+        [
+          1,
+          16,
+          64,
+          64
+        ]
+      ],
+      "outShapes": [
+        [
+          1,
+          16,
+          64,
+          64
+        ]
+      ],
+      "params": {
+        "inplace": true
+      },
+      "numParams": 0,
+      "flops": 65536,
+      "tags": [
+        "elementwise"
+      ],
+      "groupId": "g1",
+      "source": {
+        "file": "samples/dynamic_control.py",
+        "line": 25,
+        "code": "nn.ReLU(inplace=True)"
+      },
+      "notes": [],
+      "metrics": {
+        "activationBytes": 262144,
+        "receptiveField": 3,
+        "macs": 32768
+      },
+      "meta": {
+        "formula": "y = max(x, 0)",
+        "semantic": "逐元素 ReLU 非线性（负值截断）",
+        "axes": "逐元素（任意轴）",
+        "tags": [
+          "activation",
+          "relu"
+        ]
+      }
+    },
+    {
+      "id": "n4",
+      "name": "features.3",
+      "op": "MaxPool2d",
+      "kind": "pool",
+      "modulePath": "features.3",
+      "depth": 1,
+      "inShapes": [
+        [
+          1,
+          16,
+          64,
+          64
+        ]
+      ],
+      "outShapes": [
+        [
+          1,
+          16,
+          32,
+          32
+        ]
+      ],
+      "params": {
+        "type": "max",
+        "kernelSize": [
+          2,
+          2
+        ],
+        "stride": [
+          2,
+          2
+        ],
+        "padding": [
+          0,
+          0
+        ]
+      },
+      "numParams": 0,
+      "flops": 65536,
+      "tags": [
+        "downsample"
+      ],
+      "groupId": "g1",
+      "source": {
+        "file": "samples/dynamic_control.py",
+        "line": 26,
+        "code": "nn.MaxPool2d(kernel_size=2)"
+      },
+      "notes": [],
+      "metrics": {
+        "activationBytes": 65536,
+        "receptiveField": 4,
+        "macs": 32768
+      },
+      "meta": {
+        "formula": "y[n,c,oh,ow] = max_{kh,kw} x[n,c,oh·s+kh-p, ow·s+kw-p]  (k=2x2, s=2x2)",
+        "semantic": "局部最大池化（k=2x2）下采样",
+        "axes": "NCHW",
+        "tags": [
+          "pool",
+          "max"
+        ]
+      }
+    },
+    {
+      "id": "n5",
+      "name": "features.4",
+      "op": "Conv2d",
+      "kind": "conv",
+      "modulePath": "features.4",
+      "depth": 1,
+      "inShapes": [
+        [
+          1,
+          16,
+          32,
+          32
+        ]
+      ],
+      "outShapes": [
+        [
+          1,
+          32,
+          32,
+          32
+        ]
+      ],
+      "params": {
+        "inChannels": 16,
+        "outChannels": 32,
+        "kernelSize": [
+          3,
+          3
+        ],
+        "stride": [
+          1,
+          1
+        ],
+        "padding": [
+          1,
+          1
+        ],
+        "dilation": [
+          1,
+          1
+        ],
+        "groups": 1,
+        "bias": true
+      },
+      "numParams": 4640,
+      "flops": 9469952,
+      "tags": [
+        "spatial",
+        "weighted",
+        "upsample"
+      ],
+      "groupId": "g1",
+      "source": {
+        "file": "samples/dynamic_control.py",
+        "line": 27,
+        "code": "nn.Conv2d(16, 32, kernel_size=3, padding=1)"
+      },
+      "notes": [],
+      "metrics": {
+        "activationBytes": 131072,
+        "receptiveField": 8,
+        "macs": 4734976
+      },
+      "meta": {
+        "formula": "y[n,o,h',w'] = Σ_{c,kh,kw} W[o,c,kh,kw]·x[n,c,h·s+kh-p,w·s+kw-p] + b[o]  (Cin=16→Cout=32, k=3x3, s=1x1, p=1x1)",
+        "semantic": "3x3 空间卷积（通道 16→32）",
+        "axes": "NCHW",
+        "tags": [
+          "conv",
+          "spatial"
+        ]
+      }
+    },
+    {
+      "id": "n6",
+      "name": "features.5",
+      "op": "ReLU",
+      "kind": "activation",
+      "modulePath": "features.5",
+      "depth": 1,
+      "inShapes": [
+        [
+          1,
+          32,
+          32,
+          32
+        ]
+      ],
+      "outShapes": [
+        [
+          1,
+          32,
+          32,
+          32
+        ]
+      ],
+      "params": {
+        "inplace": true
+      },
+      "numParams": 0,
+      "flops": 32768,
+      "tags": [
+        "elementwise"
+      ],
+      "groupId": "g1",
+      "source": {
+        "file": "samples/dynamic_control.py",
+        "line": 28,
+        "code": "nn.ReLU(inplace=True)"
+      },
+      "notes": [],
+      "metrics": {
+        "activationBytes": 131072,
+        "receptiveField": 8,
+        "macs": 16384
+      },
+      "meta": {
+        "formula": "y = max(x, 0)",
+        "semantic": "逐元素 ReLU 非线性（负值截断）",
+        "axes": "逐元素（任意轴）",
+        "tags": [
+          "activation",
+          "relu"
+        ]
+      }
+    },
+    {
+      "id": "n7",
+      "name": "features.6",
+      "op": "AdaptiveAvgPool2d",
+      "kind": "pool",
+      "modulePath": "features.6",
+      "depth": 1,
+      "inShapes": [
+        [
+          1,
+          32,
+          32,
+          32
+        ]
+      ],
+      "outShapes": [
+        [
+          1,
+          32,
+          1,
+          1
+        ]
+      ],
+      "params": {
+        "type": "adaptive",
+        "outputSize": [
+          1,
+          1
+        ]
+      },
+      "numParams": 0,
+      "flops": 32768,
+      "tags": [
+        "downsample",
+        "global"
+      ],
+      "groupId": "g1",
+      "source": {
+        "file": "samples/dynamic_control.py",
+        "line": 29,
+        "code": "nn.AdaptiveAvgPool2d((1, 1))"
+      },
+      "notes": [],
+      "metrics": {
+        "activationBytes": 128,
+        "receptiveField": 8,
+        "macs": 16384
+      },
+      "meta": {
+        "formula": "y[n,c] = mean_{h,w} x[n,c,h,w]",
+        "semantic": "全局平均池化：空间维压成 1×1",
+        "axes": "NCHW → NC",
+        "tags": [
+          "pool",
+          "global"
+        ]
+      }
+    },
+    {
+      "id": "n8",
+      "name": "positive",
+      "op": "Linear",
+      "kind": "linear",
+      "modulePath": "positive",
+      "depth": 1,
+      "inShapes": [
+        [
+          1,
+          32
+        ]
+      ],
+      "outShapes": [
+        [
+          1,
+          32
+        ]
+      ],
+      "params": {
+        "inFeatures": 32,
+        "outFeatures": 32,
+        "bias": true
+      },
+      "numParams": 1056,
+      "flops": 2080,
+      "tags": [
+        "weighted"
+      ],
+      "groupId": "g0",
+      "source": {
+        "file": "samples/dynamic_control.py",
+        "line": 31,
+        "code": "nn.Linear(32, 32)"
+      },
+      "notes": [],
+      "metrics": {
+        "activationBytes": 128,
+        "receptiveField": 8,
+        "macs": 1040
+      },
+      "meta": {
+        "formula": "y[..., o] = Σ_i x[..., i]·W[o, i] + b[o]  (in=32→out=32)",
+        "semantic": "全连接通道混合（特征维线性变换）",
+        "axes": "N×F / NLC",
+        "tags": [
+          "linear",
+          "channel_mix"
+        ]
+      }
+    },
+    {
+      "id": "n9",
+      "name": "head",
+      "op": "Linear",
+      "kind": "linear",
+      "modulePath": "head",
+      "depth": 1,
+      "inShapes": [
+        [
+          1,
+          32
+        ]
+      ],
+      "outShapes": [
+        [
+          1,
+          10
+        ]
+      ],
+      "params": {
+        "inFeatures": 32,
+        "outFeatures": 10,
+        "bias": true
+      },
+      "numParams": 330,
+      "flops": 650,
+      "tags": [
+        "weighted"
+      ],
+      "groupId": "g0",
+      "source": {
+        "file": "samples/dynamic_control.py",
+        "line": 33,
+        "code": "nn.Linear(32, num_classes)"
+      },
+      "notes": [],
+      "metrics": {
+        "activationBytes": 40,
+        "receptiveField": 8,
+        "macs": 325
+      },
+      "meta": {
+        "formula": "y[..., o] = Σ_i x[..., i]·W[o, i] + b[o]  (in=32→out=10)",
+        "semantic": "全连接通道混合（特征维线性变换）",
+        "axes": "N×F / NLC",
+        "tags": [
+          "linear",
+          "channel_mix"
+        ]
+      }
+    },
+    {
+      "id": "n10",
+      "name": "output",
+      "op": "Output",
+      "kind": "output",
+      "modulePath": "",
+      "depth": 0,
+      "inShapes": [
+        [
+          1,
+          10
+        ]
+      ],
+      "outShapes": [
+        [
+          1,
+          10
+        ]
+      ],
+      "params": {},
+      "numParams": 0,
+      "flops": 0,
+      "tags": [
+        "boundary"
+      ],
+      "groupId": null,
+      "source": null,
+      "notes": [],
+      "metrics": {
+        "activationBytes": 40,
+        "receptiveField": 8,
+        "macs": 0
+      },
+      "meta": {
+        "formula": "y = Output((1, 10))",
+        "semantic": "网络输出张量",
+        "axes": "N×F",
+        "tags": [
+          "boundary",
+          "output"
+        ]
+      }
+    }
+  ],
+  "edges": [
+    {
+      "id": "e0",
+      "source": "n0",
+      "target": "n1",
+      "kind": "data",
+      "shapes": [
+        [
+          1,
+          3,
+          64,
+          64
+        ]
+      ],
+      "label": ""
+    },
+    {
+      "id": "e1",
+      "source": "n1",
+      "target": "n2",
+      "kind": "data",
+      "shapes": [
+        [
+          1,
+          16,
+          64,
+          64
+        ]
+      ],
+      "label": ""
+    },
+    {
+      "id": "e2",
+      "source": "n2",
+      "target": "n3",
+      "kind": "data",
+      "shapes": [
+        [
+          1,
+          16,
+          64,
+          64
+        ]
+      ],
+      "label": ""
+    },
+    {
+      "id": "e3",
+      "source": "n3",
+      "target": "n4",
+      "kind": "data",
+      "shapes": [
+        [
+          1,
+          16,
+          64,
+          64
+        ]
+      ],
+      "label": ""
+    },
+    {
+      "id": "e4",
+      "source": "n4",
+      "target": "n5",
+      "kind": "data",
+      "shapes": [
+        [
+          1,
+          16,
+          32,
+          32
+        ]
+      ],
+      "label": ""
+    },
+    {
+      "id": "e5",
+      "source": "n5",
+      "target": "n6",
+      "kind": "data",
+      "shapes": [
+        [
+          1,
+          32,
+          32,
+          32
+        ]
+      ],
+      "label": ""
+    },
+    {
+      "id": "e6",
+      "source": "n6",
+      "target": "n7",
+      "kind": "data",
+      "shapes": [
+        [
+          1,
+          32,
+          32,
+          32
+        ]
+      ],
+      "label": ""
+    },
+    {
+      "id": "e7",
+      "source": "n7",
+      "target": "n8",
+      "kind": "data",
+      "shapes": [
+        [
+          1,
+          32,
+          1,
+          1
+        ]
+      ],
+      "label": ""
+    },
+    {
+      "id": "e8",
+      "source": "n8",
+      "target": "n9",
+      "kind": "data",
+      "shapes": [
+        [
+          1,
+          32
+        ]
+      ],
+      "label": ""
+    },
+    {
+      "id": "e9",
+      "source": "n9",
+      "target": "n10",
+      "kind": "data",
+      "shapes": [
+        [
+          1,
+          10
+        ]
+      ],
+      "label": ""
+    }
+  ],
+  "groups": [
+    {
+      "id": "g0",
+      "name": "DynamicNet",
+      "label": "Dynamic Net",
+      "kind": "model",
+      "parentId": null,
+      "depth": 0,
+      "nodeIds": [
+        "n8",
+        "n9"
+      ],
+      "childGroupIds": [
+        "g1"
+      ],
+      "numParams": 6506,
+      "flops": 13535914,
+      "source": {
+        "line": 17,
+        "code": "class DynamicNet(nn.Module): \"\"\"Small CNN with a value-dependent two-way head.\"\"\" def __init__(self, num_classes: int = 10) -> None: super().__init__() self.features = nn.Sequential( nn.Conv2d(3, 16, ",
+        "file": "samples/dynamic_control.py"
+      },
+      "meta": {
+        "pattern": {
+          "kind": "classifier_head",
+          "label": "Classifier Head",
+          "formula": "logits = W·x + b",
+          "confidence": 0.85,
+          "tags": [
+            "classifier_head",
+            "linear"
+          ]
+        }
+      }
+    },
+    {
+      "id": "g1",
+      "name": "features",
+      "label": "Features",
+      "kind": "conv_block",
+      "parentId": "g0",
+      "depth": 1,
+      "nodeIds": [
+        "n1",
+        "n2",
+        "n3",
+        "n4",
+        "n5",
+        "n6",
+        "n7"
+      ],
+      "childGroupIds": [],
+      "numParams": 5120,
+      "flops": 13533184,
+      "source": {
+        "line": 17,
+        "code": "class DynamicNet(nn.Module): \"\"\"Small CNN with a value-dependent two-way head.\"\"\" def __init__(self, num_classes: int = 10) -> None: super().__init__() self.features = nn.Sequential( nn.Conv2d(3, 16, ",
+        "file": "samples/dynamic_control.py"
+      },
+      "meta": {
+        "pattern": {
+          "kind": "conv_bn_act",
+          "label": "Conv-BN-Act",
+          "formula": "y = Act(BN(Conv(x)))",
+          "confidence": 0.9,
+          "tags": [
+            "conv",
+            "conv_bn_act",
+            "normalization",
+            "activation"
+          ]
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="color-scheme" content="dark" />
+  <meta name="description" content="NetPrism 棱镜 — 把 PyTorch 网络结构变成可交互的 3D 棱镜场景。" />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%23060b14'/%3E%3Cpath d='M16 4.5 27.5 27H4.5Z' fill='%2367e8f9' fill-opacity='.16' stroke='%2367e8f9' stroke-width='1.3'/%3E%3Cpath d='M16 4.5v16.5L4.5 27' fill='%2338bdf8' fill-opacity='.28'/%3E%3Cpath d='M16 4.5 27.5 27 16 21Z' fill='%23a78bfa' fill-opacity='.32'/%3E%3C/svg%3E" />
+  <title>NetPrism · 棱镜 — 3D 神经网络透视</title>
+  <link rel="stylesheet" href="css/app.css" />
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "./vendor/three/three.module.js",
+        "three/addons/": "./vendor/three/addons/"
+      }
+    }
+  </script>
+</head>
+<body>
+  <svg class="svg-defs" aria-hidden="true" focusable="false">
+    <defs>
+      <symbol id="i-upload" viewBox="0 0 24 24"><path d="M12 16V4m0 0 4 4m-4-4L8 8" /><path d="M4 15v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3" /></symbol>
+      <symbol id="i-help" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" /><path d="M9.6 9a2.5 2.5 0 0 1 4.8 1c0 1.6-2.4 2-2.4 3.6" /><path d="M12 17.2h.01" /></symbol>
+      <symbol id="i-play" viewBox="0 0 24 24"><path d="M8 5.5v13l10.5-6.5z" fill="currentColor" stroke="none" /></symbol>
+      <symbol id="i-pause" viewBox="0 0 24 24"><path d="M8.5 5.5v13M15.5 5.5v13" stroke-width="2.6" /></symbol>
+      <symbol id="i-step" viewBox="0 0 24 24"><path d="M6 5.5v13l8.5-6.5z" fill="currentColor" stroke="none" /><path d="M18 5.5v13" stroke-width="2" /></symbol>
+      <symbol id="i-reset" viewBox="0 0 24 24"><path d="M4.5 9A8 8 0 1 1 4 14" /><path d="M4.5 4v5h5" /></symbol>
+      <symbol id="i-fit" viewBox="0 0 24 24"><path d="M4 9V5.8A1.8 1.8 0 0 1 5.8 4H9M15 4h3.2A1.8 1.8 0 0 1 20 5.8V9M20 15v3.2a1.8 1.8 0 0 1-1.8 1.8H15M9 20H5.8A1.8 1.8 0 0 1 4 18.2V15" /><circle cx="12" cy="12" r="2.6" /></symbol>
+      <symbol id="i-search" viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="6.5" /><path d="m15.4 15.4 4.1 4.1" /></symbol>
+      <symbol id="i-close" viewBox="0 0 24 24"><path d="m6 6 12 12M18 6 6 18" /></symbol>
+      <symbol id="i-chevron" viewBox="0 0 24 24"><path d="m9 6 6 6-6 6" /></symbol>
+      <symbol id="i-chevron-down" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6" /></symbol>
+      <symbol id="i-warning" viewBox="0 0 24 24"><path d="M12 3.6 21 20H3z" /><path d="M12 9.5v4.8M12 17.4h.01" /></symbol>
+      <symbol id="i-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" /><path d="M12 11v5.5M12 7.6h.01" /></symbol>
+      <symbol id="i-cube" viewBox="0 0 24 24"><path d="m12 3 8 4.5v9L12 21l-8-4.5v-9z" /><path d="m4 7.5 8 4.5 8-4.5M12 12v9" /></symbol>
+      <symbol id="i-link" viewBox="0 0 24 24"><path d="M10 14a4.2 4.2 0 0 0 5.9 0l2.6-2.6a4.2 4.2 0 0 0-5.9-5.9L11.2 6.9" /><path d="M14 10a4.2 4.2 0 0 0-5.9 0l-2.6 2.6a4.2 4.2 0 0 0 5.9 5.9l1.4-1.4" /></symbol>
+      <symbol id="i-code" viewBox="0 0 24 24"><path d="m8.5 8-4 4 4 4M15.5 8l4 4-4 4M13.5 5l-3 14" /></symbol>
+      <symbol id="i-layers" viewBox="0 0 24 24"><path d="m12 3.5 8.5 4.2L12 12 3.5 7.7z" /><path d="m4.5 12 7.5 3.7 7.5-3.7M4.5 16.3l7.5 3.7 7.5-3.7" /></symbol>
+      <symbol id="i-grid" viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="1.5" /><path d="M4 9.3h16M4 14.7h16M9.3 4v16M14.7 4v16" /></symbol>
+      <symbol id="i-tag" viewBox="0 0 24 24"><path d="m12.6 3.6 7.8.1.1 7.8-8.7 8.7-8-8z" /><circle cx="16.4" cy="7.6" r="1.2" /></symbol>
+      <symbol id="i-eye" viewBox="0 0 24 24"><path d="M2.8 12S6.2 5.8 12 5.8 21.2 12 21.2 12 17.8 18.2 12 18.2 2.8 12 2.8 12Z" /><circle cx="12" cy="12" r="3" /></symbol>
+      <symbol id="i-folder" viewBox="0 0 24 24"><path d="M3.5 7.5A1.5 1.5 0 0 1 5 6h4l2 2.5h8a1.5 1.5 0 0 1 1.5 1.5v8A1.5 1.5 0 0 1 19 19.5H5A1.5 1.5 0 0 1 3.5 18z" /></symbol>
+      <symbol id="i-bolt" viewBox="0 0 24 24"><path d="M13.5 2.8 5.5 13h6l-1 8.2 8-10.2h-6z" /></symbol>
+      <symbol id="i-target" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5" /><circle cx="12" cy="12" r="4.5" /><circle cx="12" cy="12" r="1" fill="currentColor" stroke="none" /></symbol>
+      <symbol id="i-check" viewBox="0 0 24 24"><path d="m4.5 12.5 5 5 10-11" /></symbol>
+      <symbol id="i-arrow-right" viewBox="0 0 24 24"><path d="M4 12h15M13.5 6.5 20 12l-6.5 5.5" /></symbol>
+      <symbol id="i-expand" viewBox="0 0 24 24"><path d="M9 4H4v5M15 4h5v5M20 15v5h-5M4 15v5h5" /></symbol>
+      <symbol id="i-spark" viewBox="0 0 24 24"><path d="M12 3v4M12 17v4M3 12h4M17 12h4M5.6 5.6l2.8 2.8M15.6 15.6l2.8 2.8M18.4 5.6l-2.8 2.8M8.4 15.6l-2.8 2.8" /></symbol>
+      <symbol id="i-panel-left" viewBox="0 0 24 24"><rect x="3.5" y="4.5" width="17" height="15" rx="2" /><path d="M9.5 4.5v15" /></symbol>
+      <symbol id="i-panel-right" viewBox="0 0 24 24"><rect x="3.5" y="4.5" width="17" height="15" rx="2" /><path d="M14.5 4.5v15" /></symbol>
+      <symbol id="i-table" viewBox="0 0 24 24"><rect x="3.5" y="4.5" width="17" height="15" rx="2" /><path d="M3.5 9.5h17M9.5 4.5v15M15.5 4.5v15" /></symbol>
+      <symbol id="i-download" viewBox="0 0 24 24"><path d="M12 4v11m0 0 4-4m-4 4-4-4" /><path d="M4 16v2.5A1.5 1.5 0 0 0 5.5 20h13a1.5 1.5 0 0 0 1.5-1.5V16" /></symbol>
+      <symbol id="i-copy" viewBox="0 0 24 24"><rect x="8" y="8" width="11" height="11" rx="2" /><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2" /></symbol>
+    </defs>
+  </svg>
+
+  <div id="app" class="app">
+    <header class="topbar">
+      <div class="brand">
+        <span class="brand-glow" aria-hidden="true"></span>
+        <svg class="brand-mark" viewBox="0 0 40 40" aria-hidden="true">
+          <defs>
+            <linearGradient id="prismA" x1="4" y1="34" x2="37" y2="5" gradientUnits="userSpaceOnUse">
+              <stop offset="0" stop-color="#22d3ee" /><stop offset=".55" stop-color="#60a5fa" /><stop offset="1" stop-color="#c084fc" />
+            </linearGradient>
+            <linearGradient id="prismFaceL" x1="7" y1="34" x2="22" y2="8" gradientUnits="userSpaceOnUse">
+              <stop offset="0" stop-color="#0ea5e9" stop-opacity=".85" /><stop offset="1" stop-color="#67e8f9" stop-opacity=".35" />
+            </linearGradient>
+            <linearGradient id="prismFaceR" x1="20" y1="7" x2="35" y2="34" gradientUnits="userSpaceOnUse">
+              <stop offset="0" stop-color="#a78bfa" stop-opacity=".9" /><stop offset="1" stop-color="#f472b6" stop-opacity=".3" />
+            </linearGradient>
+          </defs>
+          <polygon points="20,3.5 36,34.5 4,34.5" fill="rgba(56,189,248,.08)" stroke="url(#prismA)" stroke-width="1.5" stroke-linejoin="round" />
+          <polygon points="20,3.5 20,28.5 4,34.5" fill="url(#prismFaceL)" opacity=".85" />
+          <polygon points="20,3.5 36,34.5 20,28.5" fill="url(#prismFaceR)" opacity=".85" />
+          <path d="M20 29v5.2" stroke="#e0f2fe" stroke-width="1" opacity=".5" />
+          <path d="M20 7 13 27M20 7l7 20" stroke="#e0f2fe" stroke-width=".65" opacity=".35" />
+        </svg>
+        <div class="brand-text">
+          <span class="brand-name">NetPrism</span>
+          <span class="brand-sub">棱镜 · 3D 神经网络透视</span>
+        </div>
+      </div>
+
+      <span class="top-divider" aria-hidden="true"></span>
+
+      <div class="model-block">
+        <div class="model-title-row">
+          <h1 id="model-title" class="model-title">初始化中</h1>
+          <span id="framework-badge" class="framework-badge" hidden></span>
+          <span id="mode-badge" class="mode-badge" hidden></span>
+        </div>
+        <div id="model-subtitle" class="model-subtitle">连接解析服务 · 读取模型索引</div>
+      </div>
+
+      <div class="top-actions">
+        <div class="model-switch">
+          <svg class="icon model-switch-icon" aria-hidden="true"><use href="#i-layers" /></svg>
+          <select id="model-select" aria-label="切换模型" disabled>
+            <option>暂无模型</option>
+          </select>
+          <svg class="icon model-switch-chevron" aria-hidden="true"><use href="#i-chevron-down" /></svg>
+        </div>
+        <span id="source-badge" class="source-badge" data-source="demo">
+          <span class="source-dot" aria-hidden="true"></span>
+          <span class="source-text">演示数据</span>
+        </span>
+        <button id="algo-toggle" class="btn btn-algo" type="button" aria-pressed="false" title="算法理解面板 (A)" disabled>
+          <svg class="icon" aria-hidden="true"><use href="#i-spark" /></svg>
+          <span class="algo-toggle-label">算法</span>
+        </button>
+        <button id="table-toggle" class="btn btn-table" type="button" aria-pressed="false" title="表格视图 (T)" disabled>
+          <svg class="icon" aria-hidden="true"><use href="#i-table" /></svg>
+          <span class="table-toggle-label">表格</span>
+        </button>
+        <button id="upload-btn" class="btn btn-upload" type="button" title="选择一个装满 .py 的文件夹（静态解析，不执行代码）">
+          <svg class="icon" aria-hidden="true"><use href="#i-upload" /></svg>
+          <span class="upload-label">上传文件夹</span>
+        </button>
+        <button id="help-btn" class="icon-btn" type="button" title="快捷键与帮助 (?)" aria-label="快捷键与帮助">
+          <svg class="icon" aria-hidden="true"><use href="#i-help" /></svg>
+        </button>
+      </div>
+      <div class="top-progress" id="top-progress" aria-hidden="true"></div>
+    </header>
+
+    <main class="layout">
+      <aside id="left-panel" class="panel panel-left" aria-label="模型摘要与层列表">
+        <div class="panel-scroll">
+          <div id="summary" class="summary-slot"></div>
+          <div class="search-wrap">
+            <svg class="icon search-icon" aria-hidden="true"><use href="#i-search" /></svg>
+            <input id="layer-search" class="search-input" type="search" placeholder="搜索层 / op / 分组…" autocomplete="off" spellcheck="false" aria-label="搜索层" />
+            <button id="search-clear" class="search-clear" type="button" aria-label="清空搜索" hidden>
+              <svg class="icon" aria-hidden="true"><use href="#i-close" /></svg>
+            </button>
+            <kbd class="search-kbd">/</kbd>
+          </div>
+          <div class="section-head">
+            <span class="section-title"><svg class="icon" aria-hidden="true"><use href="#i-layers" /></svg>层列表</span>
+            <span id="tree-count" class="section-meta">—</span>
+          </div>
+          <div id="layer-tree" class="layer-tree" role="tree" aria-label="层列表"></div>
+          <div class="panel-foot">
+            <svg class="icon" aria-hidden="true"><use href="#i-code" /></svg>
+            静态解析 · 不执行代码
+            <span class="panel-foot-dot"></span>
+            graph schema v1.0 · v2 指标
+          </div>
+        </div>
+      </aside>
+
+      <section id="stage" class="stage" aria-label="3D 模型场景">
+        <div id="viewport" class="viewport"></div>
+
+        <div id="onboarding-hint" class="onboarding-hint">
+          <span class="hint-grip" aria-hidden="true">✦</span>
+          拖拽旋转 <i></i> 滚轮缩放 <i></i> 悬停查看 <i></i> 双击聚焦
+        </div>
+
+        <div class="stage-top-left">
+          <div id="stage-meta" class="stage-meta">
+            <span class="stage-meta-label">执行顺序</span>
+            <span class="stage-meta-arrow" aria-hidden="true">→</span>
+          </div>
+          <div id="big-badge" class="big-badge" hidden>
+            <svg class="icon" aria-hidden="true"><use href="#i-bolt" /></svg>
+            <span>大模型模式</span>
+          </div>
+        </div>
+
+        <div id="flow-hud" class="flow-hud" hidden>
+          <span class="flow-dot" aria-hidden="true"></span>
+          <div class="flow-text">
+            <span id="flow-label" class="flow-label">数据流待命</span>
+            <span id="flow-count" class="flow-count">0 / 0</span>
+          </div>
+          <div class="flow-track"><span id="flow-fill" class="flow-fill"></span></div>
+        </div>
+
+        <div class="edge-toggles" aria-hidden="false">
+          <button id="toggle-left" class="edge-toggle edge-toggle-left" type="button" title="收起 / 展开模型面板" aria-label="收起或展开模型面板">
+            <svg class="icon" aria-hidden="true"><use href="#i-chevron" /></svg>
+          </button>
+          <button id="toggle-right" class="edge-toggle edge-toggle-right" type="button" title="收起 / 展开详情面板" aria-label="收起或展开详情面板">
+            <svg class="icon" aria-hidden="true"><use href="#i-chevron" /></svg>
+          </button>
+        </div>
+
+        <div class="axis-hint" aria-hidden="true">
+          <span class="axis-line"></span>
+          <span>执行方向</span>
+          <svg class="icon" aria-hidden="true"><use href="#i-arrow-right" /></svg>
+        </div>
+
+        <div id="bottombar" class="bottombar">
+          <div class="bb-group">
+            <button id="play-btn" class="bb-btn bb-play" type="button" data-action="play" title="播放 / 暂停数据流 (空格)">
+              <svg class="icon bb-play-icon" aria-hidden="true"><use href="#i-play" /></svg>
+              <span class="bb-label">播放数据流</span>
+            </button>
+            <button class="bb-btn bb-icon-btn" type="button" data-action="step" title="单步前进 (→)" aria-label="单步前进">
+              <svg class="icon" aria-hidden="true"><use href="#i-step" /></svg>
+            </button>
+          </div>
+          <span class="bb-sep" aria-hidden="true"></span>
+          <div class="bb-group bb-toggles">
+            <button class="bb-toggle" type="button" data-toggle="kernels" aria-pressed="true" title="显示 / 隐藏卷积核 (K)">
+              <span class="bb-toggle-dot"></span><span class="bb-label">卷积核</span>
+            </button>
+            <button class="bb-toggle" type="button" data-toggle="groups" aria-pressed="true" title="显示 / 隐藏分组框 (G)">
+              <span class="bb-toggle-dot"></span><span class="bb-label">分组</span>
+            </button>
+            <button class="bb-toggle" type="button" data-toggle="labels" aria-pressed="true" title="显示 / 隐藏层标签 (L)">
+              <span class="bb-toggle-dot"></span><span class="bb-label">标签</span>
+            </button>
+            <button class="bb-toggle" type="button" data-toggle="allLabels" aria-pressed="false" title="一键显示全部层标签 (Shift+A)">
+              <span class="bb-toggle-dot"></span><span class="bb-label">全部标签</span>
+            </button>
+            <button class="bb-toggle" type="button" data-toggle="edges" aria-pressed="true" title="显示 / 隐藏连线 (E)">
+              <span class="bb-toggle-dot"></span><span class="bb-label">连线</span>
+            </button>
+          </div>
+          <span class="bb-sep" aria-hidden="true"></span>
+          <div class="bb-group">
+            <button class="bb-btn" type="button" data-action="reset" title="重置视角并取消选中 (R)">
+              <svg class="icon" aria-hidden="true"><use href="#i-reset" /></svg>
+              <span class="bb-label">重置视角</span>
+            </button>
+            <button class="bb-btn" type="button" data-action="fit" title="适应窗口 (F)">
+              <svg class="icon" aria-hidden="true"><use href="#i-fit" /></svg>
+              <span class="bb-label">适应窗口</span>
+            </button>
+          </div>
+        </div>
+
+        <div id="drop-overlay" class="drop-overlay" hidden>
+          <div class="drop-card">
+            <div class="drop-icon"><svg class="icon" aria-hidden="true"><use href="#i-folder" /></svg></div>
+            <h2>松开以解析模型文件夹</h2>
+            <p>只读取 <code>.py</code> 文件，静态解析，不执行代码</p>
+          </div>
+        </div>
+
+        <section id="table-view" class="table-view" hidden aria-label="层表格视图">
+          <div class="table-panel">
+            <header class="table-head">
+              <div class="table-heading">
+                <span class="table-kicker">LAYER TABLE</span>
+                <div class="table-title-row">
+                  <h2>层表格</h2>
+                  <span id="table-count" class="table-count">—</span>
+                  <span id="table-framework" class="table-framework" hidden></span>
+                </div>
+              </div>
+              <div class="table-tools">
+                <label class="table-search">
+                  <svg class="icon" aria-hidden="true"><use href="#i-search" /></svg>
+                  <input id="table-search" type="search" placeholder="搜索层 / op / kind / 分组…" autocomplete="off" spellcheck="false" aria-label="搜索表格层" />
+                </label>
+                <button id="table-export" class="btn table-export" type="button" title="按当前筛选与排序导出 CSV">
+                  <svg class="icon" aria-hidden="true"><use href="#i-download" /></svg>
+                  <span>导出 CSV</span>
+                </button>
+                <button id="table-close" class="icon-btn" type="button" title="关闭表格 (Esc)" aria-label="关闭表格">
+                  <svg class="icon" aria-hidden="true"><use href="#i-close" /></svg>
+                </button>
+              </div>
+            </header>
+            <div class="table-scroll">
+              <table class="layer-table">
+                <thead>
+                  <tr>
+                    <th class="sortable" data-sort="name" aria-sort="none" tabindex="0">层名<span class="sort-arrow">↕</span></th>
+                    <th class="sortable" data-sort="op" aria-sort="none" tabindex="0">算子<span class="sort-arrow">↕</span></th>
+                    <th class="sortable" data-sort="kind" aria-sort="none" tabindex="0">Kind<span class="sort-arrow">↕</span></th>
+                    <th class="sortable" data-sort="in" aria-sort="none" tabindex="0">IN<span class="sort-arrow">↕</span></th>
+                    <th class="sortable" data-sort="out" aria-sort="none" tabindex="0">OUT<span class="sort-arrow">↕</span></th>
+                    <th class="sortable is-num" data-sort="params" aria-sort="none" tabindex="0">参数量<span class="sort-arrow">↕</span></th>
+                    <th class="sortable is-num" data-sort="flops" aria-sort="none" tabindex="0">FLOPs<span class="sort-arrow">↕</span></th>
+                    <th class="sortable is-num" data-sort="activation" aria-sort="none" tabindex="0">激活显存<span class="sort-arrow">↕</span></th>
+                    <th class="sortable is-num" data-sort="rf" aria-sort="none" tabindex="0">感受野<span class="sort-arrow">↕</span></th>
+                    <th class="sortable" data-sort="group" aria-sort="none" tabindex="0">分组<span class="sort-arrow">↕</span></th>
+                  </tr>
+                </thead>
+                <tbody id="table-body"></tbody>
+              </table>
+              <div id="table-empty" class="table-empty" hidden>
+                <svg class="icon" aria-hidden="true"><use href="#i-search" /></svg>
+                <span>没有匹配的层</span>
+              </div>
+            </div>
+            <footer class="table-foot">
+              <span>点击列头排序 · 缺失指标显示 — · 支持 400+ 层</span>
+              <span id="table-foot-meta">—</span>
+            </footer>
+          </div>
+        </section>
+
+        <div id="state-overlay" class="state-overlay">
+          <div class="state-card state-loading">
+            <div class="prism-loader" aria-hidden="true">
+              <span class="pl-ring pl-ring-a"></span>
+              <span class="pl-ring pl-ring-b"></span>
+              <span class="pl-ring pl-ring-c"></span>
+              <span class="pl-core"></span>
+            </div>
+            <h2>正在启动 NetPrism</h2>
+            <p class="state-message">连接解析服务并读取模型索引…</p>
+          </div>
+        </div>
+
+        <div id="notice-panel" class="notice-panel" hidden></div>
+      </section>
+
+      <aside id="right-panel" class="panel panel-right" aria-label="层详情与图例">
+        <div class="panel-scroll">
+          <div class="section-head">
+            <span class="section-title"><svg class="icon" aria-hidden="true"><use href="#i-target" /></svg>层详情</span>
+            <span id="detail-meta" class="section-meta">单击层查看</span>
+          </div>
+          <div id="detail-panel" class="detail-slot"></div>
+
+          <div class="section-head legend-head">
+            <span class="section-title"><svg class="icon" aria-hidden="true"><use href="#i-tag" /></svg>图例与过滤</span>
+            <span id="legend-meta" class="section-meta">—</span>
+          </div>
+          <div id="legend-panel" class="legend-slot"></div>
+        </div>
+      </aside>
+
+      <section id="algo-view" class="algo-view" hidden aria-label="算法理解面板">
+        <div class="algo-panel">
+          <header class="algo-head">
+            <div class="algo-heading">
+              <span class="algo-kicker">ALGORITHM LENS</span>
+              <div class="algo-title-row">
+                <h2>算法理解</h2>
+                <span id="algo-model-name" class="algo-model-name">—</span>
+                <span class="algo-source-note">来自 graph.model.meta</span>
+              </div>
+            </div>
+            <div class="algo-head-actions">
+              <button id="algo-copy" class="btn algo-copy" type="button" title="复制前向伪代码" disabled>
+                <svg class="icon" aria-hidden="true"><use href="#i-copy" /></svg>
+                <span>复制伪代码</span>
+              </button>
+              <button id="algo-close" class="icon-btn" type="button" title="关闭算法面板 (Esc)" aria-label="关闭算法面板">
+                <svg class="icon" aria-hidden="true"><use href="#i-close" /></svg>
+              </button>
+            </div>
+          </header>
+
+          <div class="algo-body">
+            <aside class="algo-side">
+              <section id="algo-family" class="algo-family">
+                <div class="algo-empty">暂无算法信息</div>
+              </section>
+              <section class="algo-pattern-block">
+                <div class="algo-section-head">
+                  <div>
+                    <span class="algo-kicker">PATTERNS</span>
+                    <h3>识别模式</h3>
+                  </div>
+                  <span id="algo-pattern-count" class="algo-section-count">—</span>
+                </div>
+                <div id="algo-patterns" class="algo-patterns">
+                  <div class="algo-empty">暂无模式</div>
+                </div>
+              </section>
+            </aside>
+
+            <section class="algo-code-panel">
+              <div class="algo-code-head">
+                <div>
+                  <span class="algo-kicker">FORWARD PSEUDOCODE</span>
+                  <h3>前向伪代码</h3>
+                </div>
+                <span class="algo-code-badge">ASCII</span>
+              </div>
+              <pre id="algo-pseudocode" class="algo-code">暂无伪代码</pre>
+              <div class="algo-code-foot">由 model.meta.pseudocode 生成 · 只读展示，不执行模型代码</div>
+            </section>
+          </div>
+
+          <footer class="algo-foot">
+            <span>算法归类与公式来自 graph.meta，缺失字段不会伪造</span>
+            <span id="algo-foot-meta">—</span>
+          </footer>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <div id="tooltip" class="tooltip" role="tooltip" hidden></div>
+  <div id="toast-stack" class="toast-stack" aria-live="polite"></div>
+
+  <div id="help-modal" class="modal" hidden>
+    <div class="modal-backdrop" data-close-help></div>
+    <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="help-title">
+      <div class="modal-head">
+        <div>
+          <span class="modal-kicker">NETPRISM GUIDE</span>
+          <h2 id="help-title">交互与快捷键</h2>
+        </div>
+        <button class="icon-btn" type="button" data-close-help aria-label="关闭帮助">
+          <svg class="icon" aria-hidden="true"><use href="#i-close" /></svg>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="help-grid">
+          <section class="help-section">
+            <h3><svg class="icon" aria-hidden="true"><use href="#i-cube" /></svg>鼠标</h3>
+            <dl class="help-list">
+              <div><dt>左键拖拽</dt><dd>旋转视角</dd></div>
+              <div><dt>滚轮 / 双指捏合</dt><dd>缩放</dd></div>
+              <div><dt>右键拖拽 / 双指拖动</dt><dd>平移</dd></div>
+              <div><dt>悬停层 / 卷积核 / 连线</dt><dd>查看完整信息</dd></div>
+              <div><dt>单击层</dt><dd>选中并高亮上下游</dd></div>
+              <div><dt>双击层</dt><dd>聚焦该层</dd></div>
+              <div><dt>双击空白</dt><dd>复位视角</dd></div>
+            </dl>
+          </section>
+          <section class="help-section">
+            <h3><svg class="icon" aria-hidden="true"><use href="#i-bolt" /></svg>键盘</h3>
+            <dl class="help-list help-keys">
+              <div><dt><kbd>Space</kbd></dt><dd>播放 / 暂停数据流</dd></div>
+              <div><dt><kbd>→</kbd> <kbd>←</kbd></dt><dd>单步前进 / 后退</dd></div>
+              <div><dt><kbd>F</kbd></dt><dd>适应窗口</dd></div>
+              <div><dt><kbd>R</kbd></dt><dd>重置视角</dd></div>
+              <div><dt><kbd>L</kbd> <kbd>G</kbd> <kbd>K</kbd> <kbd>E</kbd></dt><dd>标签 / 分组 / 卷积核 / 连线</dd></div>
+              <div><dt><kbd>T</kbd></dt><dd>层表格视图</dd></div>
+              <div><dt><kbd>A</kbd></dt><dd>算法理解面板</dd></div>
+              <div><dt><kbd>Shift</kbd>+<kbd>A</kbd></dt><dd>一键显示全部层标签</dd></div>
+              <div><dt><kbd>/</kbd></dt><dd>搜索层</dd></div>
+              <div><dt><kbd>Esc</kbd></dt><dd>取消选中 / 关闭弹层</dd></div>
+            </dl>
+          </section>
+        </div>
+        <p class="help-note">
+          所有形状与参数量来自 <code>graph.json</code> 数据契约 v1.0。执行顺序沿 X 轴；
+          立方体尺寸代表输出张量，颜色代表算子 kind。算法家族、模式与伪代码来自
+          <code>model.meta</code>，层公式 / 语义来自 <code>node.meta</code>。上传文件夹时只做静态 AST 解析，不执行模型代码。
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <input id="file-input" type="file" webkitdirectory directory multiple hidden />
+  <noscript>
+    <div class="noscript">NetPrism 需要启用 JavaScript 与 WebGL 才能渲染 3D 场景。</div>
+  </noscript>
+
+  <script type="module" src="js/main.js"></script>
+</body>
+</html>

@@ -1,0 +1,689 @@
+{
+  "schemaVersion": "1.0",
+  "generator": {
+    "name": "netprism",
+    "version": "0.1.0"
+  },
+  "model": {
+    "name": "MLP",
+    "framework": "pytorch",
+    "className": "MLP",
+    "mode": "trace",
+    "source": {
+      "file": "samples/mlp.py",
+      "relPath": "mlp.py"
+    },
+    "inputSpec": [
+      {
+        "name": "x",
+        "shape": [
+          1,
+          64
+        ],
+        "dtype": "float32"
+      }
+    ],
+    "outputSpec": [
+      {
+        "name": "output",
+        "shape": [
+          1,
+          10
+        ],
+        "dtype": "float32"
+      }
+    ],
+    "totalParams": 17226,
+    "trainableParams": 17226,
+    "totalFlops": 34442,
+    "flopsApprox": false,
+    "numLayers": 6,
+    "warnings": [],
+    "metrics": {
+      "paramBytes": 68904,
+      "activationBytes": 2384,
+      "peakActivationBytes": 1024,
+      "maxReceptiveField": 1,
+      "macs": 17221
+    },
+    "meta": {
+      "family": "mlp",
+      "familyLabel": "MLP",
+      "familyConfidence": 0.8,
+      "confidence": 0.8,
+      "algorithmTags": [
+        "mlp",
+        "ffn",
+        "expansion",
+        "classifier_head",
+        "linear"
+      ],
+      "families": [
+        {
+          "id": "mlp",
+          "label": "MLP",
+          "confidence": 0.8,
+          "evidence": [
+            "名称/类名命中别名 'mlp'",
+            "必需组件 ffn: Feed-Forward Network",
+            "必需组件全部满足",
+            "可选组件 classification_head: Classifier Head",
+            "签名算子匹配 3/6"
+          ]
+        },
+        {
+          "id": "alexnet",
+          "label": "AlexNet",
+          "confidence": 0.32,
+          "evidence": [
+            "必需组件 classification_head: Classifier Head",
+            "签名算子匹配 3/5"
+          ]
+        },
+        {
+          "id": "lenet",
+          "label": "LeNet-5",
+          "confidence": 0.3,
+          "evidence": [
+            "必需组件 classification_head: Classifier Head",
+            "签名算子匹配 2/4"
+          ]
+        }
+      ],
+      "patterns": [
+        {
+          "kind": "ffn",
+          "label": "Feed-Forward Network",
+          "formula": "y = W2·Act(W1·x)",
+          "nodeIds": [
+            "n1",
+            "n2",
+            "n3",
+            "n4"
+          ],
+          "groupIds": [
+            "g1"
+          ],
+          "confidence": 0.9,
+          "evidence": [
+            "Linear 64→128 → 激活 → Linear 128→64",
+            "隐藏维扩张 2.0×"
+          ],
+          "tags": [
+            "ffn",
+            "expansion"
+          ],
+          "id": "p1"
+        },
+        {
+          "kind": "classifier_head",
+          "label": "Classifier Head",
+          "formula": "logits = W·x + b",
+          "nodeIds": [
+            "n6"
+          ],
+          "groupIds": [
+            "g1"
+          ],
+          "confidence": 0.85,
+          "evidence": [
+            "末端 Linear 输出 10 维 logits"
+          ],
+          "tags": [
+            "classifier_head",
+            "linear"
+          ],
+          "id": "p2"
+        }
+      ],
+      "pseudocode": [
+        "x = Input(1, 64)",
+        "x = Linear(128)(x)   # -> (1, 128)",
+        "x = GELU()(x)   # -> (1, 128)",
+        "x = Dropout(0.2)(x)   # -> (1, 128)",
+        "x = Linear(64)(x)   # -> (1, 64)",
+        "x = ReLU()(x)   # -> (1, 64)",
+        "logits = Linear(10)(x)   # -> (1, 10)",
+        "return logits"
+      ],
+      "familyEvidence": [
+        "名称/类名命中别名 'mlp'",
+        "必需组件 ffn: Feed-Forward Network",
+        "必需组件全部满足",
+        "可选组件 classification_head: Classifier Head",
+        "签名算子匹配 3/6"
+      ]
+    }
+  },
+  "nodes": [
+    {
+      "id": "n0",
+      "name": "x",
+      "op": "Input",
+      "kind": "input",
+      "modulePath": "",
+      "depth": 0,
+      "inShapes": [],
+      "outShapes": [
+        [
+          1,
+          64
+        ]
+      ],
+      "params": {},
+      "numParams": 0,
+      "flops": 0,
+      "tags": [
+        "boundary"
+      ],
+      "groupId": null,
+      "source": null,
+      "notes": [],
+      "metrics": {
+        "activationBytes": 256,
+        "receptiveField": 1,
+        "macs": 0
+      },
+      "meta": {
+        "formula": "x = Input(1, 64)",
+        "semantic": "网络输入张量",
+        "axes": "N×F",
+        "tags": [
+          "boundary",
+          "input"
+        ]
+      }
+    },
+    {
+      "id": "n1",
+      "name": "net.0",
+      "op": "Linear",
+      "kind": "linear",
+      "modulePath": "net.0",
+      "depth": 1,
+      "inShapes": [
+        [
+          1,
+          64
+        ]
+      ],
+      "outShapes": [
+        [
+          1,
+          128
+        ]
+      ],
+      "params": {
+        "inFeatures": 64,
+        "outFeatures": 128,
+        "bias": true
+      },
+      "numParams": 8320,
+      "flops": 16512,
+      "tags": [
+        "weighted"
+      ],
+      "groupId": "g1",
+      "source": {
+        "file": "samples/mlp.py",
+        "line": 25,
+        "code": "nn.Linear(in_features, hidden)"
+      },
+      "notes": [],
+      "metrics": {
+        "activationBytes": 512,
+        "receptiveField": 1,
+        "macs": 8256
+      },
+      "meta": {
+        "formula": "y[..., o] = Σ_i x[..., i]·W[o, i] + b[o]  (in=64→out=128)",
+        "semantic": "全连接通道混合（特征维线性变换）",
+        "axes": "N×F / NLC",
+        "tags": [
+          "linear",
+          "channel_mix"
+        ]
+      }
+    },
+    {
+      "id": "n2",
+      "name": "net.1",
+      "op": "GELU",
+      "kind": "activation",
+      "modulePath": "net.1",
+      "depth": 1,
+      "inShapes": [
+        [
+          1,
+          128
+        ]
+      ],
+      "outShapes": [
+        [
+          1,
+          128
+        ]
+      ],
+      "params": {},
+      "numParams": 0,
+      "flops": 128,
+      "tags": [
+        "elementwise"
+      ],
+      "groupId": "g1",
+      "source": {
+        "file": "samples/mlp.py",
+        "line": 26,
+        "code": "nn.GELU()"
+      },
+      "notes": [],
+      "metrics": {
+        "activationBytes": 512,
+        "receptiveField": 1,
+        "macs": 64
+      },
+      "meta": {
+        "formula": "y = x·Φ(x)",
+        "semantic": "GELU：高斯误差线性单元",
+        "axes": "逐元素（任意轴）",
+        "tags": [
+          "activation",
+          "gelu"
+        ]
+      }
+    },
+    {
+      "id": "n3",
+      "name": "net.2",
+      "op": "Dropout",
+      "kind": "dropout",
+      "modulePath": "net.2",
+      "depth": 1,
+      "inShapes": [
+        [
+          1,
+          128
+        ]
+      ],
+      "outShapes": [
+        [
+          1,
+          128
+        ]
+      ],
+      "params": {
+        "p": 0.2
+      },
+      "numParams": 0,
+      "flops": 0,
+      "tags": [
+        "regularization"
+      ],
+      "groupId": "g1",
+      "source": {
+        "file": "samples/mlp.py",
+        "line": 27,
+        "code": "nn.Dropout(dropout)"
+      },
+      "notes": [],
+      "metrics": {
+        "activationBytes": 512,
+        "receptiveField": 1,
+        "macs": 0
+      },
+      "meta": {
+        "formula": "y = x ⊙ mask/(1-p),  p=0.2",
+        "semantic": "训练期随机失活（推理期恒等）",
+        "axes": null,
+        "tags": [
+          "dropout",
+          "regularization"
+        ]
+      }
+    },
+    {
+      "id": "n4",
+      "name": "net.3",
+      "op": "Linear",
+      "kind": "linear",
+      "modulePath": "net.3",
+      "depth": 1,
+      "inShapes": [
+        [
+          1,
+          128
+        ]
+      ],
+      "outShapes": [
+        [
+          1,
+          64
+        ]
+      ],
+      "params": {
+        "inFeatures": 128,
+        "outFeatures": 64,
+        "bias": true
+      },
+      "numParams": 8256,
+      "flops": 16448,
+      "tags": [
+        "weighted"
+      ],
+      "groupId": "g1",
+      "source": {
+        "file": "samples/mlp.py",
+        "line": 28,
+        "code": "nn.Linear(hidden, hidden // 2)"
+      },
+      "notes": [],
+      "metrics": {
+        "activationBytes": 256,
+        "receptiveField": 1,
+        "macs": 8224
+      },
+      "meta": {
+        "formula": "y[..., o] = Σ_i x[..., i]·W[o, i] + b[o]  (in=128→out=64)",
+        "semantic": "全连接通道混合（特征维线性变换）",
+        "axes": "N×F / NLC",
+        "tags": [
+          "linear",
+          "channel_mix"
+        ]
+      }
+    },
+    {
+      "id": "n5",
+      "name": "net.4",
+      "op": "ReLU",
+      "kind": "activation",
+      "modulePath": "net.4",
+      "depth": 1,
+      "inShapes": [
+        [
+          1,
+          64
+        ]
+      ],
+      "outShapes": [
+        [
+          1,
+          64
+        ]
+      ],
+      "params": {
+        "inplace": true
+      },
+      "numParams": 0,
+      "flops": 64,
+      "tags": [
+        "elementwise"
+      ],
+      "groupId": "g1",
+      "source": {
+        "file": "samples/mlp.py",
+        "line": 29,
+        "code": "nn.ReLU(inplace=True)"
+      },
+      "notes": [],
+      "metrics": {
+        "activationBytes": 256,
+        "receptiveField": 1,
+        "macs": 32
+      },
+      "meta": {
+        "formula": "y = max(x, 0)",
+        "semantic": "逐元素 ReLU 非线性（负值截断）",
+        "axes": "逐元素（任意轴）",
+        "tags": [
+          "activation",
+          "relu"
+        ]
+      }
+    },
+    {
+      "id": "n6",
+      "name": "net.5",
+      "op": "Linear",
+      "kind": "linear",
+      "modulePath": "net.5",
+      "depth": 1,
+      "inShapes": [
+        [
+          1,
+          64
+        ]
+      ],
+      "outShapes": [
+        [
+          1,
+          10
+        ]
+      ],
+      "params": {
+        "inFeatures": 64,
+        "outFeatures": 10,
+        "bias": true
+      },
+      "numParams": 650,
+      "flops": 1290,
+      "tags": [
+        "weighted"
+      ],
+      "groupId": "g1",
+      "source": {
+        "file": "samples/mlp.py",
+        "line": 30,
+        "code": "nn.Linear(hidden // 2, num_classes)"
+      },
+      "notes": [],
+      "metrics": {
+        "activationBytes": 40,
+        "receptiveField": 1,
+        "macs": 645
+      },
+      "meta": {
+        "formula": "y[..., o] = Σ_i x[..., i]·W[o, i] + b[o]  (in=64→out=10)",
+        "semantic": "全连接通道混合（特征维线性变换）",
+        "axes": "N×F / NLC",
+        "tags": [
+          "linear",
+          "channel_mix"
+        ]
+      }
+    },
+    {
+      "id": "n7",
+      "name": "output",
+      "op": "Output",
+      "kind": "output",
+      "modulePath": "",
+      "depth": 0,
+      "inShapes": [
+        [
+          1,
+          10
+        ]
+      ],
+      "outShapes": [
+        [
+          1,
+          10
+        ]
+      ],
+      "params": {},
+      "numParams": 0,
+      "flops": 0,
+      "tags": [
+        "boundary"
+      ],
+      "groupId": null,
+      "source": null,
+      "notes": [],
+      "metrics": {
+        "activationBytes": 40,
+        "receptiveField": 1,
+        "macs": 0
+      },
+      "meta": {
+        "formula": "y = Output((1, 10))",
+        "semantic": "网络输出张量",
+        "axes": "N×F",
+        "tags": [
+          "boundary",
+          "output"
+        ]
+      }
+    }
+  ],
+  "edges": [
+    {
+      "id": "e0",
+      "source": "n0",
+      "target": "n1",
+      "kind": "data",
+      "shapes": [
+        [
+          1,
+          64
+        ]
+      ],
+      "label": ""
+    },
+    {
+      "id": "e1",
+      "source": "n1",
+      "target": "n2",
+      "kind": "data",
+      "shapes": [
+        [
+          1,
+          128
+        ]
+      ],
+      "label": ""
+    },
+    {
+      "id": "e2",
+      "source": "n2",
+      "target": "n3",
+      "kind": "data",
+      "shapes": [
+        [
+          1,
+          128
+        ]
+      ],
+      "label": ""
+    },
+    {
+      "id": "e3",
+      "source": "n3",
+      "target": "n4",
+      "kind": "data",
+      "shapes": [
+        [
+          1,
+          128
+        ]
+      ],
+      "label": ""
+    },
+    {
+      "id": "e4",
+      "source": "n4",
+      "target": "n5",
+      "kind": "data",
+      "shapes": [
+        [
+          1,
+          64
+        ]
+      ],
+      "label": ""
+    },
+    {
+      "id": "e5",
+      "source": "n5",
+      "target": "n6",
+      "kind": "data",
+      "shapes": [
+        [
+          1,
+          64
+        ]
+      ],
+      "label": ""
+    },
+    {
+      "id": "e6",
+      "source": "n6",
+      "target": "n7",
+      "kind": "data",
+      "shapes": [
+        [
+          1,
+          10
+        ]
+      ],
+      "label": ""
+    }
+  ],
+  "groups": [
+    {
+      "id": "g0",
+      "name": "MLP",
+      "label": "MLP",
+      "kind": "model",
+      "parentId": null,
+      "depth": 0,
+      "nodeIds": [],
+      "childGroupIds": [
+        "g1"
+      ],
+      "numParams": 17226,
+      "flops": 34442,
+      "source": {
+        "line": 13,
+        "code": "class MLP(nn.Module): \"\"\"Three linear layers with GELU/ReLU activations and dropout.\"\"\" def __init__( self, in_features: int = 64, hidden: int = 128, num_classes: int = 10, dropout: float = 0.2, ) -> ",
+        "file": "samples/mlp.py"
+      }
+    },
+    {
+      "id": "g1",
+      "name": "net",
+      "label": "MLP (2)",
+      "kind": "mlp",
+      "parentId": "g0",
+      "depth": 1,
+      "nodeIds": [
+        "n1",
+        "n2",
+        "n3",
+        "n4",
+        "n5",
+        "n6"
+      ],
+      "childGroupIds": [],
+      "numParams": 17226,
+      "flops": 34442,
+      "source": {
+        "line": 13,
+        "code": "class MLP(nn.Module): \"\"\"Three linear layers with GELU/ReLU activations and dropout.\"\"\" def __init__( self, in_features: int = 64, hidden: int = 128, num_classes: int = 10, dropout: float = 0.2, ) -> ",
+        "file": "samples/mlp.py"
+      },
+      "meta": {
+        "pattern": {
+          "kind": "ffn",
+          "label": "Feed-Forward Network",
+          "formula": "y = W2·Act(W1·x)",
+          "confidence": 0.9,
+          "tags": [
+            "ffn",
+            "expansion"
+          ]
+        }
+      }
+    }
+  ]
+}
