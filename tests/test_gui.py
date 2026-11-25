@@ -17,8 +17,8 @@ import pytest
 
 pytest.importorskip("PySide6")
 
-from PySide6.QtCore import QPoint, Qt  # noqa: E402
-from PySide6.QtGui import QGuiApplication, QImage  # noqa: E402
+from PySide6.QtCore import QPoint, QPointF, Qt  # noqa: E402
+from PySide6.QtGui import QGuiApplication, QImage, QWheelEvent  # noqa: E402
 from PySide6.QtTest import QTest  # noqa: E402
 from PySide6.QtWidgets import QApplication  # noqa: E402
 
@@ -148,6 +148,136 @@ def test_3d_drag_rotates_and_double_click_resets(app, window):
     _process(app)
     assert abs(view._yaw - DEFAULT_YAW) < 1e-6
     assert abs(view._pitch - DEFAULT_PITCH) < 1e-6
+
+
+def test_3d_drag_repaints_live_and_keeps_model_in_frame(app):
+    """A real drag must repaint continuously and never fling the model out.
+
+    Regression for the 15:39 build: a single-shot timer was re-armed on every
+    mouse-move, so a steady drag never repainted, and the model then jumped to a
+    wildly different pose on release (users reported "甩动/突然放大/跑出视口").
+    """
+    from netprism.gui.graph_loader import load_demo_payload
+
+    graph = load_demo_payload()["graphs"]["cnn_vgg__vggmini"]
+    view = Graph3DView()
+    view.resize(1100, 800)
+    view.show()
+    view.set_graph(graph)
+    _process(app)
+
+    refreshes = {"n": 0}
+    original = Graph3DView._refresh_projection
+
+    def counting(self):
+        refreshes["n"] += 1
+        return original(self)
+
+    Graph3DView._refresh_projection = counting
+    try:
+        viewport = view.viewport()
+        start = QPoint(viewport.width() // 2, viewport.height() // 2)
+        QTest.mousePress(viewport, Qt.MouseButton.LeftButton, Qt.KeyboardModifier.NoModifier, start)
+        snapshots = []
+        for step in range(1, 41):
+            QTest.mouseMove(viewport, start + QPoint(10 * step, step // 4))
+            QTest.qWait(5)
+            if step in (5, 10, 20, 30, 40):
+                snapshots.append(
+                    (
+                        view._yaw,
+                        [item._faces[0][0][0].x() for item in view._node_items.values()][:6],
+                    )
+                )
+        QTest.mouseRelease(
+            viewport, Qt.MouseButton.LeftButton, Qt.KeyboardModifier.NoModifier,
+            start + QPoint(400, 10),
+        )
+        _process(app)
+        assert refreshes["n"] >= 8, f"drag repainted only {refreshes['n']} times"
+        # The picture really changed while the button was still down.
+        assert len({round(yaw, 6) for yaw, _points in snapshots}) == len(snapshots)
+        assert len({tuple(round(x, 3) for x in points) for _yaw, points in snapshots}) >= 3
+
+        # And the model stayed inside the viewport the whole time.
+        rect = view.scene().itemsBoundingRect()
+        top_left = view.mapFromScene(rect.topLeft())
+        bottom_right = view.mapFromScene(rect.bottomRight())
+        assert top_left.x() >= -2 and top_left.y() >= -2
+        assert bottom_right.x() <= viewport.width() + 2
+        assert bottom_right.y() <= viewport.height() + 2
+
+        # The model centre is pinned to the viewport centre.
+        origin = view.mapFromScene(QPointF(0.0, 0.0))
+        assert abs(origin.x() - viewport.width() / 2) <= 2
+        assert abs(origin.y() - viewport.height() / 2) <= 2
+    finally:
+        Graph3DView._refresh_projection = original
+        view.close()
+        view.deleteLater()
+
+
+def test_3d_rotation_never_zooms_in_past_default(app):
+    """Orbiting may zoom out to stay framed, but never past the loaded size."""
+    from netprism.gui.graph_loader import load_demo_payload
+
+    graph = load_demo_payload()["graphs"]["cnn_vgg__vggmini"]
+    view = Graph3DView()
+    view.resize(1100, 800)
+    view.show()
+    view.set_graph(graph)
+    _process(app)
+    base_scale = view.transform().m11()
+    viewport = view.viewport()
+    for yaw in (DEFAULT_YAW, 0.0, 0.6, 1.5708, 2.4, 3.6, -2.0):
+        view._yaw = yaw
+        view._refresh_projection()
+        _process(app)
+        scale = view.transform().m11()
+        assert scale <= base_scale + 1e-6, f"yaw {yaw} zoomed in: {scale} > {base_scale}"
+        rect = view.scene().itemsBoundingRect()
+        top_left = view.mapFromScene(rect.topLeft())
+        bottom_right = view.mapFromScene(rect.bottomRight())
+        assert top_left.x() >= -2 and top_left.y() >= -2, f"yaw {yaw} clipped at top-left"
+        assert bottom_right.x() <= viewport.width() + 2, f"yaw {yaw} clipped at right"
+        assert bottom_right.y() <= viewport.height() + 2, f"yaw {yaw} clipped at bottom"
+    view.close()
+    view.deleteLater()
+
+
+def test_3d_wheel_zoom_is_smooth_and_reversible(app):
+    from netprism.gui.graph_loader import load_demo_payload
+
+    graph = load_demo_payload()["graphs"]["cnn_vgg__vggmini"]
+    view = Graph3DView()
+    view.resize(1100, 800)
+    view.show()
+    view.set_graph(graph)
+    _process(app)
+    viewport = view.viewport()
+
+    def wheel(delta: int) -> None:
+        pos = QPoint(320, 240)
+        event = QWheelEvent(
+            QPointF(pos), QPointF(view.mapToGlobal(pos)), QPoint(0, 0), QPoint(0, delta),
+            Qt.MouseButton.NoButton, Qt.KeyboardModifier.NoModifier,
+            Qt.ScrollPhase.NoScrollPhase, False,
+        )
+        QApplication.sendEvent(viewport, event)
+        _process(app)
+
+    before = view.transform().m11()
+    wheel(120)
+    once = view.transform().m11()
+    assert once > before
+    assert 1.05 < once / before < 1.25, once / before
+    origin = view.mapFromScene(QPointF(0.0, 0.0))
+    assert abs(origin.x() - viewport.width() / 2) <= 2
+    assert abs(origin.y() - viewport.height() / 2) <= 2
+    wheel(-120)
+    assert abs(view.transform().m11() - before) < 1e-6
+    view.close()
+    view.deleteLater()
 
 
 def test_open_path_background_worker(app, window):
@@ -340,6 +470,18 @@ def test_export_image_uses_presentation_angle_and_restores_view(app, window, tmp
     image = QImage(str(target))
     assert not image.isNull()
     assert (image.width(), image.height()) == (1920, 1080)
+    # The scene rect must be cropped to the projection: exporting against the
+    # live (rotation-invariant) rect would shrink the model into a small island.
+    background = image.pixelColor(2, 2)
+    sampled = 0
+    painted = 0
+    for y in range(0, image.height(), 6):
+        for x in range(0, image.width(), 6):
+            sampled += 1
+            color = image.pixelColor(x, y)
+            if abs(color.red() - background.red()) + abs(color.green() - background.green()) + abs(color.blue() - background.blue()) > 12:
+                painted += 1
+    assert painted / sampled > 0.10, f"export looks empty: {painted / sampled:.3f}"
     # camera angle is restored after the presentation export
     assert abs(view._yaw - before_yaw) < 1e-6
     assert abs(view._pitch - before_pitch) < 1e-6

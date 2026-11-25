@@ -8,6 +8,7 @@ set of edges and suppressing per-node labels above a threshold.
 from __future__ import annotations
 
 import math
+import time
 from pathlib import Path
 from typing import Any
 
@@ -22,6 +23,7 @@ from PySide6.QtGui import (
     QPainterPath,
     QPen,
     QPolygonF,
+    QTransform,
 )
 from PySide6.QtWidgets import QApplication, QGraphicsItem, QGraphicsPathItem, QGraphicsScene, QGraphicsView, QLabel, QToolTip
 
@@ -53,6 +55,25 @@ EXPORT_ANGLES = (
     (-0.30, 0.36),
 )
 EXPORT_ASPECT = 16.0 / 9.0
+
+#: Drag sensitivity (radians per pixel).  A 400 px drag is a ~126° turntable
+#: turn: the same order as desktop 3D viewers, but slow enough to aim.
+YAW_PER_PIXEL = 0.0055
+PITCH_PER_PIXEL = 0.0048
+PITCH_LIMIT = 1.15
+#: Live rotation repaint budget: at most one geometry refresh per frame.
+FRAME_INTERVAL = 1.0 / 60.0
+#: Wheel zoom factor applied per 120 units of angleDelta.
+ZOOM_FACTOR_120 = 1.14
+MIN_ZOOM = 0.10
+MAX_ZOOM = 12.0
+#: Pixels kept free around the projected model when auto-framing.
+FIT_MARGIN_X = 26.0
+FIT_MARGIN_Y = 32.0
+#: Padding added to group boxes around their member layers, in world units.
+GROUP_PAD_X = 0.52
+GROUP_PAD_Y = 0.32
+GROUP_PAD_Z = 0.32
 
 
 def _poly(points: list[QPointF]) -> QPolygonF:
@@ -132,6 +153,13 @@ class NodeItem(QGraphicsItem):
         path.addRect(self._bounds)
         return path
 
+    def refresh(self) -> None:
+        """Re-project the box for the current camera without rebuilding the scene."""
+        self.prepareGeometryChange()
+        self._compute()
+        self.setZValue(100 + self._depth)
+        self.update()
+
     def paint(self, painter: QPainter, option, widget=None) -> None:  # noqa: ARG002
         painter.setRenderHint(QPainter.RenderHint.Antialiasing, True)
         for face, shade, _depth in self._faces:
@@ -202,6 +230,12 @@ class GroupItem(QGraphicsItem):
     def boundingRect(self) -> QRectF:
         return self._rect
 
+    def refresh(self) -> None:
+        """Re-project the group box for the current camera."""
+        self.prepareGeometryChange()
+        self._compute()
+        self.update()
+
     def paint(self, painter: QPainter, option, widget=None) -> None:  # noqa: ARG002
         painter.setRenderHint(QPainter.RenderHint.Antialiasing, True)
         fill = QColor(self.color)
@@ -241,6 +275,17 @@ class PillLabelItem(QGraphicsItem):
     def boundingRect(self) -> QRectF:
         return self._rect.adjusted(-2, -2, 2, 2)
 
+    def place(self, position: QPointF) -> None:
+        """Move the pill so it sits just above ``position`` (scene pixels)."""
+        self.prepareGeometryChange()
+        self._rect = QRectF(
+            position.x() - self.width / 2,
+            position.y() - self.height,
+            self.width,
+            self.height,
+        )
+        self.update()
+
     def paint(self, painter: QPainter, option, widget=None) -> None:  # noqa: ARG002
         painter.setRenderHint(QPainter.RenderHint.Antialiasing, True)
         background = QColor(5, 11, 20, 230)
@@ -265,8 +310,10 @@ class Graph3DView(QGraphicsView):
         self.setScene(QGraphicsScene(self))
         self.setRenderHints(QPainter.RenderHint.Antialiasing | QPainter.RenderHint.TextAntialiasing)
         self.setViewportUpdateMode(QGraphicsView.ViewportUpdateMode.BoundingRectViewportUpdate)
-        self.setTransformationAnchor(QGraphicsView.ViewportAnchor.AnchorUnderMouse)
-        self.setResizeAnchor(QGraphicsView.ViewportAnchor.AnchorViewCenter)
+        # The camera is recomputed explicitly in _apply_camera(), so Qt must not
+        # re-anchor the transform behind our back.
+        self.setTransformationAnchor(QGraphicsView.ViewportAnchor.NoAnchor)
+        self.setResizeAnchor(QGraphicsView.ViewportAnchor.NoAnchor)
         self.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
         self.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
         self.setFrameShape(QGraphicsView.Shape.NoFrame)
@@ -284,21 +331,27 @@ class Graph3DView(QGraphicsView):
         self._node_items: dict[str, NodeItem] = {}
         self._group_items: list[GroupItem] = []
         self._edge_items: list[QGraphicsPathItem] = []
+        self._edge_specs: list[tuple[QGraphicsPathItem, tuple[float, float, float],
+                                      tuple[float, float, float], str]] = []
         self._label_items: list[QGraphicsItem] = []
+        self._label_specs: list[tuple[PillLabelItem, tuple[float, float, float]]] = []
         self._selected_id: str | None = None
         self._hovered_id: str | None = None
         self._highlighted: set[str] = set()
         self._yaw = DEFAULT_YAW
         self._pitch = DEFAULT_PITCH
-        self._needs_fit = True
+        self._zoom = 1.0
+        self._fit_cap = 0.0
+        self._world_bounds: tuple[float, float, float, float, float, float] | None = None
         self._press_pos: QPoint | None = None
         self._press_yaw = self._yaw
         self._press_pitch = self._pitch
         self._dragging = False
+        self._last_frame = 0.0
         self._rotation_timer = QTimer(self)
         self._rotation_timer.setSingleShot(True)
-        self._rotation_timer.setInterval(16)
-        self._rotation_timer.timeout.connect(lambda: self._rebuild(fit=False))
+        self._rotation_timer.setInterval(max(1, int(FRAME_INTERVAL * 1000)))
+        self._rotation_timer.timeout.connect(self._apply_pending_rotation)
 
         self.hint = QLabel("左键拖拽旋转   ·   滚轮缩放   ·   单击层选中   ·   双击复位", self)
         self.hint.setStyleSheet(
@@ -351,14 +404,15 @@ class Graph3DView(QGraphicsView):
         self._highlighted.clear()
         self._yaw = DEFAULT_YAW
         self._pitch = DEFAULT_PITCH
+        self._zoom = 1.0
         self._compute_layout()
-        self._needs_fit = True
         self._rebuild(fit=True)
         self.empty_label.setVisible(not self.nodes)
         self.update()
 
     def _compute_layout(self) -> None:
         self.positions = {}
+        self._world_bounds = None
         if not self.nodes:
             return
         raw_volumes: list[float] = []
@@ -400,6 +454,29 @@ class Graph3DView(QGraphicsView):
                 (centers[index] - pivot, 0.0, 0.0),
                 (dx, dy, dz),
             )
+        # Rotation-invariant world bounds (node boxes plus the padding used by
+        # group boxes).  The camera framing and the scene rect are derived from
+        # this once per layout, so turning the model never moves the picture.
+        min_x = min_y = min_z = math.inf
+        max_x = max_y = max_z = -math.inf
+        for (cx, cy, cz), (dx, dy, dz) in self.positions.values():
+            min_x = min(min_x, cx - dx / 2)
+            max_x = max(max_x, cx + dx / 2)
+            min_y = min(min_y, cy - dy / 2)
+            max_y = max(max_y, cy + dy / 2)
+            min_z = min(min_z, cz - dz / 2)
+            max_z = max(max_z, cz + dz / 2)
+        if not self.positions:
+            self._world_bounds = None
+            return
+        self._world_bounds = (
+            min_x - GROUP_PAD_X,
+            max_x + GROUP_PAD_X,
+            min_y - GROUP_PAD_Y,
+            max_y + GROUP_PAD_Y,
+            min_z - GROUP_PAD_Z,
+            max_z + GROUP_PAD_Z,
+        )
 
     def project(self, point: tuple[float, float, float]) -> tuple[QPointF, float]:
         x, y, z = point
@@ -415,20 +492,25 @@ class Graph3DView(QGraphicsView):
     # scene rebuilding
     # ------------------------------------------------------------------ #
     def _rebuild(self, *, fit: bool = False) -> None:
+        """Recreate every item (graph, selection or highlight changes)."""
         scene = self.scene()
+        self._rotation_timer.stop()
         scene.clear()
         self._node_items.clear()
         self._group_items.clear()
         self._edge_items.clear()
+        self._edge_specs.clear()
         self._label_items.clear()
+        self._label_specs.clear()
         if not self.nodes:
+            self._zoom = 1.0
+            self._fit_cap = 0.0
             scene.setSceneRect(QRectF(-320, -240, 640, 480))
             self.stats.setText("0 layers")
             self.empty_label.setVisible(True)
             self.hint.setVisible(False)
-            if fit:
-                self._needs_fit = True
-                QTimer.singleShot(0, self.fit_scene)
+            self._apply_camera(refit=True)
+            self.viewport().update()
             return
         self.empty_label.setVisible(False)
         self.hint.setVisible(True)
@@ -449,45 +531,28 @@ class Graph3DView(QGraphicsView):
                 ys.append(center[1] + dims[1] / 2)
                 zs.append(center[2] + dims[2] / 2)
             bounds = (
-                min(xs) - 0.52,
-                max(xs) + 0.52,
-                min(ys) - 0.32,
-                max(ys) + 0.32,
-                min(zs) - 0.32,
-                max(zs) + 0.32,
+                min(xs) - GROUP_PAD_X,
+                max(xs) + GROUP_PAD_X,
+                min(ys) - GROUP_PAD_Y,
+                max(ys) + GROUP_PAD_Y,
+                min(zs) - GROUP_PAD_Z,
+                max(zs) + GROUP_PAD_Z,
             )
             item = GroupItem(self, group, bounds)
             scene.addItem(item)
             self._group_items.append(item)
             center_x = (bounds[0] + bounds[1]) / 2
-            label_point, _depth = self.project((center_x, bounds[3] + 0.52, 0.0))
             label = group.get("label") or group.get("name") or group.get("id")
-            self._add_label(str(label), group_color(group.get("kind")), label_point)
+            self._add_label(str(label), group_color(group.get("kind")),
+                            (center_x, bounds[3] + 0.52, 0.0))
 
-        edge_items = self._visible_edges()
-        for edge in edge_items:
+        for edge in self._visible_edges():
             source = self.positions.get(str(edge.get("source")))
             target = self.positions.get(str(edge.get("target")))
             if not source or not target:
                 continue
-            start, start_depth = self.project(source[0])
-            end, end_depth = self.project(target[0])
-            dx = end.x() - start.x()
-            dy = end.y() - start.y()
-            length = math.hypot(dx, dy) or 1.0
-            nx, ny = -dy / length, dx / length
             kind = str(edge.get("kind") or "data")
-            bend = 8.0 + min(32.0, length * 0.14)
-            if kind in ("residual", "skip"):
-                bend = 22.0 + min(36.0, length * 0.18)
-            # One control point on a single side gives a smooth arc.  Two
-            # controls on opposite sides created a sharp S/spike for skips.
-            apex = QPointF(
-                start.x() + dx * 0.5 + nx * bend,
-                start.y() + dy * 0.5 + ny * bend,
-            )
-            path = QPainterPath(start)
-            path.quadTo(apex, end)
+            path, z_value = self._edge_geometry(source[0], target[0], kind)
             item = QGraphicsPathItem(path)
             color = QColor(edge_color(kind))
             color.setAlpha(145)
@@ -495,9 +560,10 @@ class Graph3DView(QGraphicsView):
             if kind in ("residual", "skip"):
                 pen.setStyle(Qt.PenStyle.DashLine)
             item.setPen(pen)
-            item.setZValue(-150 + (start_depth + end_depth) * 0.02)
+            item.setZValue(z_value)
             scene.addItem(item)
             self._edge_items.append(item)
+            self._edge_specs.append((item, source[0], target[0], kind))
 
         for node in self.nodes:
             node_id = str(node.get("id"))
@@ -512,18 +578,56 @@ class Graph3DView(QGraphicsView):
             self._node_items[node_id] = item
 
         self._add_labels()
-
-        rect = scene.itemsBoundingRect()
-        if rect.isEmpty():
-            rect = QRectF(-320, -240, 640, 480)
-        scene.setSceneRect(rect.adjusted(-90, -80, 90, 80))
+        self._update_scene_rect()
+        if fit:
+            self._zoom = 1.0
+        self._recompute_fit_cap()
+        self._apply_camera()
         self.stats.setText(
             f"{len(self.nodes)} layers · {len(self.group_by_id)} groups · {len(self._edge_items)} edges · 厚度=通道数"
         )
-        if fit:
-            self._needs_fit = True
-            QTimer.singleShot(0, self.fit_scene)
-        self.update()
+        self.viewport().update()
+
+    def _edge_geometry(self, source: tuple[float, float, float],
+                       target: tuple[float, float, float], kind: str) -> tuple[QPainterPath, float]:
+        start, start_depth = self.project(source)
+        end, end_depth = self.project(target)
+        dx = end.x() - start.x()
+        dy = end.y() - start.y()
+        length = math.hypot(dx, dy) or 1.0
+        nx, ny = -dy / length, dx / length
+        bend = 8.0 + min(32.0, length * 0.14)
+        if kind in ("residual", "skip"):
+            bend = 22.0 + min(36.0, length * 0.18)
+        # One control point on a single side gives a smooth arc.  Two
+        # controls on opposite sides created a sharp S/spike for skips.
+        apex = QPointF(
+            start.x() + dx * 0.5 + nx * bend,
+            start.y() + dy * 0.5 + ny * bend,
+        )
+        path = QPainterPath(start)
+        path.quadTo(apex, end)
+        return path, -150 + (start_depth + end_depth) * 0.02
+
+    def _refresh_projection(self) -> None:
+        """Re-project every item for the current camera without rebuilding the scene.
+
+        Full ``scene.clear()`` + recreate on every mouse-move was the reason
+        dragging felt like nothing happened until the button was released.
+        """
+        for item in self._node_items.values():
+            item.refresh()
+        for item in self._group_items:
+            item.refresh()
+        for item, source, target, kind in self._edge_specs:
+            path, z_value = self._edge_geometry(source, target, kind)
+            item.setPath(path)
+            item.setZValue(z_value)
+        for item, anchor in self._label_specs:
+            point, _depth = self.project(anchor)
+            item.place(point)
+        self._apply_camera()
+        self.viewport().update()
 
     def _add_labels(self) -> None:
         show_all = len(self.nodes) <= 18
@@ -538,16 +642,18 @@ class Graph3DView(QGraphicsView):
             if not node or not position:
                 continue
             center, dims = position
-            point, _depth = self.project((center[0], center[1] + dims[1] / 2 + 0.25, center[2]))
             text = str(node.get("name") or node_id)
             if len(text) > 22:
                 text = text[:20] + "…"
-            self._add_label(text, kind_color(node.get("kind")), point)
+            self._add_label(text, kind_color(node.get("kind")),
+                            (center[0], center[1] + dims[1] / 2 + 0.25, center[2]))
 
-    def _add_label(self, text: str, color: str, point: QPointF) -> None:
+    def _add_label(self, text: str, color: str, anchor: tuple[float, float, float]) -> None:
+        point, _depth = self.project(anchor)
         item = PillLabelItem(text, color, point)
         self.scene().addItem(item)
         self._label_items.append(item)
+        self._label_specs.append((item, anchor))
 
     def _visible_edges(self) -> list[dict[str, Any]]:
         if not self.edges:
@@ -570,19 +676,85 @@ class Graph3DView(QGraphicsView):
     # ------------------------------------------------------------------ #
     # camera / fitting / interaction
     # ------------------------------------------------------------------ #
-    def fit_scene(self) -> None:
-        rect = self.scene().sceneRect()
-        if rect.isEmpty():
+    def _projected_half_extent(self) -> tuple[float, float]:
+        """Half width/height (scene pixels) of the model's projection.
+
+        Computed from the rotation-invariant world bounds, so it is cheap and
+        continuous while the model turns.
+        """
+        bounds = self._world_bounds
+        if bounds is None:
+            return 1.0, 1.0
+        min_x, max_x, min_y, max_y, min_z, max_z = bounds
+        half_x = 0.0
+        half_y = 0.0
+        for x in (min_x, max_x):
+            for y in (min_y, max_y):
+                for z in (min_z, max_z):
+                    point, _depth = self.project((x, y, z))
+                    half_x = max(half_x, abs(point.x()))
+                    half_y = max(half_y, abs(point.y()))
+        return max(1.0, half_x), max(1.0, half_y)
+
+    def _required_scale(self) -> float:
+        if self._world_bounds is None:
+            return 1.0
+        half_x, half_y = self._projected_half_extent()
+        viewport = self.viewport()
+        available_x = max(40.0, viewport.width() / 2.0 - FIT_MARGIN_X)
+        available_y = max(30.0, viewport.height() / 2.0 - FIT_MARGIN_Y)
+        return max(0.01, min(available_x / half_x, available_y / half_y))
+
+    def _recompute_fit_cap(self) -> None:
+        """Remember the zoom that fits the model at the default presentation angle."""
+        yaw, pitch = self._yaw, self._pitch
+        self._yaw, self._pitch = DEFAULT_YAW, DEFAULT_PITCH
+        try:
+            self._fit_cap = self._required_scale()
+        finally:
+            self._yaw, self._pitch = yaw, pitch
+
+    def _apply_camera(self, *, refit: bool = False) -> None:
+        """Place the model centre at the viewport centre with a stable zoom.
+
+        The scale never grows past the default-presentation fit while orbiting
+        (so turning the model cannot suddenly "zoom in"), but it does shrink as
+        needed so the turned model still fits the viewport instead of being
+        clipped by the edges.
+        """
+        if refit or self._fit_cap <= 0.0:
+            self._recompute_fit_cap()
+        scale = min(self._fit_cap, self._required_scale()) * self._zoom
+        self.setTransform(QTransform.fromScale(scale, scale))
+        self.centerOn(0.0, 0.0)
+
+    def _update_scene_rect(self) -> None:
+        """A rotation-invariant, origin-centred scene rect.
+
+        Letting the scene rect follow the projected items made Qt re-clamp the
+        scroll bars while the model turned, which shifted the picture sideways.
+        """
+        bounds = self._world_bounds
+        if bounds is None:
+            self.scene().setSceneRect(QRectF(-320, -240, 640, 480))
             return
-        self.resetTransform()
-        self.fitInView(rect.adjusted(-20, -20, 20, 20), Qt.AspectRatioMode.KeepAspectRatio)
-        self._needs_fit = False
+        min_x, max_x, min_y, max_y, min_z, max_z = bounds
+        radius = 0.0
+        for x in (min_x, max_x):
+            for y in (min_y, max_y):
+                for z in (min_z, max_z):
+                    radius = max(radius, math.sqrt(x * x + y * y + z * z))
+        half = max(240.0, radius * SCALE * 1.35 + 240.0)
+        self.scene().setSceneRect(QRectF(-half, -half, 2 * half, 2 * half))
+
+    def fit_scene(self) -> None:
+        self._zoom = 1.0
+        self._apply_camera(refit=True)
 
     def reset_view(self) -> None:
         self._yaw = DEFAULT_YAW
         self._pitch = DEFAULT_PITCH
         self._selected_id = self._selected_id if self._selected_id in self.node_by_id else None
-        self._needs_fit = True
         self._rebuild(fit=True)
 
     def _pick_export_angle(self) -> tuple[float, float]:
@@ -639,35 +811,41 @@ class Graph3DView(QGraphicsView):
         width = max(640, int(width))
         height = max(360, int(height))
         old_yaw, old_pitch = self._yaw, self._pitch
-        old_fit = self._needs_fit
         export_yaw, export_pitch = self._pick_export_angle()
         try:
             self._yaw = export_yaw
             self._pitch = export_pitch
-            self._needs_fit = False
             self._rebuild(fit=True)
             self.fit_scene()
             QApplication.processEvents()
 
-            image = QImage(width, height, QImage.Format.Format_ARGB32)
-            image.fill(QColor("#050b14"))
-            painter = QPainter(image)
-            painter.setRenderHint(QPainter.RenderHint.Antialiasing, True)
-            painter.setRenderHint(QPainter.RenderHint.TextAntialiasing, True)
-            source = self.scene().sceneRect().adjusted(-24, -24, 24, 24)
-            self.scene().render(
-                painter,
-                QRectF(0, 0, width, height),
-                source,
-                Qt.AspectRatioMode.KeepAspectRatio,
-            )
-            painter.end()
+            # The live scene rect is rotation-invariant (deliberately loose);
+            # the exported picture wants the tight projected bounds instead.
+            tight = self.scene().itemsBoundingRect()
+            if tight.isEmpty():
+                tight = QRectF(-320, -240, 640, 480)
+            tight = tight.adjusted(-24, -24, 24, 24)
+            self.scene().setSceneRect(tight)
+            try:
+                image = QImage(width, height, QImage.Format.Format_ARGB32)
+                image.fill(QColor("#050b14"))
+                painter = QPainter(image)
+                painter.setRenderHint(QPainter.RenderHint.Antialiasing, True)
+                painter.setRenderHint(QPainter.RenderHint.TextAntialiasing, True)
+                self.scene().render(
+                    painter,
+                    QRectF(0, 0, width, height),
+                    tight,
+                    Qt.AspectRatioMode.KeepAspectRatio,
+                )
+                painter.end()
+            finally:
+                self._update_scene_rect()
             if not image.save(str(target), "PNG"):
                 raise RuntimeError(f"无法写入图片: {target}")
         finally:
             self._yaw = old_yaw
             self._pitch = old_pitch
-            self._needs_fit = old_fit or True
             self._rebuild(fit=True)
             self.fit_scene()
         return target
@@ -691,8 +869,29 @@ class Graph3DView(QGraphicsView):
     def resizeEvent(self, event) -> None:  # noqa: N802
         super().resizeEvent(event)
         self._place_overlays()
-        if self._needs_fit:
-            QTimer.singleShot(0, self.fit_scene)
+        if self.nodes:
+            self._recompute_fit_cap()
+            self._apply_camera()
+
+    def _request_rotation_frame(self) -> None:
+        """Repaint the rotation now if the frame budget allows, else coalesce.
+
+        The old code re-armed a 16 ms single-shot timer on every mouse move, so
+        a steady drag (moves every 5-10 ms) never let it fire: the model stayed
+        frozen for the whole drag and then jumped to the final pose on release.
+        """
+        now = time.monotonic()
+        elapsed = now - self._last_frame
+        if elapsed >= FRAME_INTERVAL:
+            self._last_frame = now
+            self._rotation_timer.stop()
+            self._refresh_projection()
+        elif not self._rotation_timer.isActive():
+            self._rotation_timer.start(max(1, int((FRAME_INTERVAL - elapsed) * 1000) + 1))
+
+    def _apply_pending_rotation(self) -> None:
+        self._last_frame = time.monotonic()
+        self._refresh_projection()
 
     def mousePressEvent(self, event) -> None:  # noqa: N802
         if event.button() == Qt.MouseButton.LeftButton:
@@ -700,6 +899,7 @@ class Graph3DView(QGraphicsView):
             self._press_yaw = self._yaw
             self._press_pitch = self._pitch
             self._dragging = False
+            self._last_frame = 0.0
             event.accept()
             return
         super().mousePressEvent(event)
@@ -709,9 +909,12 @@ class Graph3DView(QGraphicsView):
             delta = event.position().toPoint() - self._press_pos
             if abs(delta.x()) > 3 or abs(delta.y()) > 3:
                 self._dragging = True
-                self._yaw = self._press_yaw + delta.x() * 0.0075
-                self._pitch = max(-1.15, min(1.15, self._press_pitch + delta.y() * 0.0065))
-                self._rotation_timer.start()
+                self._yaw = self._press_yaw + delta.x() * YAW_PER_PIXEL
+                self._pitch = max(
+                    -PITCH_LIMIT,
+                    min(PITCH_LIMIT, self._press_pitch + delta.y() * PITCH_PER_PIXEL),
+                )
+                self._request_rotation_frame()
             event.accept()
             return
         super().mouseMoveEvent(event)
@@ -721,7 +924,11 @@ class Graph3DView(QGraphicsView):
             was_drag = self._dragging
             self._press_pos = None
             self._dragging = False
-            if not was_drag:
+            self._rotation_timer.stop()
+            if was_drag:
+                # Land on the final pose even if the last move was throttled.
+                self._refresh_projection()
+            else:
                 node = self._node_at(event.position().toPoint())
                 if node is not None:
                     self.select_node(str(node.get("id")), notify=True)
@@ -737,12 +944,18 @@ class Graph3DView(QGraphicsView):
         super().mouseDoubleClickEvent(event)
 
     def wheelEvent(self, event) -> None:  # noqa: N802
-        factor = 1.13 if event.angleDelta().y() > 0 else 0.885
-        current = self.transform().m11()
-        if current * factor < 0.12 or current * factor > 9.0:
+        delta = event.angleDelta().y()
+        if not delta:
             event.accept()
             return
-        self.scale(factor, factor)
+        factor = ZOOM_FACTOR_120 ** (delta / 120.0)
+        zoom = max(MIN_ZOOM, min(MAX_ZOOM, self._zoom * factor))
+        if abs(zoom - self._zoom) < 1e-9:
+            event.accept()
+            return
+        self._zoom = zoom
+        self._apply_camera()
+        self.viewport().update()
         event.accept()
 
     def _node_at(self, pos: QPoint) -> dict[str, Any] | None:
