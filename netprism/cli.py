@@ -255,7 +255,8 @@ def _emit_text(text: str, out: str | None) -> None:
 
 def _scan(folder: str, *, out: str, execute: bool, class_name: str | None,
           input_shape: tuple[int, ...] | None, max_files: int, quiet: bool,
-          all_variants: bool = False, include_formats: bool = True) -> tuple[dict[str, Any], dict[str, Any]]:
+          all_variants: bool = False, include_formats: bool = True,
+          unknown_input: bool = False) -> tuple[dict[str, Any], dict[str, Any]]:
     AnalyzeError, AnalyzeOptions, _analyze_file, analyze_folder = _load_core()
     source = Path(folder).expanduser().resolve()
     if not source.exists():
@@ -265,6 +266,7 @@ def _scan(folder: str, *, out: str, execute: bool, class_name: str | None,
         execute=execute,
         class_name=class_name,
         input_shape=input_shape,
+        unknown_input=unknown_input,
         max_files=max_files,
     )
     started = time.perf_counter()

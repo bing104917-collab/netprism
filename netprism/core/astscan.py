@@ -3278,6 +3278,7 @@ def _first_consuming_decl(root: Decl) -> Decl | None:
 
 def static_input_shape(root: Decl, options: Any) -> tuple[Shape, str]:
     explicit = getattr(options, "input_shape", None)
+    unknown = bool(getattr(options, "unknown_input", False))
     first = _first_consuming_decl(root)
     dtype = "float32"
     if first is not None and first.kind == "embedding":
@@ -3290,31 +3291,31 @@ def static_input_shape(root: Decl, options: Any) -> tuple[Shape, str]:
         if shape:
             return shape, dtype
     if first is None:
-        return [1, 3, 64, 64], "float32"
+        return ([1, 3, -1, -1] if unknown else [1, 3, 64, 64]), "float32"
     params = first.params
     if first.kind in ("conv", "deconv"):
         dims = _conv_dims(first.op)
         channels = int(params.get("inChannels") or 3)
         if dims == 1:
-            return [1, channels, 64], "float32"
+            return [1, channels, -1 if unknown else 64], "float32"
         if dims == 3:
-            return [1, channels, 16, 16, 16], "float32"
-        return [1, channels, 64, 64], "float32"
+            return ([1, channels, -1, -1, -1] if unknown else [1, channels, 16, 16, 16]), "float32"
+        return ([1, channels, -1, -1] if unknown else [1, channels, 64, 64]), "float32"
     if first.kind == "linear":
         return [1, int(params.get("inFeatures") or 64)], "float32"
     if first.kind == "embedding":
-        return [1, 16], "int64"
+        return ([1, -1] if unknown else [1, 16]), "int64"
     if first.kind == "attention":
         embed = int(params.get("embedDim") or 32)
         if params.get("batchFirst"):
-            return [1, 16, embed], "float32"
-        return [16, 1, embed], "float32"
+            return [1, -1 if unknown else 16, embed], "float32"
+        return [-1 if unknown else 16, 1, embed], "float32"
     if first.kind == "rnn":
         features = int(params.get("inputFeatures") or 32)
         if params.get("batchFirst"):
-            return [1, 16, features], "float32"
-        return [16, 1, features], "float32"
-    return [1, 3, 64, 64], "float32"
+            return [1, -1 if unknown else 16, features], "float32"
+        return [-1 if unknown else 16, 1, features], "float32"
+    return ([1, 3, -1, -1] if unknown else [1, 3, 64, 64]), "float32"
 
 
 def infer_input_specs(root: Decl, module_class: ModuleClass, options: Any) -> list[dict[str, Any]]:

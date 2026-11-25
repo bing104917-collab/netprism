@@ -398,9 +398,9 @@ def test_background_parse_sample_and_static_flag(app, tmp_path: Path, monkeypatc
     captured_sync: dict[str, bool] = {}
     real_sync = gui_main.parse_path_sync
 
-    def spy_sync(path, *, static: bool = False):  # noqa: ANN001
+    def spy_sync(path, *, static: bool = False, **kwargs):  # noqa: ANN001
         captured_sync["static"] = static
-        return real_sync(path, static=static)
+        return real_sync(path, static=static, **kwargs)
 
     monkeypatch.setattr(gui_main, "parse_path_sync", spy_sync)
 
@@ -408,9 +408,16 @@ def test_background_parse_sample_and_static_flag(app, tmp_path: Path, monkeypatc
     real_worker = gui_main.ParseWorker
 
     class SpyWorker(real_worker):  # type: ignore[misc, valid-type]
-        def __init__(self, path, *, static: bool = False, parent=None):  # noqa: ANN001
+        def __init__(self, path, *, static: bool = False, input_shape=None,
+                     unknown_input=False, parent=None):  # noqa: ANN001
             capture_worker["static"] = static
-            super().__init__(path, static=static, parent=parent)
+            super().__init__(
+                path,
+                static=static,
+                input_shape=input_shape,
+                unknown_input=unknown_input,
+                parent=parent,
+            )
 
     monkeypatch.setattr(gui_main, "ParseWorker", SpyWorker)
 

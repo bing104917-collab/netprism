@@ -19,6 +19,7 @@ from PySide6.QtWidgets import (
     QFileDialog,
     QFrame,
     QHBoxLayout,
+    QInputDialog,
     QLabel,
     QLineEdit,
     QListWidget,
@@ -85,6 +86,7 @@ class MainWindow(QMainWindow):
         self.source_path: str | None = None
         self.source_kind: str | None = None
         self.parse_worker: ParseWorker | None = None
+        self.input_shape: tuple[int, ...] | None = None
         self._busy = False
         self._syncing_search = False
 
@@ -183,6 +185,7 @@ class MainWindow(QMainWindow):
         self.export_report_btn = self._button("导出报告", "exportButton", "导出 Markdown 或 HTML 报告")
         self.export_csv_btn = self._button("导出 CSV", "exportCsvButton", "导出当前层表格为 CSV（UTF-8 BOM）")
         self.export_image_btn = self._button("导出图片", "exportImageButton", "按最佳角度导出 3D PNG")
+        self.input_shape_btn = self._button("输入形状：自动", "inputShapeButton", "指定输入形状；? 表示未知维（静态解析默认未知）")
         for button in (
             self.open_folder_btn,
             self.open_file_btn,
@@ -190,6 +193,7 @@ class MainWindow(QMainWindow):
             self.export_report_btn,
             self.export_csv_btn,
             self.export_image_btn,
+            self.input_shape_btn,
         ):
             button.setFixedHeight(30)
             row.addWidget(button)
@@ -214,6 +218,7 @@ class MainWindow(QMainWindow):
         self.export_report_btn.clicked.connect(lambda: self.export_report())
         self.export_csv_btn.clicked.connect(lambda: self.export_csv())
         self.export_image_btn.clicked.connect(lambda: self.export_image())
+        self.input_shape_btn.clicked.connect(lambda: self.edit_input_shape())
         self.search_edit.textChanged.connect(self._on_global_search)
         return bar
 
@@ -296,10 +301,52 @@ class MainWindow(QMainWindow):
         QShortcut(QKeySequence("Ctrl+F"), self, activated=self._focus_search)
         QShortcut(QKeySequence("Ctrl+E"), self, activated=lambda: self.export_csv())
         QShortcut(QKeySequence("Ctrl+Shift+E"), self, activated=lambda: self.export_image())
+        QShortcut(QKeySequence("Ctrl+I"), self, activated=lambda: self.edit_input_shape())
 
     def _focus_search(self) -> None:
         self.search_edit.setFocus()
         self.search_edit.selectAll()
+
+    def _format_input_shape(self, shape: tuple[int, ...] | None) -> str:
+        if not shape:
+            return "自动"
+        return "×".join("?" if dim < 0 else str(dim) for dim in shape)
+
+    def edit_input_shape(self) -> None:
+        """Let the user enter a concrete or partially unknown input shape."""
+        current = self._format_input_shape(self.input_shape)
+        text, accepted = QInputDialog.getText(
+            self,
+            "输入形状",
+            "输入各维，逗号/空格分隔；? 或 -1 表示未知。\n"
+            "例如 1,4,?,?,? 或 1,3,224,224。留空=自动。",
+            text="" if self.input_shape is None else current,
+        )
+        if not accepted:
+            return
+        raw = str(text).replace("×", " ").replace("x", " ").replace("X", " ").replace(",", " ")
+        parts = raw.split()
+        if not parts:
+            self.input_shape = None
+        else:
+            values: list[int] = []
+            try:
+                for part in parts:
+                    values.append(-1 if part in {"?", "*", "-1"} else int(part))
+            except ValueError:
+                self._show_error("输入形状无效", "每一维必须是整数、? 或 -1。")
+                return
+            if any(value == 0 or value < -1 for value in values):
+                self._show_error("输入形状无效", "维度必须为正整数，或 ?/-1 表示未知。")
+                return
+            self.input_shape = tuple(values)
+        self.input_shape_btn.setText(f"输入形状：{self._format_input_shape(self.input_shape)}")
+        self.input_shape_btn.setToolTip(
+            "当前输入形状：" + self._format_input_shape(self.input_shape)
+            + "；? 表示未知维（静态解析默认未知）"
+        )
+        if self.source_path and self.source_kind != "demo" and not self._busy:
+            self.open_path(self.source_path, background=True)
 
     # ------------------------------------------------------------------ #
     # model loading
@@ -538,7 +585,12 @@ class MainWindow(QMainWindow):
             self._start_parse(source, background=True)
             return True
         try:
-            payload = parse_path_sync(source, static=self.static_checkbox.isChecked())
+            payload = parse_path_sync(
+                source,
+                static=self.static_checkbox.isChecked(),
+                input_shape=self.input_shape,
+                unknown_input=True,
+            )
         except Exception as exc:
             self._show_error("解析失败", str(exc))
             return False
@@ -553,7 +605,13 @@ class MainWindow(QMainWindow):
         self._set_busy(True)
         self.statusBar().showMessage(f"解析中：{source}  ·  {'静态 AST' if self.static_checkbox.isChecked() else 'trace'}")
         self.progress.show()
-        worker = ParseWorker(source, static=self.static_checkbox.isChecked(), parent=self)
+        worker = ParseWorker(
+            source,
+            static=self.static_checkbox.isChecked(),
+            input_shape=self.input_shape,
+            unknown_input=True,
+            parent=self,
+        )
         self.parse_worker = worker
         worker.succeeded.connect(self._on_parse_succeeded)
         worker.failed.connect(self._on_parse_failed)

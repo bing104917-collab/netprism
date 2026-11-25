@@ -212,7 +212,8 @@ def _payload_from_graphs(
     }
 
 
-def _parse_folder(folder: Path, *, static: bool) -> dict[str, Any]:
+def _parse_folder(folder: Path, *, static: bool, input_shape: tuple[int, ...] | None = None,
+                  unknown_input: bool = False) -> dict[str, Any]:
     from netprism import cli as cli_module
 
     with tempfile.TemporaryDirectory(prefix="netprism_gui_scan_") as tmp:
@@ -224,11 +225,12 @@ def _parse_folder(folder: Path, *, static: bool) -> dict[str, Any]:
                 out=str(out),
                 execute=not static,
                 class_name=None,
-                input_shape=None,
+                input_shape=input_shape,
                 max_files=200,
                 quiet=True,
                 all_variants=False,
                 include_formats=True,
+                unknown_input=unknown_input and input_shape is None,
             )
         index = _read_json(out / "index.json")
         graphs, errors = _graphs_from_index(index, out)
@@ -251,11 +253,19 @@ def _parse_folder(folder: Path, *, static: bool) -> dict[str, Any]:
         }
 
 
-def _parse_python_static(file_path: Path) -> dict[str, Any]:
+def _parse_python_static(file_path: Path, *, input_shape: tuple[int, ...] | None = None,
+                         unknown_input: bool = True) -> dict[str, Any]:
     from netprism.core import AnalyzeOptions, analyze_file
 
     try:
-        graphs = analyze_file(file_path, AnalyzeOptions(execute=False))
+        graphs = analyze_file(
+            file_path,
+            AnalyzeOptions(
+                execute=False,
+                input_shape=input_shape,
+                unknown_input=unknown_input and input_shape is None,
+            ),
+        )
     except Exception as exc:  # AnalyzeError and any parser failure
         raise ParseError(f"解析失败：{exc}") from exc
     if not graphs:
@@ -263,12 +273,24 @@ def _parse_python_static(file_path: Path) -> dict[str, Any]:
     return _payload_from_graphs(graphs, source_path=file_path, source_name=file_path.name)
 
 
-def _parse_single(file_path: Path, *, static: bool) -> dict[str, Any]:
+def _parse_single(file_path: Path, *, static: bool,
+                  input_shape: tuple[int, ...] | None = None,
+                  unknown_input: bool = False) -> dict[str, Any]:
     suffix = file_path.suffix.lower()
     if suffix == ".json":
         return load_graph_json(file_path)
-    if suffix == ".py" and static:
-        return _parse_python_static(file_path)
+    if suffix == ".py":
+        if static:
+            return _parse_python_static(file_path, input_shape=input_shape, unknown_input=unknown_input)
+        from netprism.core import AnalyzeOptions, analyze_file
+
+        try:
+            graphs = analyze_file(file_path, AnalyzeOptions(execute=True, input_shape=input_shape))
+        except Exception as exc:
+            raise ParseError(f"解析失败：{exc}") from exc
+        if not graphs:
+            raise ParseError("没有找到可解析的模型。")
+        return _payload_from_graphs(graphs, source_path=file_path, source_name=file_path.name)
     from netprism import cli as cli_module
 
     with tempfile.TemporaryDirectory(prefix="netprism_gui_file_") as tmp:
@@ -294,12 +316,14 @@ def _parse_single(file_path: Path, *, static: bool) -> dict[str, Any]:
         }
 
 
-def parse_path_sync(path: str | Path, *, static: bool = False) -> dict[str, Any]:
+def parse_path_sync(path: str | Path, *, static: bool = False,
+                    input_shape: tuple[int, ...] | None = None,
+                    unknown_input: bool = False) -> dict[str, Any]:
     """Parse a folder or model file synchronously.
 
-    ``static=True`` maps to ``AnalyzeOptions(execute=False)`` for Python
-    sources.  A graph JSON is loaded directly and never annotated behind the
-    user's back (so intentionally meta-less graphs keep their empty state).
+    ``input_shape`` is an optional user-specified shape; in static mode
+    ``unknown_input=True`` keeps spatial/sequence dimensions unknown instead of
+    inventing 16x16x16.
     """
     source = Path(path).expanduser().resolve()
     if not source.exists():
@@ -312,11 +336,13 @@ def parse_path_sync(path: str | Path, *, static: bool = False) -> dict[str, Any]
             payload = load_scan_dir(source)
             payload["source_kind"] = "folder"
             return payload
-        return _parse_folder(source, static=static)
+        return _parse_folder(source, static=static, input_shape=input_shape, unknown_input=unknown_input)
     if not source.is_file():
         raise ParseError(f"不支持的路径：{source}")
     try:
-        return _parse_single(source, static=static)
+        return _parse_single(
+            source, static=static, input_shape=input_shape, unknown_input=unknown_input
+        )
     except ParseError:
         raise
     except SystemExit as exc:
@@ -332,14 +358,23 @@ class ParseWorker(QThread):
     succeeded = Signal(object)
     failed = Signal(str)
 
-    def __init__(self, path: str | Path, *, static: bool = False, parent=None) -> None:
+    def __init__(self, path: str | Path, *, static: bool = False,
+                 input_shape: tuple[int, ...] | None = None,
+                 unknown_input: bool = False, parent=None) -> None:
         super().__init__(parent)
         self.path = str(path)
         self.static = bool(static)
+        self.input_shape = tuple(int(v) for v in input_shape) if input_shape else None
+        self.unknown_input = bool(unknown_input)
 
     def run(self) -> None:  # pragma: no cover - timing is exercised by tests
         try:
-            payload = parse_path_sync(self.path, static=self.static)
+            payload = parse_path_sync(
+                self.path,
+                static=self.static,
+                input_shape=self.input_shape,
+                unknown_input=self.unknown_input,
+            )
         except ParseError as exc:
             self.failed.emit(str(exc))
         except Exception as exc:  # noqa: BLE001 - background border

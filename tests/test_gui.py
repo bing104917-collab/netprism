@@ -286,6 +286,22 @@ def test_parse_static_worker(app):
     assert payload["graphs"]
 
 
+def test_static_unknown_input_and_user_override(app, window):
+    source = project_root() / "samples" / "cnn_vgg.py"
+    window.static_checkbox.setChecked(True)
+    assert window.open_path(source, background=False)
+    spec = window.current_graph["model"]["inputSpec"][0]["shape"]
+    assert spec[:2] == [1, 3]
+    assert spec[-1] == -1
+    assert "?" in window.summary_panel.browser.toPlainText()
+
+    window.input_shape = (1, 3, 64, 64)
+    assert window.open_path(source, background=False)
+    spec = window.current_graph["model"]["inputSpec"][0]["shape"]
+    assert spec[:3] == [1, 3, 64]
+    assert spec[3] == 64
+
+
 def test_channel_depth_is_visibly_relative(app):
     graph = {
         "nodes": [

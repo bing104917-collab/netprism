@@ -38,6 +38,10 @@ class AnalyzeOptions:
     input_shape: tuple[int, ...] | None = None
     """Explicit dummy input shape; inferred automatically when ``None``."""
 
+    unknown_input: bool = False
+    """Static mode: leave spatial/sequence input dimensions at ``-1`` instead of
+    guessing concrete sizes.  Ignored when an explicit ``input_shape`` is set."""
+
     max_files: int = 200
     """Upper bound on the number of ``.py`` files visited per folder scan."""
 
