@@ -8,8 +8,8 @@ used.
 
 ## Team roles
 
-- Committers and reviewers: `@YOUR_GITHUB_HANDLE`
-- Approvers: `@YOUR_GITHUB_HANDLE`
+- Committers and reviewers: `@bing104917-collab`
+- Approvers: `@bing104917-collab`
 
 Replace `YOUR_GITHUB_HANDLE` with the actual GitHub account/team before
 submitting the SignPath application.
