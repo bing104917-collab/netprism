@@ -56,3 +56,31 @@ def test_launcher_is_web_only() -> None:
     source = (ROOT / "scripts" / "start_web.py").read_text(encoding="utf-8")
     assert "netprism.gui" not in source
     assert "webbrowser" not in source  # server.serve() owns opening the browser
+
+
+def _load_packaging_launcher():
+    path = ROOT / "packaging" / "web_launcher.py"
+    spec = importlib.util.spec_from_file_location("netprism_web_launcher", path)
+    assert spec is not None and spec.loader is not None
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
+def test_frozen_web_launcher_serves_the_bundled_demo(capsys) -> None:
+    """The code that ships inside NetPrism.exe really serves the current demo."""
+    launcher = _load_packaging_launcher()
+    assert launcher._smoke(ROOT / "web", ROOT / "examples" / "demo") == 0
+    output = capsys.readouterr().out
+    assert "OK:" in output and "8 models" in output
+
+
+def test_web_exe_build_script_is_lean() -> None:
+    script = (ROOT / "scripts" / "build_web_exe.ps1").read_text(encoding="utf-8")
+    assert "packaging\\web_launcher.py" in script
+    assert "--onefile" in script
+    assert "web;web" in script
+    assert "examples\\demo;examples\\demo" in script
+    for module in ("torch", "onnx", "PySide6"):
+        assert f'"--exclude-module", "{module}"' in script, module
+

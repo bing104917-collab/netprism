@@ -114,7 +114,27 @@ python -m netprism serve .\netprism_out --port 8765 --open
 - 页面：<http://127.0.0.1:8765/>；关掉命令行窗口（或 Ctrl+C）即停止服务。
 - 数据默认用内置 `examples/demo`（8 个模型）。
 - 浏览器里可以直接把模型文件夹拖进去，走静态解析（默认不执行上传的代码）。
-- 桌面的 `NetPrism Web.cmd` 是同一个启动器的快捷方式。
+- 桌面的 `NetPrism Web.cmd` 是同一个启动器的快捷方式（需要本机有 Python）。
+
+### 免安装 EXE（发给别人用）
+
+`dist\web\NetPrism.exe`（约 9 MB，单文件）就是同一个 Web 应用的 Windows 封装：
+
+- **双击** → 本机起服务（自动挑空闲端口）→ 默认浏览器自动打开 3D 视图；
+- 不用装 Python、不用装任何依赖，整个程序只有这一个 exe；
+- 内置当前前端 + 8 个演示模型；把模型文件夹**拖到 exe 上**会先用静态 AST 重新解析再打开；
+- 网页里的「上传文件夹」同样是静态解析，**不执行上传的代码**；
+- 精简版不带 torch / ONNX，只解析 `.py` 源码；需要 trace 精确分析或 ONNX/TorchScript 时，用源码环境（`python -m netprism serve ...`）或完整版构建；
+- 冷启动到页面可访问约 **0.7 秒**；关掉黑色命令行窗口即停止服务。
+
+重新构建：
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File scripts\build_web_exe.ps1
+```
+
+> 构建脚本会在 `%TEMP%` 放一个副本做 smoke（某些被沙箱/重定向的目录里，PyInstaller onefile
+> 会报 `Could not create temporary directory!`；把 exe 放到桌面或普通文件夹即可正常双击）。
 
 ## 原生 GUI（已暂停）
 
