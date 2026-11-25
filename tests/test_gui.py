@@ -322,6 +322,8 @@ def test_channel_depth_is_visibly_relative(app):
     assert depth["n64"] > depth["n32"] > depth["n4"] > depth["n3"]
     assert depth["n64"] - depth["n3"] > 2.0
     assert depth["n32"] - depth["n4"] > 0.7
+    xs = [view.positions[node_id][0][0] for node_id in view.positions]
+    assert abs(min(xs) + max(xs)) < 1e-6, "3D orbit pivot should be the model center"
     view.close()
 
 

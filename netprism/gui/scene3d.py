@@ -373,9 +373,19 @@ class Graph3DView(QGraphicsView):
         max_volume = max(raw_volumes) or 1.0
         max_spatial = max(raw_spatial) or 1.0
         max_channel_count = max((item[2] for item in dims), default=1.0) or 1.0
-        max_channel_count = max((item[2] for item in dims), default=1.0) or 1.0
+        centers: list[float] = []
         cursor = 0.0
         previous_group: str | None = None
+        for index, node in enumerate(self.nodes):
+            group_id = str(node.get("groupId") or "")
+            if index:
+                cursor += GROUP_GAP if group_id != previous_group and group_id else 2.05
+            previous_group = group_id or None
+            centers.append(cursor)
+        # Rotate around the model's center, not its first layer.  Otherwise a
+        # long model swings out of the viewport and feels uncontrollable while
+        # dragging (the old pivot was the origin at the first node).
+        pivot = (min(centers) + max(centers)) / 2 if centers else 0.0
         for index, node in enumerate(self.nodes):
             raw_v, raw_s, raw_c = dims[index]
             log_v = math.log10(raw_v + 1) / max_volume
@@ -386,12 +396,8 @@ class Graph3DView(QGraphicsView):
             dx = 0.68 + 0.58 * log_v
             dy = 0.78 + 1.55 * log_s
             dz = 0.55 + 2.45 * channel_ratio
-            group_id = str(node.get("groupId") or "")
-            if index:
-                cursor += GROUP_GAP if group_id != previous_group and group_id else 2.05
-            previous_group = group_id or None
             self.positions[str(node.get("id"))] = (
-                (cursor, 0.0, 0.0),
+                (centers[index] - pivot, 0.0, 0.0),
                 (dx, dy, dz),
             )
 
