@@ -513,6 +513,7 @@ def cmd_scan(args: argparse.Namespace) -> int:
         quiet=args.quiet,
         all_variants=args.all_variants,
         include_formats=not args.no_formats,
+        unknown_input=getattr(args, "unknown_input", False),
     )
     if args.json:
         print(json.dumps(result, ensure_ascii=False, indent=2))
@@ -659,6 +660,7 @@ def cmd_view(args: argparse.Namespace) -> int:
             quiet=args.quiet,
             all_variants=args.all_variants,
             include_formats=not args.no_formats,
+            unknown_input=getattr(args, "unknown_input", False),
         )
     return _serve_dir(
         args.out,
@@ -702,6 +704,8 @@ def build_parser() -> argparse.ArgumentParser:
     scan.add_argument("--out", default=_DEFAULT_OUT, help=f"输出目录（默认 {_DEFAULT_OUT}）")
     scan.add_argument("--json", action="store_true", help="额外输出 index JSON 到 stdout")
     scan.add_argument("--quiet", action="store_true", help="不打印摘要")
+    scan.add_argument("--unknown-input", action="store_true",
+                      help="静态模式：未指定的输入空间/序列维保持 -1，不猜测 16×16×16")
     add_analysis_options(scan, variants=True, formats=True)
 
     inspect = sub.add_parser("inspect", help="在终端中查看单个文件的结构")
@@ -745,6 +749,8 @@ def build_parser() -> argparse.ArgumentParser:
     view.add_argument("--allow-execute", action="store_true", help="允许 Web 端上传后执行模型代码（危险）")
     view.add_argument("--web-dir", default=None, help="覆盖 web/ 目录")
     view.add_argument("--quiet", action="store_true")
+    view.add_argument("--unknown-input", action="store_true",
+                      help="静态模式：未指定的输入空间/序列维保持 -1")
     add_analysis_options(view, variants=True, formats=True)
 
     return parser

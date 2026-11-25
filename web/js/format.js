@@ -310,54 +310,87 @@ export function opSummary(node) {
   if (!node) return "";
   const p = node.params || {};
   const kind = node.kind;
+  const op = node.op || (kind ? kindMeta(kind).label : "—");
+  const outShape = node.outShapes && node.outShapes[0];
+  const channel = Array.isArray(outShape) && outShape.length >= 2 ? outShape[1] : null;
+  const dims = (value) => {
+    if (Array.isArray(value)) return value;
+    if (typeof value === "number") return [value];
+    return null;
+  };
+  const dimText = (value) => {
+    const list = dims(value);
+    return list ? list.join("×") : null;
+  };
   switch (kind) {
     case "conv":
     case "deconv": {
-      const k = normalizeDim(p.kernelSize);
-      const s = normalizeDim(p.stride);
-      const parts = [];
-      if (k) parts.push(`k${k[0]}×${k[1]}`);
+      const k = dimText(p.kernelSize);
+      const s = dimText(p.stride);
+      const pad = dimText(p.padding);
+      const parts = [op];
+      if (k) parts.push(`k${k}`);
       if (p.inChannels != null && p.outChannels != null) parts.push(`${p.inChannels}→${p.outChannels}`);
-      if (p.groups != null && Number(p.groups) > 1) parts.push(`g${p.groups}`);
-      if (s && (s[0] !== 1 || s[1] !== 1)) parts.push(`s${s[0]}×${s[1]}`);
+      if (p.groups != null && Number(p.groups) > 1) parts.push(`g=${p.groups}`);
+      if (s && !/^1(×1)*$/.test(s)) parts.push(`s${s}`);
+      if (pad && !/^0(×0)*$/.test(pad)) parts.push(`p${pad}`);
       return parts.join(" · ");
     }
     case "linear":
-      if (p.inFeatures != null && p.outFeatures != null) return `${p.inFeatures} → ${p.outFeatures}`;
-      break;
+      return p.inFeatures != null && p.outFeatures != null
+        ? `${op} · ${p.inFeatures} → ${p.outFeatures}`
+        : op;
     case "attention":
     case "mlp": {
       const heads = p.numHeads ?? p.heads;
       const dim = p.embedDim ?? p.hiddenFeatures ?? p.outFeatures;
-      const parts = [];
-      if (heads != null) parts.push(`${heads} 头`);
+      const parts = [op];
+      if (heads != null) parts.push(`${heads} heads`);
       if (dim != null) parts.push(`d${dim}`);
       return parts.join(" · ");
     }
     case "ffn":
     case "mlp_block": {
-      if (p.inFeatures != null && p.hiddenFeatures != null) return `${p.inFeatures} → ${p.hiddenFeatures} → ${p.outFeatures ?? p.inFeatures}`;
+      if (p.inFeatures != null && p.hiddenFeatures != null) {
+        return `${op} · ${p.inFeatures} → ${p.hiddenFeatures} → ${p.outFeatures ?? p.inFeatures}`;
+      }
       break;
     }
     case "norm": {
-      if (p.numFeatures != null) return `C${p.numFeatures}`;
-      if (p.normalizedShape) return formatParamValue("normalizedShape", p.normalizedShape);
-      break;
+      if (/GroupNorm/i.test(op)) {
+        const groups = p.numGroups ?? p.groups
+          ?? (Array.isArray(p.normalizedShape) ? p.normalizedShape[0] : p.normalizedShape);
+        const parts = [`${op} · G=${groups ?? "?"}`];
+        if (channel != null) parts.push(`C=${channel}`);
+        return parts.join(" · ");
+      }
+      if (/BatchNorm/i.test(op)) {
+        return channel != null ? `${op} · C=${channel}` : op;
+      }
+      if (/LayerNorm/i.test(op)) {
+        const normShape = dimText(p.normalizedShape);
+        return normShape ? `${op} · ${normShape}` : op;
+      }
+      if (p.numFeatures != null) return `${op} · C=${p.numFeatures}`;
+      if (p.normalizedShape) return `${op} · ${formatParamValue("normalizedShape", p.normalizedShape)}`;
+      return op;
     }
     case "pool": {
-      const k = normalizeDim(p.kernelSize);
-      const parts = [];
-      if (k) parts.push(`k${k[0]}×${k[1]}`);
+      const k = dimText(p.kernelSize);
+      const parts = [op];
+      if (k) parts.push(`k${k}`);
       if (p.outputSize) parts.push(`out ${formatParamValue("outputSize", p.outputSize)}`);
       if (p.type) parts.push(String(p.type));
       return parts.join(" · ");
     }
+    case "activation":
+    case "dropout":
+    case "softmax":
+      return op;
     case "embedding":
-      if (p.numEmbeddings != null) return `${p.numEmbeddings} × ${p.embeddingDim ?? "?"}`;
-      break;
+      return p.numEmbeddings != null ? `${op} · ${p.numEmbeddings} × ${p.embeddingDim ?? "?"}` : op;
   }
-  const shape = node.outShapes && node.outShapes[0];
-  return shape ? formatShapeCompact(shape) : node.op;
+  return outShape ? `${op} · ${formatShapeCompact(outShape)}` : op;
 }
 
 export function opDetail(node) {
