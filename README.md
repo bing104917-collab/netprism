@@ -37,6 +37,8 @@ NetPrism 面向这样的日常场景：别人（或 AI）扔给你一个文件�
 要求 Python ≥ 3.10。解析 `trace` 模式需要 PyTorch；只做静态解析则不需要。
 
 ```powershell
+# 最省事：双击仓库根目录的 start_web.cmd（本机起服务 + 自动打开浏览器）
+
 # 在本仓库根目录（Windows 可直接用 netprism.cmd，会自动找解释器）
 .\netprism.cmd view .\samples --open
 
@@ -89,9 +91,40 @@ python -m netprism explain .\model.onnx --json
 > ⚠️ `trace` 模式会导入并执行目标文件夹里的 Python 代码。只对可信代码使用；
 > 来历不明的模型请用 `--static`。Web 端“上传文件夹”默认就是静态解析，且服务端默认拒绝执行上传代码。
 
-## Windows 桌面版（原生 GUI）
+## Web 服务 + 浏览器（当前主用模式）
 
-**不再启动 HTTP 服务，也不打开浏览器。** 双击后直接进入 PySide6 桌面窗口：模型列表、3D 层视图、层表格、算法理解、报告摘要、层详情，全部是原生控件。
+**本机起服务，浏览器里看。** 这是现在交付和日常使用的方式：不需要打包、不需要前端构建。
+
+```powershell
+# 最省事：双击仓库根目录的 start_web.cmd
+# 它会在 127.0.0.1:8765 起服务（端口被占用会自动换一个）并打开浏览器
+```
+
+等价的手动命令：
+
+```powershell
+# 直接看内置 demo
+python -m netprism serve examples\demo --port 8765 --open
+
+# 先扫描自己的模型目录，再起服务
+python -m netprism scan .\models --out .\netprism_out
+python -m netprism serve .\netprism_out --port 8765 --open
+```
+
+- 页面：<http://127.0.0.1:8765/>；关掉命令行窗口（或 Ctrl+C）即停止服务。
+- 数据默认用内置 `examples/demo`（8 个模型）。
+- 浏览器里可以直接把模型文件夹拖进去，走静态解析（默认不执行上传的代码）。
+- 桌面的 `NetPrism Web.cmd` 是同一个启动器的快捷方式。
+
+## 原生 GUI（已暂停）
+
+> **2026-11-25 用户决定**：原生 PySide6 窗口的 3D 拖拽 / 窗口 / 启动体验“基本用不了”，
+> 停用桌面 GUI，回到 Web 服务 + 浏览器模式。GUI 源码（`netprism/gui/`）与构建脚本
+> （`scripts/build_gui.ps1`）仍保留在仓库里，但不再作为交付形态；桌面上的
+> `NetPrism.exe` 已改名为 `NetPrism-gui-old.exe`。
+
+<details>
+<summary>历史记录：原生 GUI 的形态、用法与构建方式</summary>
 
 ![NetPrism 原生 GUI](docs/screenshots/gui.png)
 
@@ -126,6 +159,19 @@ VoronoiCNN 静态解析的未知输入尺寸（`1×4×?×?×?`）：
 > exe 未做代码签名，Windows SmartScreen 可能提示“未知发布者”；确认来源后选择“更多信息 → 仍要运行”。
 >
 > GUI 源码无 `http.server` / `webbrowser` / `QWebEngine` 依赖；内置数据含 demo、算法知识库和 schema。
+
+```powershell
+$py = "C:\Users\hrbkcy2523\.dsh\dsh-runtimes\dsh-primary-runtime\dependencies\python\python.exe"
+
+# 目录版 GUI（启动快）
+.\scripts\build_gui.ps1 -Python $py
+
+# 单文件 GUI
+.\scripts\build_gui.ps1 -Python $py -OneFile
+```
+
+</details>
+
 
 ## Code signing policy
 

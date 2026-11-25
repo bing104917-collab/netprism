@@ -2,7 +2,28 @@
 
 生成时间：2026-11-25 15:45（Asia/Shanghai）
 
-新对话请先读本文件，再直接检查当前桌面 EXE 的真实交互，不要只跑 offscreen 测试后就宣布修复。
+> ## ⚠️ 2026-11-25 15:57 方向变更（用户决定）
+>
+> 用户复测原生桌面 GUI 后明确表态：**“现在的整个 gui 形式存在巨大问题，基本用不了，
+> 退回到原来的开启服务在浏览器里看的模式吧。”**
+>
+> 因此：
+>
+> - **当前主用形态 = Web 服务 + 浏览器**，不要再把原生 GUI 当交付形态。
+> - 一键入口：双击仓库根目录 `start_web.cmd`，或桌面的 `NetPrism Web.cmd`。
+>   它在 `127.0.0.1:8765` 起服务（端口被占用自动顺延）并打开浏览器；关窗口即停止。
+> - 等价命令：`python -m netprism serve examples\demo --port 8765 --open`。
+> - 桌面上的旧 `NetPrism.exe` 已改名为 `NetPrism-gui-old.exe`，别再用它验证。
+> - GUI 源码与 `scripts/build_gui.ps1` 保留，但**不要再花时间修 GUI 交互**，除非用户重新要求。
+> - 本文档第 1~10 节是 GUI 时代的历史记录；Web 的运行/验收以 `README.md`、
+>   `web/README.md` 和 `scripts/ui_check.py` 为准。
+>
+> Web 端当前实测（2026-11-25 16:0x，Playwright + Chrome，`python scripts/ui_check.py
+> --url http://127.0.0.1:8765/`）：`ok: true`，8 个模型可切换，canvas/悬停/选中/播放/
+> 图例过滤/上下文字段全部正常，无 console/page/http 错误。
+
+新对话请先读本文件顶部的方向说明。GUI 时代那句“先检查桌面 EXE 的真实交互”已经过时；
+现在请先确认 `start_web.cmd` 能起服务、`scripts/ui_check.py` 浏览器验收通过。
 
 ---
 
@@ -12,11 +33,12 @@
 
 用户明确要求：
 
-- **必须是原生 Python GUI（PySide6 / QtWidgets）**
-- **不要 HTTP 服务**
-- **不要浏览器前端**
-- **不要自动打开浏览器**
-- 最终做成 Windows EXE 发给别人
+- ~~必须是原生 Python GUI（PySide6 / QtWidgets）~~ → **2026-11-25 15:57 已撤销**：
+  用户改回 **Web 服务 + 浏览器**（`python -m netprism serve ... --open` / `start_web.cmd`）。
+- ~~不要 HTTP 服务~~ → 撤销
+- ~~不要浏览器前端~~ → 撤销
+- ~~不要自动打开浏览器~~ → 撤销（一键启动器默认会打开浏览器；`--no-open` 可关）
+- 最终做成 Windows EXE 发给别人（GUI 时代的目标，现在暂缓；Web 模式先在本机跑通）
 - 已在申请 SignPath Foundation 免费签名；目前尚未通过
 - 3D 要准确、流畅、美观
 - 分组、skip connection、输入形状必须语义正确
