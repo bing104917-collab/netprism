@@ -182,12 +182,14 @@ class MainWindow(QMainWindow):
         self.reparse_btn = self._button("重新解析", "reparseButton", "用当前模式重新解析来源")
         self.export_report_btn = self._button("导出报告", "exportButton", "导出 Markdown 或 HTML 报告")
         self.export_csv_btn = self._button("导出 CSV", "exportCsvButton", "导出当前层表格为 CSV（UTF-8 BOM）")
+        self.export_image_btn = self._button("导出图片", "exportImageButton", "按最佳角度导出 3D PNG")
         for button in (
             self.open_folder_btn,
             self.open_file_btn,
             self.reparse_btn,
             self.export_report_btn,
             self.export_csv_btn,
+            self.export_image_btn,
         ):
             button.setFixedHeight(30)
             row.addWidget(button)
@@ -211,6 +213,7 @@ class MainWindow(QMainWindow):
         self.reparse_btn.clicked.connect(self.reparse)
         self.export_report_btn.clicked.connect(lambda: self.export_report())
         self.export_csv_btn.clicked.connect(lambda: self.export_csv())
+        self.export_image_btn.clicked.connect(lambda: self.export_image())
         self.search_edit.textChanged.connect(self._on_global_search)
         return bar
 
@@ -292,6 +295,7 @@ class MainWindow(QMainWindow):
         QShortcut(QKeySequence("Ctrl+R"), self, activated=self.reparse)
         QShortcut(QKeySequence("Ctrl+F"), self, activated=self._focus_search)
         QShortcut(QKeySequence("Ctrl+E"), self, activated=lambda: self.export_csv())
+        QShortcut(QKeySequence("Ctrl+Shift+E"), self, activated=lambda: self.export_image())
 
     def _focus_search(self) -> None:
         self.search_edit.setFocus()
@@ -616,6 +620,36 @@ class MainWindow(QMainWindow):
         self.statusBar().showMessage(f"CSV 已导出：{target}")
         return target
 
+    def export_image(self, path: str | Path | None = None) -> Path | None:
+        """Export the 3D graph at a presentation angle as PNG."""
+        if not self.current_graph:
+            self._show_error("无法导出", "当前没有模型。")
+            return None
+        target: Path | None
+        if path is None:
+            start = self._recent_dir()
+            name = str(self.current_entry.get("name") if self.current_entry else "model")
+            selected, _filter = QFileDialog.getSaveFileName(
+                self,
+                "导出 3D 图片",
+                str(Path(start) / f"{name}_3d.png"),
+                "PNG (*.png)",
+            )
+            target = Path(selected) if selected else None
+        else:
+            target = Path(path)
+        if target is None:
+            return None
+        target = target.with_suffix(".png")
+        try:
+            exported = self.view_3d.export_image(target)
+        except Exception as exc:  # noqa: BLE001 - surface as a dialog, don't crash
+            self._show_error("导出图片失败", str(exc))
+            return None
+        self._remember_dir(exported.parent)
+        self.statusBar().showMessage(f"3D 图片已导出：{exported}")
+        return exported
+
     def export_report(self, path: str | Path | None = None, fmt: str | None = None) -> Path | None:
         if not self.current_graph:
             self._show_error("无法导出", "当前没有模型。")
@@ -668,6 +702,7 @@ class MainWindow(QMainWindow):
         has_model = self.current_graph is not None
         self.export_report_btn.setEnabled(has_model and not self._busy)
         self.export_csv_btn.setEnabled(has_model and not self._busy)
+        self.export_image_btn.setEnabled(has_model and not self._busy)
         self.reparse_btn.setEnabled(bool(self.source_path) and not self._busy)
 
     def _recent_dir(self) -> str:

@@ -8,6 +8,7 @@ set of edges and suppressing per-node labels above a threshold.
 from __future__ import annotations
 
 import math
+from pathlib import Path
 from typing import Any
 
 from PySide6.QtCore import QPoint, QPointF, QRectF, Qt, QTimer, Signal
@@ -15,13 +16,14 @@ from PySide6.QtGui import (
     QColor,
     QFont,
     QFontMetricsF,
+    QImage,
     QLinearGradient,
     QPainter,
     QPainterPath,
     QPen,
     QPolygonF,
 )
-from PySide6.QtWidgets import QGraphicsItem, QGraphicsPathItem, QGraphicsScene, QGraphicsView, QLabel, QToolTip
+from PySide6.QtWidgets import QApplication, QGraphicsItem, QGraphicsPathItem, QGraphicsScene, QGraphicsView, QLabel, QToolTip
 
 from .theme import (
     format_count,
@@ -40,6 +42,16 @@ from .theme import (
 SCALE = 42.0
 DEFAULT_YAW = -1.0
 DEFAULT_PITCH = 0.48
+#: Candidate presentation angles; export picks the one closest to 16:9.
+EXPORT_ANGLES = (
+    (-1.00, 0.48),
+    (-0.86, 0.44),
+    (-0.72, 0.42),
+    (-0.58, 0.40),
+    (-0.44, 0.38),
+    (-0.30, 0.36),
+)
+EXPORT_ASPECT = 16.0 / 9.0
 
 
 def _poly(points: list[QPointF]) -> QPolygonF:
@@ -350,26 +362,27 @@ class Graph3DView(QGraphicsView):
             return
         raw_volumes: list[float] = []
         raw_spatial: list[float] = []
-        raw_channels: list[float] = []
         dims: list[tuple[float, float, float]] = []
         for node in self.nodes:
             shape = _first_shape(node)
             volume, spatial, channels = _shape_metrics(shape)
             raw_volumes.append(math.log10(volume + 1))
             raw_spatial.append(math.log10(spatial + 1))
-            raw_channels.append(math.log10(channels + 1))
             dims.append((volume, spatial, channels))
         max_volume = max(raw_volumes) or 1.0
         max_spatial = max(raw_spatial) or 1.0
-        max_channels = max(raw_channels) or 1.0
+        max_channel_count = max((item[2] for item in dims), default=1.0) or 1.0
+        max_channel_count = max((item[2] for item in dims), default=1.0) or 1.0
         for index, node in enumerate(self.nodes):
             raw_v, raw_s, raw_c = dims[index]
             log_v = math.log10(raw_v + 1) / max_volume
             log_s = math.log10(raw_s + 1) / max_spatial
-            log_c = math.log10(raw_c + 1) / max_channels
+            # Channel depth is deliberately *linear*, not log-normalised:
+            # 3 -> 4 -> 32 -> 64 must read as a real relative thickness.
+            channel_ratio = max(0.0, min(1.0, float(raw_c) / max_channel_count))
             dx = 0.68 + 0.58 * log_v
             dy = 0.78 + 1.55 * log_s
-            dz = 0.78 + 1.55 * log_c
+            dz = 0.55 + 2.45 * channel_ratio
             self.positions[str(node.get("id"))] = (
                 (index * 2.05, 0.0, 0.0),
                 (dx, dy, dz),
@@ -488,7 +501,7 @@ class Graph3DView(QGraphicsView):
             rect = QRectF(-320, -240, 640, 480)
         scene.setSceneRect(rect.adjusted(-90, -80, 90, 80))
         self.stats.setText(
-            f"{len(self.nodes)} layers · {len(self.group_by_id)} groups · {len(self._edge_items)} edges"
+            f"{len(self.nodes)} layers · {len(self.group_by_id)} groups · {len(self._edge_items)} edges · 厚度=通道数"
         )
         if fit:
             self._needs_fit = True
@@ -554,6 +567,93 @@ class Graph3DView(QGraphicsView):
         self._selected_id = self._selected_id if self._selected_id in self.node_by_id else None
         self._needs_fit = True
         self._rebuild(fit=True)
+
+    def _pick_export_angle(self) -> tuple[float, float]:
+        """Pick the candidate whose projected bounds best fill a 16:9 canvas."""
+        if not self.positions:
+            return EXPORT_ANGLES[2]
+        old_yaw, old_pitch = self._yaw, self._pitch
+        best: tuple[float, float, float] | None = None
+        try:
+            for yaw, pitch in EXPORT_ANGLES:
+                self._yaw, self._pitch = yaw, pitch
+                xs: list[float] = []
+                ys: list[float] = []
+                for (cx, cy, cz), (dx, dy, dz) in self.positions.values():
+                    for sx in (-0.5, 0.5):
+                        for sy in (-0.5, 0.5):
+                            for sz in (-0.5, 0.5):
+                                point, _depth = self.project(
+                                    (cx + dx * sx, cy + dy * sy, cz + dz * sz)
+                                )
+                                xs.append(point.x())
+                                ys.append(point.y())
+                if not xs:
+                    continue
+                width = max(xs) - min(xs)
+                height = max(ys) - min(ys)
+                if width <= 0 or height <= 0:
+                    continue
+                aspect = width / height
+                score = abs(math.log(max(0.01, aspect) / EXPORT_ASPECT))
+                if best is None or score < best[0]:
+                    best = (score, yaw, pitch)
+        finally:
+            self._yaw, self._pitch = old_yaw, old_pitch
+        if best is None:
+            return EXPORT_ANGLES[2]
+        return best[1], best[2]
+
+    def export_image(
+        self,
+        path: str | Path,
+        *,
+        width: int = 1920,
+        height: int = 1080,
+    ) -> Path:
+        """Render the graph at an automatically chosen presentation angle into a PNG.
+
+        The current camera angle is restored afterwards.  The exported scene
+        includes labels/group boxes, not the Qt overlay widgets (hint/stats).
+        """
+        target = Path(path).expanduser()
+        target = target.with_suffix(".png")
+        target.parent.mkdir(parents=True, exist_ok=True)
+        width = max(640, int(width))
+        height = max(360, int(height))
+        old_yaw, old_pitch = self._yaw, self._pitch
+        old_fit = self._needs_fit
+        export_yaw, export_pitch = self._pick_export_angle()
+        try:
+            self._yaw = export_yaw
+            self._pitch = export_pitch
+            self._needs_fit = False
+            self._rebuild(fit=True)
+            self.fit_scene()
+            QApplication.processEvents()
+
+            image = QImage(width, height, QImage.Format.Format_ARGB32)
+            image.fill(QColor("#050b14"))
+            painter = QPainter(image)
+            painter.setRenderHint(QPainter.RenderHint.Antialiasing, True)
+            painter.setRenderHint(QPainter.RenderHint.TextAntialiasing, True)
+            source = self.scene().sceneRect().adjusted(-24, -24, 24, 24)
+            self.scene().render(
+                painter,
+                QRectF(0, 0, width, height),
+                source,
+                Qt.AspectRatioMode.KeepAspectRatio,
+            )
+            painter.end()
+            if not image.save(str(target), "PNG"):
+                raise RuntimeError(f"无法写入图片: {target}")
+        finally:
+            self._yaw = old_yaw
+            self._pitch = old_pitch
+            self._needs_fit = old_fit or True
+            self._rebuild(fit=True)
+            self.fit_scene()
+        return target
 
     def set_caption(self, text: str) -> None:
         self.caption.setText(text)

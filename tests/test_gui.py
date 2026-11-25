@@ -18,7 +18,7 @@ import pytest
 pytest.importorskip("PySide6")
 
 from PySide6.QtCore import QPoint, Qt  # noqa: E402
-from PySide6.QtGui import QGuiApplication  # noqa: E402
+from PySide6.QtGui import QGuiApplication, QImage  # noqa: E402
 from PySide6.QtTest import QTest  # noqa: E402
 from PySide6.QtWidgets import QApplication  # noqa: E402
 
@@ -284,6 +284,47 @@ def test_parse_static_worker(app):
     assert payload["models"]
     assert payload["source_path"]
     assert payload["graphs"]
+
+
+def test_channel_depth_is_visibly_relative(app):
+    graph = {
+        "nodes": [
+            {"id": "n4", "name": "c4", "op": "Conv2d", "kind": "conv", "outShapes": [[1, 4, 16, 16]]},
+            {"id": "n32", "name": "c32", "op": "Conv2d", "kind": "conv", "outShapes": [[1, 32, 16, 16]]},
+            {"id": "n64", "name": "c64", "op": "Conv2d", "kind": "conv", "outShapes": [[1, 64, 16, 16]]},
+            {"id": "n3", "name": "c3", "op": "Conv2d", "kind": "conv", "outShapes": [[1, 3, 16, 16]]},
+        ],
+        "edges": [],
+        "groups": [],
+    }
+    view = Graph3DView()
+    view.resize(900, 600)
+    view.show()
+    view.set_graph(graph)
+    app.processEvents()
+    depth = {node_id: view.positions[node_id][1][2] for node_id in ("n3", "n4", "n32", "n64")}
+    assert depth["n64"] > depth["n32"] > depth["n4"] > depth["n3"]
+    assert depth["n64"] - depth["n3"] > 2.0
+    assert depth["n32"] - depth["n4"] > 0.7
+    view.close()
+
+
+def test_export_image_uses_presentation_angle_and_restores_view(app, window, tmp_path):
+    window.show()
+    window.tabs.setCurrentIndex(0)
+    _process(app)
+    view = window.view_3d
+    before_yaw, before_pitch = view._yaw, view._pitch
+    target = tmp_path / "graph.png"
+    exported = window.export_image(target)
+    assert exported == target
+    assert target.is_file() and target.stat().st_size > 5000
+    image = QImage(str(target))
+    assert not image.isNull()
+    assert (image.width(), image.height()) == (1920, 1080)
+    # camera angle is restored after the presentation export
+    assert abs(view._yaw - before_yaw) < 1e-6
+    assert abs(view._pitch - before_pitch) < 1e-6
 
 
 def test_smoke_subprocess():
