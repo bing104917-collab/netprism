@@ -32,7 +32,7 @@ default CLI variant folding.
 | state-spaces__mamba | 2 | 7 | 3 | 0 |
 | tkipf__pygcn | 1 | 1 | 5 | 0 |
 | ultralytics__yolov5 | 8 | 9 | 40 | 601,676 |
-| yanx27__Pointnet_Pointnet2_pytorch | 3 | 11 | 71 | 657,666 |
+| yanx27__Pointnet_Pointnet2_pytorch | 3 | 11 | 72 | 657,666 |
 | yenchenlin__nerf-pytorch | 1 | 2 | 3 | 34,308 |
 
 Totals: **47 models, 0 file-level errors, 191 static warnings**.

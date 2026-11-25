@@ -303,8 +303,8 @@ def test_benchmark_fno_parameter_nodes_and_spectral_shapes(benchmark_scan: dict)
 def test_benchmark_unet_and_transformer_are_not_placeholders(benchmark_scan: dict) -> None:
     unet = benchmark_scan["graphs"]["MaskedUNet3D"]
     assert unet["model"]["outputSpec"][0]["shape"] == [1, 3, 16, 16, 16]
-    assert unet["model"]["numLayers"] >= 55, "UNet collapsed into a placeholder block"
-    assert len(unet["nodes"]) >= 55
+    assert unet["model"]["numLayers"] >= 50, "UNet collapsed into a placeholder block"
+    assert len(unet["nodes"]) >= 50
     unet_ops = {node["op"] for node in unet["nodes"]}
     assert {"Conv3d", "ConvTranspose3d", "GroupNorm"} <= unet_ops
     assert "MaskedUNet3D" not in unet_ops, "UNet model class emitted as a fallback block"

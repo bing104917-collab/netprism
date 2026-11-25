@@ -239,3 +239,21 @@ def test_benchmark_models_parse_to_zero_warnings() -> None:
             assert differences[folder] == 0
     assert seen, "benchmark archive contained no expected model.py files"
     assert all(difference >= 0 for difference in differences.values())
+
+
+@pytest.mark.skipif(not BENCHMARK.is_dir(), reason="benchmark archive not present")
+def test_unet_loop_keeps_list_state_and_connects_pools() -> None:
+    """Regression: ``skips.append(...)`` must advance the static loop state."""
+    graph = _graph(BENCHMARK / "masked_unet" / "model.py")
+    pools = [node for node in graph["nodes"] if node["op"] == "MaxPool3d"]
+    assert len(pools) == 3, [node["name"] for node in pools]
+    input_channels = [node["inShapes"][0][1] for node in pools]
+    assert input_channels == [16, 32, 64], input_channels
+    # Each pool must consume the previous encoder block, not the first block.
+    producers = {edge["target"]: edge["source"] for edge in graph["edges"]}
+    for index, pool in enumerate(pools[1:], start=1):
+        source = graph["nodes"][int(producers[pool["id"]][1:])]
+        assert source["name"].startswith(f"downs.{index - 1}.5"), source["name"]
+    cats = [node for node in graph["nodes"] if node["op"] == "torch.cat"]
+    assert cats, "UNet has no skip concatenations"
+    assert all(len(node["inShapes"]) >= 2 for node in cats), [n["inShapes"] for n in cats]

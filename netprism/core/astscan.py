@@ -2181,8 +2181,10 @@ class _Runner:
                 return [-1]
             return _ParamRef(f"{base.name}.{expression.attr}")
         if isinstance(base, (list, tuple)):
-            return None
+            return _MethodRef(expression.attr, base)
         if isinstance(base, dict):
+            if expression.attr in {"get", "items", "keys", "values", "pop", "update"}:
+                return _MethodRef(expression.attr, base)
             return base.get(expression.attr)
         return None
 
@@ -2248,6 +2250,52 @@ class _Runner:
         base = func.base
         if isinstance(base, _Tensor):
             return self._tensor_method(name, base, args, kwargs, call)
+        if isinstance(base, list):
+            if name == "append" and args:
+                base.append(args[0])
+                return None
+            if name == "extend" and args:
+                value = args[0]
+                if isinstance(value, (list, tuple)):
+                    base.extend(value)
+                return None
+            if name == "insert" and len(args) >= 2 and isinstance(args[0], int):
+                base.insert(args[0], args[1])
+                return None
+            if name == "pop":
+                if not base:
+                    return None
+                index = args[0] if args and isinstance(args[0], int) else -1
+                try:
+                    return base.pop(index)
+                except IndexError:
+                    return None
+            if name == "clear":
+                base.clear()
+                return None
+            if name == "copy":
+                return list(base)
+            if name == "index" and args:
+                try:
+                    return base.index(args[0])
+                except ValueError:
+                    return None
+            if name == "count" and args:
+                return base.count(args[0])
+        if isinstance(base, dict):
+            if name == "get" and args:
+                return base.get(args[0], args[1] if len(args) > 1 else None)
+            if name == "items":
+                return list(base.items())
+            if name == "keys":
+                return list(base.keys())
+            if name == "values":
+                return list(base.values())
+            if name == "pop" and args:
+                return base.pop(args[0], None)
+            if name == "update" and args and isinstance(args[0], dict):
+                base.update(args[0])
+                return None
         return None
 
     def _call_module_function(

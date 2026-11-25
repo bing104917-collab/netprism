@@ -183,13 +183,19 @@ export function buildEdgeContent(layout, graph, options = {}) {
       materials.push(glowMaterial);
     }
 
-    const arrowScale = isSpecial ? 1.35 : 0.72;
-    const arrow = arrowMesh(curve, color, arrowScale, isSpecial ? 0.95 : 0.4);
-    arrow.mesh.userData.pick = { type: "edge", id: edge.id };
-    arrow.mesh.renderOrder = 5;
-    root.add(arrow.mesh);
-    materials.push(arrow.material);
-    pickables.push(arrow.mesh);
+    // A data edge follows the left-to-right execution order; drawing an
+    // arrowhead on every layer connection just adds noise.  Keep arrows for
+    // skip/residual/attention where direction is semantically important.
+    let arrow = null;
+    if (isSpecial || isAttention) {
+      const arrowScale = isSpecial ? 1.35 : 0.72;
+      arrow = arrowMesh(curve, color, arrowScale, isSpecial ? 0.95 : 0.4);
+      arrow.mesh.userData.pick = { type: "edge", id: edge.id };
+      arrow.mesh.renderOrder = 5;
+      root.add(arrow.mesh);
+      materials.push(arrow.material);
+      pickables.push(arrow.mesh);
+    }
 
     let label = null;
     if (isSpecial && !big) {

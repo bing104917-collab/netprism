@@ -250,7 +250,7 @@
     "static": 3,
     "errors": 0,
     "warnings": 11,
-    "layers": 71,
+    "layers": 72,
     "params": 657666,
     "first_warnings": [
       "get_model: fc1: no input shape available",
