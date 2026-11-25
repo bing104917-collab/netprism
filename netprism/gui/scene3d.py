@@ -474,10 +474,14 @@ class Graph3DView(QGraphicsView):
             bend = 8.0 + min(32.0, length * 0.14)
             if kind in ("residual", "skip"):
                 bend = 22.0 + min(36.0, length * 0.18)
-            c1 = QPointF(start.x() + dx * 0.34 + nx * bend, start.y() + dy * 0.34 + ny * bend)
-            c2 = QPointF(start.x() + dx * 0.66 - nx * bend, start.y() + dy * 0.66 - ny * bend)
+            # One control point on a single side gives a smooth arc.  Two
+            # controls on opposite sides created a sharp S/spike for skips.
+            apex = QPointF(
+                start.x() + dx * 0.5 + nx * bend,
+                start.y() + dy * 0.5 + ny * bend,
+            )
             path = QPainterPath(start)
-            path.cubicTo(c1, c2, end)
+            path.quadTo(apex, end)
             item = QGraphicsPathItem(path)
             color = QColor(edge_color(kind))
             color.setAlpha(145)

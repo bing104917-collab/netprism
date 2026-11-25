@@ -31,10 +31,10 @@ function specialArch(layout, source, target, offset, kind) {
   for (const item of layout.nodes) {
     if (item.order > from && item.order < to) top = Math.max(top, item.sy / 2);
   }
-  // Route special edges well above the tensor row so they never hide behind
-  // node boxes. Skip edges get the highest lane; residuals sit one lane below.
-  const base = kind === "skip" ? 3.7 : 2.7;
-  return top + base + offset * 0.55;
+  // Route special edges above the tensor row.  Keep the apex low enough to
+  // read as an arc rather than a tall spike.
+  const base = kind === "skip" ? 2.65 : 1.95;
+  return top + base + offset * 0.42;
 }
 
 export function buildEdgeContent(layout, graph, options = {}) {
@@ -63,7 +63,6 @@ export function buildEdgeContent(layout, graph, options = {}) {
     const isSpecial = kind !== "data" && !isAttention;
     const color = meta.color;
     const dx = target.x - source.x;
-    const backward = dx < 0;
 
     let start;
     let end;
@@ -94,18 +93,10 @@ export function buildEdgeContent(layout, graph, options = {}) {
       );
       const arch = specialArch(layout, source, target, specialIndex, kind);
       specialIndex += 1;
-      const reach = Math.max(1.1, Math.abs(dx) * 0.22);
-      const c1 = new THREE.Vector3(
-        backward ? start.x + reach : start.x + Math.min(reach, Math.abs(dx) * 0.4),
-        arch,
-        0,
-      );
-      const c2 = new THREE.Vector3(
-        backward ? end.x - reach : end.x - Math.min(reach, Math.abs(dx) * 0.4),
-        arch,
-        0,
-      );
-      curve = new THREE.CubicBezierCurve3(start, c1, c2, end);
+      // A single rounded apex reads as an arc.  Using two cubic control points
+      // at the same height made short skips look like a tent/spike.
+      const apex = new THREE.Vector3((start.x + end.x) / 2, arch, 0);
+      curve = new THREE.QuadraticBezierCurve3(start, apex, end);
     } else {
       start = new THREE.Vector3(source.x + source.sx / 2 + 0.04, 0, 0);
       end = new THREE.Vector3(target.x - target.sx / 2 - 0.04, 0, 0);
