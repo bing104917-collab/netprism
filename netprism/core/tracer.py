@@ -1067,8 +1067,15 @@ def _build_graph_analysis(
             edge_kind = "data"
             label = ""
             if target_spec.kind == "concat":
-                edge_kind = "skip"
-                label = "skip"
+                # The latest producer is the main decoder path (data); only a
+                # shape-compatible earlier branch is a real skip.  Marking every
+                # concat input as skip made the upsampling path look like a skip
+                # connection (same rule as the static parser).
+                if source_index_value != latest and _concat_skip_compatible(
+                    source_spec, target_spec
+                ):
+                    edge_kind = "skip"
+                    label = "skip"
             elif target_spec.kind == "add" and len(sources) >= 2:
                 if source_index_value != latest:
                     edge_kind = "residual"
@@ -1179,6 +1186,35 @@ def _tensors_of(value: Any, torch: Any, depth: int = 0) -> list[Any]:
             result.extend(_tensors_of(item, torch, depth + 1))
         return result
     return []
+
+
+def _concat_skip_compatible(source: NodeSpec, target: NodeSpec) -> bool:
+    """A concat branch is a real skip only when its non-concat dims match.
+
+    Mirrors the static parser's rule (:meth:`StaticWalker._concat_skip_compatible`):
+    the branch coming from the most recent node is the main decoder path, and the
+    other branch only counts as a skip when it lines up with the concat output.
+    """
+    source_shapes = source.out_shapes or []
+    target_shapes = target.out_shapes or []
+    if not source_shapes or not target_shapes:
+        return False
+    dim = target.params.get("dim", 1)
+    if not isinstance(dim, int) or isinstance(dim, bool):
+        return False
+    source_shape = source_shapes[0]
+    output = target_shapes[0]
+    if len(source_shape) != len(output):
+        return False
+    normalized = dim if dim >= 0 else len(output) + dim
+    if normalized < 0 or normalized >= len(output):
+        return False
+    for position, (left, right) in enumerate(zip(source_shape, output)):
+        if position == normalized:
+            continue
+        if left != right and left != -1 and right != -1:
+            return False
+    return True
 
 
 def _shares_attention_path(source: str, target: str, attention_paths: set[str]) -> bool:

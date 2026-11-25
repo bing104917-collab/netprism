@@ -315,6 +315,39 @@ def test_unetmini_structure_and_skip_cats(monkeypatch: pytest.MonkeyPatch) -> No
     assert all(parts == 2 and dim == 1 for parts, dim in cat_calls)
 
 
+def test_trace_unetmini_marks_only_the_encoder_branch_as_skip() -> None:
+    """Regression: trace used to mark *both* concat inputs of UNet as skip.
+
+    The upsampled decoder branch is the main data path; only the encoder branch
+    is a skip connection.  Marking both drew a bogus skip arc on UNetMini.
+    """
+    from netprism.core import AnalyzeOptions, analyze_file
+
+    graph = analyze_file(
+        SAMPLES / "unet_mini.py", AnalyzeOptions(input_shape=(1, 3, 64, 64))
+    )[0]
+    by_id = {node["id"]: node for node in graph["nodes"]}
+    skips = [edge for edge in graph["edges"] if edge["kind"] == "skip"]
+    assert len(skips) == 2, [
+        (by_id[edge["source"]]["name"], by_id[edge["target"]]["name"]) for edge in skips
+    ]
+    assert sorted(by_id[edge["source"]]["name"] for edge in skips) == [
+        "enc1.block.5",
+        "enc2.block.5",
+    ]
+    concat_ids = {node["id"] for node in graph["nodes"] if node["kind"] == "concat"}
+    main_path = [
+        edge
+        for edge in graph["edges"]
+        if edge["target"] in concat_ids and by_id[edge["source"]]["kind"] == "deconv"
+    ]
+    assert len(main_path) == 2
+    assert all(edge["kind"] == "data" for edge in main_path)
+    for edge in skips:
+        source_shape = by_id[edge["source"]]["outShapes"][0]
+        assert source_shape in by_id[edge["target"]]["inShapes"]
+
+
 def test_mlp_structure() -> None:
     model = build_model("mlp", "MLP")
     net = model.net

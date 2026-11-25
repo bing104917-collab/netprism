@@ -13,14 +13,27 @@
 > - 一键入口：双击仓库根目录 `start_web.cmd`，或桌面的 `NetPrism Web.cmd`。
 >   它在 `127.0.0.1:8765` 起服务（端口被占用自动顺延）并打开浏览器；关窗口即停止。
 > - 等价命令：`python -m netprism serve examples\demo --port 8765 --open`。
-> - 桌面上的旧 `NetPrism.exe` 已改名为 `NetPrism-gui-old.exe`，别再用它验证。
+> - **免安装 EXE（2026-11-25 构建）**：`dist\web\NetPrism.exe`，9.1 MB 单文件，桌面已放一份 `NetPrism.exe`。
+>   双击 → 起服务（自动挑空闲端口）+ 自动开浏览器；冷启动到 API 可访问实测 **0.68 s**。
+>   实测：`--smoke` 通过（8 模型 211 层）、Playwright 真浏览器验收 `ok:true`、上传 .py 静态解析通过、
+>   拖模型文件夹到 exe 上会静态重扫（8 个 samples 模型）。
+>   构建：`powershell -File scripts\build_web_exe.ps1`（PyInstaller onefile，故意排除 torch/onnx/PySide6）。
+>   ⚠️ 陷阱：从这个 DSH 工作区目录里直接运行 onefile exe 会报 `Could not create temporary directory!`；
+>   复制到桌面/普通文件夹就正常，构建脚本的 smoke 已改为从 `%TEMP%` 副本运行。
+> - 桌面旧的 GUI `NetPrism.exe` 已改名 `NetPrism-gui-old.exe`（231 MB，可删）。
 > - GUI 源码与 `scripts/build_gui.ps1` 保留，但**不要再花时间修 GUI 交互**，除非用户重新要求。
 > - 本文档第 1~10 节是 GUI 时代的历史记录；Web 的运行/验收以 `README.md`、
 >   `web/README.md` 和 `scripts/ui_check.py` 为准。
 >
 > Web 端当前实测（2026-11-25 16:0x，Playwright + Chrome，`python scripts/ui_check.py
 > --url http://127.0.0.1:8765/`）：`ok: true`，8 个模型可切换，canvas/悬停/选中/播放/
-> 图例过滤/上下文字段全部正常，无 console/page/http 错误。
+> 图例过滤/上下文字段全部正常，无 console/page/http 错误。EXE 版（8795 端口）复测同样 `ok: true`。
+>
+> - **2026-11-25 16:4x 算法补丁（trace concat skip）**：trace 模式的 concat 边原来把所有输入都当
+>   skip，UNetMini 因此多画 2 条假 skip（up1/up2 主路径被画成跳连）。已按静态解析同样的规则修好：
+>   最新生产者 = 主路径（data），只有形状兼容的较早分支 = skip。演示数据已重新扫描，
+>   新增 `test_trace_unetmini_marks_only_the_encoder_branch_as_skip` 与 `test_unet_skip_edges_and_unet_groups`
+>   的断言；全量测试 434 passed / 1 skipped。EXE 已重建并替换桌面副本。
 
 新对话请先读本文件顶部的方向说明。GUI 时代那句“先检查桌面 EXE 的真实交互”已经过时；
 现在请先确认 `start_web.cmd` 能起服务、`scripts/ui_check.py` 浏览器验收通过。

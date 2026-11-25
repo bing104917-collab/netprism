@@ -148,7 +148,7 @@
           ],
           "confidence": 0.95,
           "evidence": [
-            "2 条 kind=skip 跳连边汇入 concat n30",
+            "1 条 kind=skip 跳连边汇入 concat n30",
             "上采样分支 n29 与编码器特征拼接"
           ],
           "tags": [
@@ -201,7 +201,7 @@
           ],
           "confidence": 0.95,
           "evidence": [
-            "2 条 kind=skip 跳连边汇入 concat n22",
+            "1 条 kind=skip 跳连边汇入 concat n22",
             "上采样分支 n21 与编码器特征拼接"
           ],
           "tags": [
@@ -3057,7 +3057,7 @@
       "id": "e22",
       "source": "n21",
       "target": "n22",
-      "kind": "skip",
+      "kind": "data",
       "shapes": [
         [
           1,
@@ -3066,7 +3066,7 @@
           32
         ]
       ],
-      "label": "skip"
+      "label": ""
     },
     {
       "id": "e23",
@@ -3192,7 +3192,7 @@
       "id": "e31",
       "source": "n29",
       "target": "n30",
-      "kind": "skip",
+      "kind": "data",
       "shapes": [
         [
           1,
@@ -3201,7 +3201,7 @@
           64
         ]
       ],
-      "label": "skip"
+      "label": ""
     },
     {
       "id": "e32",

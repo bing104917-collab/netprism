@@ -604,7 +604,14 @@ def test_unet_skip_edges_and_unet_groups(tmp_path: Path) -> None:
     concat = concat_nodes[0]
     incoming = [edge for edge in graph["edges"] if edge["target"] == concat["id"]]
     assert len(incoming) == 2
-    assert all(edge["kind"] == "skip" for edge in incoming)
+    # Older branch = encoder skip; the newest producer is the decoder main path
+    # (marking every concat input as skip drew a bogus skip arc on the upsample).
+    order = {node["id"]: index for index, node in enumerate(graph["nodes"])}
+    incoming.sort(key=lambda edge: order[edge["source"]])
+    assert [edge["kind"] for edge in incoming] == ["skip", "data"]
+    by_id = {node["id"]: node for node in graph["nodes"]}
+    assert by_id[incoming[0]["source"]]["name"].startswith("enc1")
+    assert by_id[incoming[1]["source"]]["name"].startswith("up")
     assert concat["outShapes"] == [[1, 8, 16, 16]]
 
     unet_groups = [group for group in graph["groups"] if group["kind"] == "unet_block"]

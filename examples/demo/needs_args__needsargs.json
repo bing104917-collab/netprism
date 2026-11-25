@@ -15,7 +15,7 @@
     },
     "inputSpec": [
       {
-        "name": "input",
+        "name": "x",
         "shape": [
           1,
           64
@@ -133,7 +133,7 @@
   "nodes": [
     {
       "id": "n0",
-      "name": "input",
+      "name": "x",
       "op": "Input",
       "kind": "input",
       "modulePath": "",
