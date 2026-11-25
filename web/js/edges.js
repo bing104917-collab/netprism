@@ -216,7 +216,7 @@ export function buildEdgeContent(layout, graph, options = {}) {
       target,
       line,
       glow,
-      arrow: arrow.mesh,
+      arrow: arrow ? arrow.mesh : null,
       label,
       labelDefault: false,
       isAttention,

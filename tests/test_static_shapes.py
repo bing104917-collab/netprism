@@ -257,3 +257,19 @@ def test_unet_loop_keeps_list_state_and_connects_pools() -> None:
     cats = [node for node in graph["nodes"] if node["op"] == "torch.cat"]
     assert cats, "UNet has no skip concatenations"
     assert all(len(node["inShapes"]) >= 2 for node in cats), [n["inShapes"] for n in cats]
+    # Only the encoder branch of each concat is a skip; the decoder/upsample
+    # branch is the main data path and must not be drawn as a skip.
+    skips = [edge for edge in graph["edges"] if edge["kind"] == "skip"]
+    assert len(skips) == 3, [(e["source"], e["target"]) for e in skips]
+    by_id = {node["id"]: node for node in graph["nodes"]}
+    for edge in skips:
+        source_shape = by_id[edge["source"]]["outShapes"][0]
+        target = by_id[edge["target"]]
+        assert source_shape in target["inShapes"], (source_shape, target["inShapes"])
+    skip_targets = {edge["target"] for edge in skips}
+    upsample_to_cat = [
+        edge for edge in graph["edges"]
+        if edge["target"] in skip_targets and edge not in skips
+    ]
+    assert upsample_to_cat, "decoder branch should still reach concat nodes"
+    assert all(edge["kind"] == "data" for edge in upsample_to_cat)

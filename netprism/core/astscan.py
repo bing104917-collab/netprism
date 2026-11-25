@@ -3005,7 +3005,19 @@ class _Runner:
         residual_flags: list[tuple[int, bool]] = []
         latest_producer = producer_set[-1] if producer_set else None
         if kind == "concat":
-            residual_flags = [(producer, False) for producer in producer_set]
+            # One input is the main decoder path (normally the latest
+            # producer); the other inputs are encoder skips.  Marking *all*
+            # concat inputs as skip made the upsampling path look like a
+            # skip connection.  A skip also needs matching spatial dims.
+            concat_dim = int(params.get("dim", 1) or 1)
+            residual_flags = [
+                (
+                    producer,
+                    producer != latest_producer
+                    and self._concat_skip_compatible(producer, node_index, out_shapes, concat_dim),
+                )
+                for producer in producer_set
+            ]
         elif kind == "add" and len(in_tensors) >= 2 and len(producer_set) >= 2:
             for producer in producer_set:
                 residual_flags.append((producer, producer != latest_producer))
@@ -3017,7 +3029,7 @@ class _Runner:
                 continue
             edge_kind = "residual" if is_residual else "data"
             label = ""
-            if kind == "concat":
+            if kind == "concat" and is_residual:
                 edge_kind = "skip"
                 label = "skip"
             elif is_residual:
@@ -3130,6 +3142,33 @@ class _Runner:
             ):
                 return True
         return False
+
+    def _concat_skip_compatible(
+        self,
+        producer: int,
+        target: int,
+        out_shapes: list[Shape],
+        dim: int,
+    ) -> bool:
+        """A concat branch is a real skip only when its non-concat dims match."""
+        if producer < 0 or target <= producer or producer >= len(self.nodes):
+            return False
+        source_shapes = self.nodes[producer].out_shapes or []
+        if not source_shapes or not out_shapes:
+            return False
+        source = source_shapes[0]
+        output = out_shapes[0]
+        if len(source) != len(output):
+            return False
+        normalized = dim if dim >= 0 else len(output) + dim
+        if normalized < 0 or normalized >= len(output):
+            return False
+        for index, (left, right) in enumerate(zip(source, output)):
+            if index == normalized:
+                continue
+            if left != right and left != -1 and right != -1:
+                return False
+        return True
 
     def _result_tensors(self, value: Any) -> list[_Tensor]:
         if value is None:
