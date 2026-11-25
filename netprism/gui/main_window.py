@@ -11,8 +11,8 @@ import os
 from pathlib import Path
 from typing import Any
 
-from PySide6.QtCore import QSignalBlocker, QSize, Qt, QSettings
-from PySide6.QtGui import QFont, QFontDatabase, QKeySequence, QShortcut
+from PySide6.QtCore import QSignalBlocker, QSize, Qt, QSettings, QTimer
+from PySide6.QtGui import QCursor, QFont, QFontDatabase, QGuiApplication, QKeySequence, QShortcut
 from PySide6.QtWidgets import (
     QApplication,
     QCheckBox,
@@ -781,6 +781,36 @@ class MainWindow(QMainWindow):
     def _show_error(self, title: str, message: str) -> None:
         self.statusBar().showMessage(f"{title}：{message}")
         QMessageBox.critical(self, title, message)
+
+    def showEvent(self, event) -> None:  # noqa: N802
+        super().showEvent(event)
+        if not getattr(self, "_screen_checked", False):
+            self._screen_checked = True
+            # Windows can restore a Qt window onto a disconnected/phantom
+            # monitor (or an off-screen position).  Check after the native
+            # window exists, then re-center on the screen under the cursor.
+            QTimer.singleShot(0, self.ensure_on_active_screen)
+
+    def ensure_on_active_screen(self) -> None:
+        """Keep the window reachable when Windows restores a bad position."""
+        if QGuiApplication.platformName() == "offscreen":
+            return
+        screen = QGuiApplication.screenAt(QCursor.pos()) or QGuiApplication.primaryScreen()
+        if screen is None:
+            return
+        available = screen.availableGeometry()
+        frame = self.frameGeometry()
+        intersection = available.intersected(frame)
+        if intersection.width() >= min(320, frame.width()) and intersection.height() >= min(220, frame.height()):
+            return
+        width = min(max(self.width(), 320), available.width())
+        height = min(max(self.height(), 240), available.height())
+        x = available.x() + (available.width() - width) // 2
+        y = available.y() + (available.height() - height) // 2
+        self.setGeometry(x, y, width, height)
+        self.raise_()
+        self.activateWindow()
+        self.statusBar().showMessage(f"窗口已移到当前屏幕：{screen.name()}")
 
     def closeEvent(self, event) -> None:  # noqa: N802
         worker = self.parse_worker

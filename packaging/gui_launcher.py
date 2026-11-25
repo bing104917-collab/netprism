@@ -16,6 +16,44 @@ import sys
 from pathlib import Path
 
 KNOWN_MODEL_SUFFIXES = {".py", ".pt", ".pth", ".onnx", ".keras", ".json"}
+_INSTANCE_NAME = f"NetPrismGUI-{os.environ.get('USERNAME', 'user')}"
+
+
+def _activate_existing_instance() -> bool:
+    """Raise the already-running native window instead of opening another one."""
+    from PySide6.QtNetwork import QLocalSocket
+
+    socket = QLocalSocket()
+    socket.connectToServer(_INSTANCE_NAME)
+    if not socket.waitForConnected(180):
+        return False
+    socket.write(b"activate")
+    socket.flush()
+    socket.waitForBytesWritten(250)
+    socket.disconnectFromServer()
+    return True
+
+
+def _install_raise_server(window) -> None:  # noqa: ANN001
+    from PySide6.QtNetwork import QLocalServer
+
+    server = QLocalServer(window)
+    QLocalServer.removeServer(_INSTANCE_NAME)
+    if not server.listen(_INSTANCE_NAME):
+        return
+    window._instance_server = server
+
+    def on_connection() -> None:
+        while server.hasPendingConnections():
+            connection = server.nextPendingConnection()
+            if connection is not None:
+                connection.deleteLater()
+        window.showNormal()
+        window.ensure_on_active_screen()
+        window.raise_()
+        window.activateWindow()
+
+    server.newConnection.connect(on_connection)
 
 
 def _safe_print(text: str) -> None:
@@ -50,6 +88,9 @@ def main(argv: list[str] | None = None) -> int:
         return 1
 
     app = create_application([sys.argv[0]])
+    if not smoke and _activate_existing_instance():
+        _safe_print("NetPrism is already running; raised the existing window.")
+        return 0
     window = MainWindow(load_demo=True)
     if not window.models:
         _safe_print("ERROR: built-in demo failed to load")
@@ -67,6 +108,8 @@ def main(argv: list[str] | None = None) -> int:
         return 0
 
     window.show()
+    if not smoke:
+        _install_raise_server(window)
     if args:
         target = Path(args[0]).expanduser()
         if target.exists() and (target.is_dir() or target.suffix.lower() in KNOWN_MODEL_SUFFIXES):
