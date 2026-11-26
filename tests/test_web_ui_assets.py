@@ -34,3 +34,11 @@ def test_web_toolbar_has_image_export() -> None:
     assert "_compositeLabels(" in scene
     main_js = (WEB / "js" / "main.js").read_text(encoding="utf-8")
     assert "exportCurrentImage" in main_js
+
+
+def test_concat_layers_render_as_a_plus_circle() -> None:
+    nodes_js = (WEB / "js" / "nodes.js").read_text(encoding="utf-8")
+    assert "function buildConcatVisual(" in nodes_js
+    assert 'item.kind === "concat"' in nodes_js
+    assert "TorusGeometry" in nodes_js
+    assert "CircleGeometry" in nodes_js

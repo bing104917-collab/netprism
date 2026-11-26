@@ -44,6 +44,12 @@
 >   3. **导出图片**：Web 顶栏新增「导出图片」按钮，按当前视角导出 1920px 宽 PNG（含分组标签/层标签，
 >      由 WebGL 画面 + CSS2D 标签合成）；EXE 同步重建（9.11 MB）。
 >   验证：全量 437 passed / 1 skipped；`ui_check.py` 真浏览器 `ok:true`；EXE 端树标题/导出均实测通过。
+>
+> - **2026-11-26 10:1x concat 改为圆形 ⊕ 节点**：`concat` 在 3D 里不再画成薄片，改为圆环 + 十字的
+>   **⊕ 圆形节点**（YZ 平面，青色），数据流和跳连的线都汇入这个圆；层列表仍显示 `Concat`。
+>   EXE 已重建（SHA256 `0A3A3682…`，桌面 `NetPrism.exe` 与 `算法解译\NetPrism.exe` 均已替换）。
+>   ⚠️ 正在运行的旧窗口仍加载旧 bundle（旧 exe 已改名为 `算法解译\NetPrism-old.exe`），
+>   **关掉旧窗口、重新双击新 `NetPrism.exe` 才能看到 ⊕**。
 
 新对话请先读本文件顶部的方向说明。GUI 时代那句“先检查桌面 EXE 的真实交互”已经过时；
 现在请先确认 `start_web.cmd` 能起服务、`scripts/ui_check.py` 浏览器验收通过。

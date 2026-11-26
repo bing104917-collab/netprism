@@ -131,6 +131,89 @@ function buildTensorVisual(item, group, materials, meshes, options = {}) {
   return mesh;
 }
 
+function buildConcatVisual(item, group, materials, meshes) {
+  // Concat is a junction, not a tensor slab: draw the conventional ⊕ symbol in
+  // the YZ plane so the two incoming lines (main path + skip) visibly meet it.
+  const color = new THREE.Color(item.color);
+  const channels = Math.max(1, Number(item.analysis?.c) || 1);
+  const radius = clamp(0.7 + 0.12 * Math.log2(channels), 0.85, 1.35);
+
+  const discMaterial = new THREE.MeshPhysicalMaterial({
+    color: brighten(color, 0.18),
+    emissive: color,
+    emissiveIntensity: 0.6,
+    transparent: true,
+    opacity: 0.5,
+    roughness: 0.24,
+    metalness: 0.18,
+    depthWrite: false,
+    side: THREE.DoubleSide,
+  });
+  const disc = new THREE.Mesh(new THREE.CircleGeometry(radius * 0.92, 40), discMaterial);
+  disc.rotation.y = Math.PI / 2;
+  disc.renderOrder = 2;
+  disc.userData.pick = { type: "node", id: item.id };
+  group.add(disc);
+  meshes.push(disc);
+  materials.push(discMaterial);
+
+  const rimMaterial = new THREE.MeshBasicMaterial({
+    color: brighten(color, 0.38),
+    transparent: true,
+    opacity: 0.92,
+    depthWrite: false,
+  });
+  const rim = new THREE.Mesh(
+    new THREE.TorusGeometry(radius, Math.max(0.028, radius * 0.055), 10, 44),
+    rimMaterial,
+  );
+  rim.rotation.y = Math.PI / 2;
+  rim.userData.pick = { type: "node", id: item.id };
+  rim.renderOrder = 3;
+  group.add(rim);
+  meshes.push(rim);
+  materials.push(rimMaterial);
+
+  // The plus of the ⊕ (bars in the YZ plane, slightly in front of the disc).
+  const plusMaterial = new THREE.MeshBasicMaterial({
+    color: brighten(color, 0.55),
+    transparent: true,
+    opacity: 0.96,
+    depthWrite: false,
+  });
+  const barLength = radius * 1.5;
+  const barThickness = Math.max(0.07, radius * 0.12);
+  const bars = [
+    new THREE.BoxGeometry(barThickness, barLength, barThickness),
+    new THREE.BoxGeometry(barThickness, barThickness, barLength),
+  ];
+  for (const geometry of bars) {
+    const bar = new THREE.Mesh(geometry, plusMaterial);
+    bar.renderOrder = 4;
+    bar.userData.pick = { type: "node", id: item.id };
+    group.add(bar);
+    meshes.push(bar);
+  }
+  materials.push(plusMaterial);
+
+  const glowMaterial = new THREE.MeshBasicMaterial({
+    color,
+    transparent: true,
+    opacity: 0.1,
+    blending: THREE.AdditiveBlending,
+    depthWrite: false,
+    side: THREE.DoubleSide,
+  });
+  const glow = new THREE.Mesh(new THREE.CircleGeometry(radius * 1.75, 32), glowMaterial);
+  glow.rotation.y = Math.PI / 2;
+  glow.position.x = -0.03;
+  glow.renderOrder = 1;
+  group.add(glow);
+  materials.push(glowMaterial);
+
+  return { radius, visualTop: radius * 1.15 };
+}
+
 function buildAttentionVisual(item, group, materials, meshes, big) {
   const heads = clamp(Math.round(Number(item.params.numHeads ?? item.params.heads ?? 4)) || 4, 1, 16);
   const baseMaterial = new THREE.MeshPhysicalMaterial({
@@ -344,6 +427,9 @@ function makeNodeGroup(item, layout, options) {
   } else if (item.kind === "ffn") {
     extra = buildFfnVisual(item, group, materials, meshes, big);
     visualTop = item.sy / 2;
+  } else if (item.kind === "concat") {
+    extra = buildConcatVisual(item, group, materials, meshes);
+    visualTop = extra.visualTop;
   } else {
     buildTensorVisual(item, group, materials, meshes, {
       big,
