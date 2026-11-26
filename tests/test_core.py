@@ -229,6 +229,50 @@ class TinyUNet(nn.Module):
         return self.head(x)
 '''
 
+TAIL_SKIP_SOURCE = '''
+import torch
+import torch.nn as nn
+
+
+class ConvBlock(nn.Module):
+    def __init__(self, cin, cout):
+        super().__init__()
+        self.net = nn.Sequential(
+            nn.Conv3d(cin, cout, 3, padding=1, bias=False),
+            nn.GroupNorm(8, cout),
+            nn.SiLU(),
+        )
+
+    def forward(self, x):
+        return self.net(x)
+
+
+class UpBlock(nn.Module):
+    def __init__(self, cin, cout):
+        super().__init__()
+        self.up = nn.ConvTranspose3d(cin, cout, 2, stride=2)
+        self.block = ConvBlock(cout, cout)
+
+    def forward(self, x, skip):
+        x = self.up(x)
+        x = self.block(x)
+        return torch.cat([x, skip], dim=1)
+
+
+class TailSkipNet(nn.Module):
+    def __init__(self):
+        super().__init__()
+        self.enc = ConvBlock(4, 8)
+        self.pool = nn.MaxPool3d(2)
+        self.mid = ConvBlock(8, 8)
+        self.up = UpBlock(8, 4)
+
+    def forward(self, x):
+        skip = self.enc(x)
+        y = self.mid(self.pool(skip))
+        return self.up(y, skip)
+'''
+
 DYNAMIC_SOURCE = '''
 import torch
 import torch.nn as nn
@@ -634,6 +678,40 @@ def test_unet_skip_edges_and_unet_groups(tmp_path: Path) -> None:
     _assert_schema(static)
     assert any(edge["kind"] == "skip" for edge in static["edges"])
     _assert_group_invariants(static)
+
+
+def test_trailing_concat_merge_is_promoted_out_of_the_group(tmp_path: Path) -> None:
+    """A decoder module's output concat belongs *after* the group.
+
+    ``UpBlock.forward`` ends with ``torch.cat([block(x), skip])``; the tensors only
+    line up after the block, so the concat must be laid out after the group box
+    (regression: it sat inside the group and skip arcs looked like they ended
+    before the decoder block).
+    """
+    path = _write(tmp_path, "tail_skip.py", TAIL_SKIP_SOURCE)
+    graph = analyze_file(
+        path, AnalyzeOptions(execute=False, input_shape=(1, 4, 8, 8, 8))
+    )[0]
+    _assert_schema(graph)
+
+    groups = {group["id"]: group for group in graph["groups"]}
+    root = graph["groups"][0]
+    up_group = next(group for group in graph["groups"] if group["name"] == "up")
+    cat = next(node for node in graph["nodes"] if node["kind"] == "concat")
+
+    assert cat["groupId"] == root["id"], "merge node should move to the parent group"
+    assert cat["id"] not in up_group["nodeIds"]
+    order = {node["id"]: index for index, node in enumerate(graph["nodes"])}
+    member_orders = [order[node_id] for node_id in up_group["nodeIds"] if node_id in order]
+    assert member_orders and max(member_orders) < order[cat["id"]]
+
+    skips = [edge for edge in graph["edges"] if edge["kind"] == "skip"]
+    assert len(skips) == 1
+    assert skips[0]["target"] == cat["id"]
+    source = next(node for node in graph["nodes"] if node["id"] == skips[0]["source"])
+    assert source["outShapes"][0] in cat["inShapes"]
+    assert not any(node["id"] in groups[up_group["id"]]["nodeIds"] for node in [cat])
+    _assert_group_invariants(graph)
 
 
 def test_hook_fallback_for_dynamic_control_flow(tmp_path: Path) -> None:

@@ -1,4 +1,4 @@
-﻿/* ==========================================================================
+/* ==========================================================================
    NetPrism 鈥?3D neural network prism
    Dark, glassy, luminous. No external assets.
    ========================================================================== */
@@ -477,6 +477,23 @@ kbd {
 
 .btn-upload.is-busy .icon {
   animation: spin 0.9s linear infinite;
+}
+
+.btn-export {
+  color: #e3f4ff;
+  border-color: rgba(148, 163, 184, 0.26);
+  background: rgba(15, 23, 39, 0.6);
+}
+
+.btn-export:hover {
+  border-color: rgba(103, 232, 249, 0.5);
+  background: rgba(22, 33, 52, 0.82);
+  box-shadow: 0 0 20px rgba(56, 189, 248, 0.12);
+}
+
+.btn-export .icon {
+  width: 15px;
+  height: 15px;
 }
 
 .icon-btn {

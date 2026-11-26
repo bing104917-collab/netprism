@@ -434,6 +434,11 @@ def build_groups(
     root["numParams"] = sum(node.num_params for node in nodes)
     root["flops"] = sum(node.flops for node in nodes)
 
+    _promote_trailing_merges(
+        nodes, node_ids, edges, groups, node_group_ids, parent_of_group, id_for_path
+    )
+    _recompute_group_totals(nodes, node_ids, groups)
+
     _relabel_aggregator_groups(groups)
     _disambiguate_labels(groups)
 
@@ -447,6 +452,113 @@ def build_groups(
                 )
             seen_nodes[node_id] = group["id"]
     return groups, node_group_ids, warnings
+
+
+def _promote_trailing_merges(
+    nodes: list[NodeSpec],
+    node_ids: list[str],
+    edges: list[EdgeSpec],
+    groups: list[dict],
+    node_group_ids: list[str | None],
+    parent_of_group: dict[str, str],
+    id_for_path: dict[str, str],
+) -> None:
+    """Move a group's trailing concat merge out into its parent group.
+
+    Decoder modules often end with ``torch.cat(block(x), skip)``.  That concat is
+    the module's output, so it only lines up *after* the module's layers; keeping
+    it inside the group box made skip arcs look like they ended before the
+    decoder block, and the layer tree listed the target before the block.  A
+    trailing concat that consumes a skip/residual from another group is promoted
+    to the parent group so it sits right after the group.
+    """
+    if not groups:
+        return
+    index_by_id = {node_id: index for index, node_id in enumerate(node_ids)}
+    group_by_id = {group["id"]: group for group in groups}
+    path_by_id = {group["id"]: group["name"] for group in groups}
+    root_id = groups[0]["id"]
+    incoming: dict[str, list[EdgeSpec]] = {}
+    for edge in edges:
+        incoming.setdefault(node_ids[edge.target], []).append(edge)
+    for index, node in enumerate(nodes):
+        if node.kind != "concat":
+            continue
+        group_id = node_group_ids[index]
+        if not group_id or group_id == root_id:
+            continue
+        group = group_by_id.get(group_id)
+        path = path_by_id.get(group_id)
+        if group is None or not path:
+            continue
+        members = [
+            index_by_id[node_id]
+            for node_id in group.get("nodeIds") or []
+            if node_id in index_by_id
+        ]
+        if not members or max(members) != index:
+            continue
+        external_merge = any(
+            edge.kind in ("skip", "residual")
+            and node_group_ids[edge.source] not in (None, group_id)
+            for edge in incoming.get(node_ids[index], [])
+        )
+        if not external_merge:
+            continue
+        parent_path = parent_of_group.get(path, "")
+        parent_id = id_for_path.get(parent_path, root_id) if parent_path else root_id
+        if not parent_id or parent_id == group_id:
+            continue
+        group["nodeIds"] = [
+            node_id for node_id in group.get("nodeIds") or [] if node_id != node_ids[index]
+        ]
+        parent_group = group_by_id.get(parent_id)
+        if parent_group is not None:
+            parent_nodes = parent_group.setdefault("nodeIds", [])
+            if node_ids[index] not in parent_nodes:
+                parent_nodes.append(node_ids[index])
+                parent_nodes.sort(key=lambda node_id: index_by_id.get(node_id, 0))
+        node_group_ids[index] = parent_id
+        node.group_id = parent_id
+
+
+def _recompute_group_totals(
+    nodes: list[NodeSpec],
+    node_ids: list[str],
+    groups: list[dict],
+) -> None:
+    """Recompute per-group params/FLOPs after memberships were adjusted."""
+    node_by_id = {node_id: node for node_id, node in zip(node_ids, nodes)}
+    group_by_id = {group["id"]: group for group in groups}
+    cache: dict[str, tuple[int, int]] = {}
+
+    def totals(group_id: str) -> tuple[int, int]:
+        if group_id in cache:
+            return cache[group_id]
+        group = group_by_id.get(group_id)
+        if group is None:
+            return (0, 0)
+        params = sum(
+            node_by_id[node_id].num_params
+            for node_id in group.get("nodeIds") or []
+            if node_id in node_by_id
+        )
+        flops = sum(
+            node_by_id[node_id].flops
+            for node_id in group.get("nodeIds") or []
+            if node_id in node_by_id
+        )
+        for child_id in group.get("childGroupIds") or []:
+            child_params, child_flops = totals(child_id)
+            params += child_params
+            flops += child_flops
+        cache[group_id] = (params, flops)
+        return cache[group_id]
+
+    for group in groups:
+        params, flops = totals(group["id"])
+        group["numParams"] = params
+        group["flops"] = flops
 
 
 _PLURAL_LABELS = {

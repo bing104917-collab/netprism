@@ -3,7 +3,7 @@
 import * as THREE from "three";
 import { createLabel } from "./labels.js";
 import {
-  kindColor, kindLabel, opSummary, escapeHtml, clamp, truncate, formatParamValue,
+  kindColor, kindLabel, opSummary, opName, opParams, escapeHtml, clamp, truncate, formatParamValue,
   groupShapeSummary,
 } from "./format.js";
 import { THIN_KINDS, defaultLabelVisible } from "./layout.js";
@@ -318,10 +318,11 @@ function addBoundaryRing(item, group, materials) {
 }
 
 function nodeLabelHtml(item) {
-  const summary = truncate(opSummary(item.node), 34);
+  const display = opName(item.node) || item.node.name || item.id;
+  const summary = truncate(opParams(item.node), 34);
   return (
     `<span class="nl-dot"></span>` +
-    `<span class="nl-name">${escapeHtml(item.node.name || item.id)}</span>` +
+    `<span class="nl-name">${escapeHtml(display)}</span>` +
     (summary ? `<span class="nl-sub">${escapeHtml(summary)}</span>` : "")
   );
 }

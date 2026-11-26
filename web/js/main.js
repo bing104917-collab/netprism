@@ -77,6 +77,7 @@ function boot() {
     onRetry: () => bootstrap(),
     onDemo: () => bootstrap({ forceDemo: true }),
     onStateAction: (action) => handleStateAction(action),
+    onExport: () => exportCurrentImage(),
   });
 
   try {
@@ -685,6 +686,31 @@ function handleStateAction(action) {
       break;
     default:
       break;
+  }
+}
+
+/* -------------------------------------------------------------------------- */
+/* Image export                                                               */
+/* -------------------------------------------------------------------------- */
+
+function exportCurrentImage() {
+  if (!scene) return;
+  const modelName = state.graph?.model?.name || "NetPrism";
+  try {
+    const dataUrl = scene.exportImage(1920);
+    if (!dataUrl || dataUrl.length < 128) throw new Error("画布为空");
+    const safeName =
+      String(modelName).replace(/[\\/:*?"<>|\s]+/g, "_").slice(0, 64) || "netprism";
+    const stamp = new Date().toISOString().slice(0, 19).replace(/[:T]/g, "-");
+    const anchor = document.createElement("a");
+    anchor.href = dataUrl;
+    anchor.download = `${safeName}-3D-${stamp}.png`;
+    document.body.appendChild(anchor);
+    anchor.click();
+    anchor.remove();
+    ui.toast("success", "已导出图片", `${modelName} · 3D 视图 PNG（1920px 宽）`, 4200);
+  } catch (error) {
+    ui.toast("error", "导出失败", error && error.message ? error.message : String(error), 6000);
   }
 }
 

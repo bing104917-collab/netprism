@@ -3,7 +3,7 @@
 import {
   EDGE_META, KIND_META, KIND_ORDER, edgeMeta, escapeHtml, formatCount, formatFlops,
   formatShape, formatShapeCompact, formatParamValue, groupMeta, kindColor, kindLabel,
-  modeMeta, opSummary, paramEntries, truncate, shapePills, formatInteger, clamp,
+  modeMeta, opSummary, opName, opParams, paramEntries, truncate, shapePills, formatInteger, clamp,
   activationMBValue, formatActivationMB, formatMacs, formatReceptiveField, frameworkMeta,
   isMetricNumber, modelMetricValue, nodeMetricValue, normalizeFramework,
 } from "./format.js";
@@ -47,6 +47,7 @@ export class UI {
       sourceText: document.querySelector("#source-badge .source-text"),
       uploadBtn: document.getElementById("upload-btn"),
       uploadLabel: document.querySelector("#upload-btn .upload-label"),
+      exportBtn: document.getElementById("export-btn"),
       fileInput: document.getElementById("file-input"),
       helpBtn: document.getElementById("help-btn"),
       wrap: document.getElementById("viewport")?.closest(".app"),
@@ -133,6 +134,8 @@ export class UI {
       if (this.el.uploadBtn.classList.contains("is-busy")) return;
       this.el.fileInput?.click();
     });
+
+    on(this.el.exportBtn, "click", () => this.callbacks.onExport?.());
 
     on(this.el.fileInput, "change", (event) => {
       const files = event.target.files;
@@ -632,18 +635,19 @@ export class UI {
     const renderNodeRow = (item) => {
       const node = item.node;
       const kind = item.kind;
-      const meta = groupMeta(this.groupById.get(item.groupId)?.kind || "");
-      const search = `${node.name} ${node.op} ${kindLabel(kind)} ${item.groupId || ""} ${node.tags?.join(" ") || ""}`.toLowerCase();
+      const display = opName(node) || item.id;
+      const detail = [node.name, opParams(node)].filter(Boolean).join(" · ");
+      const search = `${node.name} ${node.op} ${display} ${kindLabel(kind)} ${item.groupId || ""} ${node.tags?.join(" ") || ""}`.toLowerCase();
       const hidden = this.hiddenKinds.has(kind);
       return `
         <button class="tree-node${hidden ? " is-filtered" : ""}" type="button"
           data-node-id="${escapeHtml(item.id)}" data-kind="${escapeHtml(kind)}"
           data-search="${escapeHtml(search)}" style="--c:${kindColor(kind)}"
-          title="${escapeHtml(node.name)} · ${escapeHtml(node.op)}">
+          title="${escapeHtml(display)} · ${escapeHtml(node.name || "")}">
           <span class="tn-dot"></span>
           <span class="tn-main">
-            <span class="tn-name">${escapeHtml(node.name || item.id)}</span>
-            <span class="tn-sub">${escapeHtml(opSummary(node))}</span>
+            <span class="tn-name">${escapeHtml(display)}</span>
+            <span class="tn-sub">${escapeHtml(detail)}</span>
           </span>
           ${Number(node.numParams) > 0 ? `<span class="tn-params">${formatCount(node.numParams)}</span>` : ""}
         </button>`;
@@ -657,9 +661,15 @@ export class UI {
       const collapsed = this.collapsedGroups.has(key);
       const meta = groupMeta(group.kind);
       const body = [
-        ...direct.map(renderNodeRow),
-        ...childGroups.map((child) => renderGroup(child, depth + 1)),
-      ].join("");
+        ...direct.map((item) => ({ order: item.order, html: renderNodeRow(item) })),
+        ...childGroups.map((child) => ({
+          order: infoById.get(child.id)?.firstOrder ?? 1e9,
+          html: renderGroup(child, depth + 1),
+        })),
+      ]
+        .sort((a, b) => a.order - b.order)
+        .map((entry) => entry.html)
+        .join("");
       if (!body) return "";
       return `
         <section class="tree-group${collapsed ? " is-collapsed" : ""}" data-group-id="${escapeHtml(group.id)}">
@@ -1437,11 +1447,12 @@ export class UI {
             <button class="dc-nav-btn" type="button" data-nav="1" ${index >= layout.nodeCount - 1 ? "disabled" : ""} title="下一层 (→)">${icon("chevron")}</button>
           </span>
         </div>
-        <div class="dc-name">${escapeHtml(node.name || node.id)}</div>
+        <div class="dc-name">${escapeHtml(opName(node) || node.id)}</div>
         <div class="dc-meta-row">
           ${group ? `<span class="dc-meta-chip" style="--c:${groupMeta(group.kind).color}">${escapeHtml(this.groupDisplayLabel(group))}</span>` : `<span class="dc-meta-chip">未分组</span>`}
           <span class="dc-meta-chip">depth ${depth}</span>
           ${framework ? `<span class="dc-meta-chip framework-mini" data-framework="${escapeHtml(framework)}">${escapeHtml(frameworkInfo.label)}</span>` : ""}
+          ${node.name ? `<span class="dc-meta-chip" title="模块路径">${escapeHtml(node.name)}</span>` : ""}
           <span class="dc-meta-chip">${escapeHtml(node.id)}</span>
           ${node.tags?.includes("residual") ? `<span class="dc-meta-chip">残差合并</span>` : ""}
         </div>
@@ -1514,8 +1525,8 @@ export class UI {
         node.meta && typeof node.meta.semantic === "string" ? node.meta.semantic.trim() : "";
       html = `
         <div class="tt-head"><span class="tt-type" style="--c:${color}">层</span><span class="tt-kind">${escapeHtml(kindLabel(kind))}</span><span class="tt-name">${escapeHtml(node.id)}</span></div>
-        <div class="tt-title">${escapeHtml(node.name || node.id)}</div>
-        <div class="tt-sub">${escapeHtml(node.op)}${group ? ` · ${escapeHtml(this.groupDisplayLabel(group))}` : ""}</div>
+        <div class="tt-title">${escapeHtml(opName(node) || node.id)}</div>
+        <div class="tt-sub">${escapeHtml(node.name || "")}${group ? ` · ${escapeHtml(this.groupDisplayLabel(group))}` : ""}</div>
         ${semantic ? `<div class="tt-semantic">${escapeHtml(truncate(semantic, 180))}</div>` : ""}
         <div class="tt-shapes">
           <div class="tt-shape-row"><span class="tt-shape-k">IN</span><span class="tt-shape-pills">${this._ttPills(shapesIn)}</span></div>
@@ -1545,8 +1556,8 @@ export class UI {
       const dilation = params.dilation ?? "—";
       html = `
         <div class="tt-head"><span class="tt-type" style="--c:${color}">卷积核</span><span class="tt-kind">filter bank</span><span class="tt-name">${escapeHtml(node.id)}</span></div>
-        <div class="tt-title">${escapeHtml(node.name || node.id)}</div>
-        <div class="tt-sub">${escapeHtml(node.op)} · ${kH}×${kW} 卷积核网格</div>
+        <div class="tt-title">${escapeHtml(opName(node) || node.id)}</div>
+        <div class="tt-sub">${escapeHtml(node.name || "")} · ${kH}×${kW} 卷积核网格</div>
         <div class="tt-shapes">
           <div class="tt-shape-row"><span class="tt-shape-k">IN</span><span class="tt-shape-pills">${this._ttPills(node.inShapes || [])}</span></div>
           <div class="tt-shape-row"><span class="tt-shape-k">OUT</span><span class="tt-shape-pills">${this._ttPills(node.outShapes || [], true)}</span></div>

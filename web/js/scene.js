@@ -65,7 +65,8 @@ export class SceneManager {
       antialias: true,
       alpha: true,
       powerPreference: "high-performance",
-      preserveDrawingBuffer: false,
+      // Needed so "导出图片" can copy the frame into a 2D canvas reliably.
+      preserveDrawingBuffer: true,
     });
     this.renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.5));
     this.renderer.setClearColor(0x000000, 0);
@@ -548,6 +549,119 @@ export class SceneManager {
     this.labelRenderer.setSize(width, height);
     if (!this.userInteracted && this.layout) {
       this.fit({ instant: true });
+    }
+  }
+
+  /**
+   * Render the current view into a PNG data URL.
+   *
+   * The WebGL canvas is re-rendered at a higher pixel ratio and the CSS2D
+   * labels (which live in the DOM, not in the WebGL buffer) are composited on
+   * top, so the exported picture matches what is on screen.
+   */
+  exportImage(width = 1920) {
+    const cssWidth = Math.max(1, Math.round(this.container.clientWidth || 0));
+    const cssHeight = Math.max(1, Math.round(this.container.clientHeight || 0));
+    if (!cssWidth || !cssHeight) return "";
+    const scale = Math.max(1, Math.min(3, (Number(width) || 1920) / cssWidth));
+    const outWidth = Math.round(cssWidth * scale);
+    const outHeight = Math.round(cssHeight * scale);
+    const previousRatio = this.renderer.getPixelRatio();
+    const previousSize = new THREE.Vector2();
+    this.renderer.getSize(previousSize);
+    try {
+      this.renderer.setPixelRatio(scale);
+      this.renderer.setSize(cssWidth, cssHeight, false);
+      this.renderer.render(this.scene, this.camera);
+      const out = document.createElement("canvas");
+      out.width = outWidth;
+      out.height = outHeight;
+      const ctx = out.getContext("2d");
+      if (!ctx) return "";
+      const background = ctx.createLinearGradient(0, 0, outWidth, outHeight);
+      background.addColorStop(0, "#0d1b2e");
+      background.addColorStop(0.55, "#070d18");
+      background.addColorStop(1, "#160d25");
+      ctx.fillStyle = background;
+      ctx.fillRect(0, 0, outWidth, outHeight);
+      ctx.drawImage(this.renderer.domElement, 0, 0, outWidth, outHeight);
+      this._compositeLabels(ctx, outWidth / cssWidth);
+      return out.toDataURL("image/png");
+    } finally {
+      this.renderer.setPixelRatio(previousRatio);
+      this.renderer.setSize(previousSize.x, previousSize.y, false);
+      this.renderer.render(this.scene, this.camera);
+    }
+  }
+
+  _compositeLabels(ctx, scale) {
+    const layer = this.labelRenderer && this.labelRenderer.domElement;
+    if (!layer || !scale) return;
+    const layerRect = layer.getBoundingClientRect();
+    if (!layerRect.width || !layerRect.height) return;
+    const roundRect = (x, y, w, h, r) => {
+      const radius = Math.min(r, w / 2, h / 2);
+      ctx.beginPath();
+      ctx.moveTo(x + radius, y);
+      ctx.arcTo(x + w, y, x + w, y + h, radius);
+      ctx.arcTo(x + w, y + h, x, y + h, radius);
+      ctx.arcTo(x, y + h, x, y, radius);
+      ctx.arcTo(x, y, x + w, y, radius);
+      ctx.closePath();
+    };
+    for (const el of layer.children) {
+      if (!(el instanceof HTMLElement)) continue;
+      if (el.hidden || el.style.display === "none") continue;
+      const style = getComputedStyle(el);
+      if (style.visibility === "hidden" || Number(style.opacity) < 0.05) continue;
+      const rect = el.getBoundingClientRect();
+      if (rect.width < 2 || rect.height < 2) continue;
+      const x = (rect.left - layerRect.left) * scale;
+      const y = (rect.top - layerRect.top) * scale;
+      const w = rect.width * scale;
+      const h = rect.height * scale;
+      if (x + w < 0 || y + h < 0 || x > ctx.canvas.width || y > ctx.canvas.height) continue;
+      const accent = (el.style.getPropertyValue("--c") || "").trim() || "#67e8f9";
+      const radius = (el.classList.contains("group-tag") ? 7 : 6) * scale;
+      roundRect(x, y, w, h, radius);
+      const pill = ctx.createLinearGradient(x, y, x, y + h);
+      pill.addColorStop(0, "rgba(12, 21, 36, 0.94)");
+      pill.addColorStop(1, "rgba(6, 11, 20, 0.9)");
+      ctx.fillStyle = pill;
+      ctx.fill();
+      ctx.save();
+      ctx.globalAlpha = 0.45;
+      ctx.strokeStyle = accent;
+      ctx.lineWidth = Math.max(1, scale);
+      ctx.stroke();
+      ctx.restore();
+      ctx.save();
+      roundRect(x, y, w, h, radius);
+      ctx.clip();
+      for (const part of el.querySelectorAll(".nl-dot, .gt-dot, .nl-name, .nl-sub, .gt-name, .gt-meta")) {
+        const partRect = part.getBoundingClientRect();
+        if (partRect.width < 1 || partRect.height < 1) continue;
+        const px = (partRect.left - layerRect.left) * scale;
+        const py = (partRect.top - layerRect.top) * scale;
+        const pw = partRect.width * scale;
+        const ph = partRect.height * scale;
+        if (part.classList.contains("nl-dot") || part.classList.contains("gt-dot")) {
+          ctx.beginPath();
+          ctx.fillStyle = accent;
+          ctx.arc(px + pw / 2, py + ph / 2, Math.max(1, pw / 2), 0, Math.PI * 2);
+          ctx.fill();
+          continue;
+        }
+        const partStyle = getComputedStyle(part);
+        const fontSize = Math.max(6, parseFloat(partStyle.fontSize) || 9.5) * scale;
+        const family = partStyle.fontFamily || "system-ui, -apple-system, sans-serif";
+        ctx.font = `${partStyle.fontWeight || 600} ${fontSize}px ${family}`;
+        ctx.fillStyle = partStyle.color || "#c8d9ea";
+        ctx.textBaseline = "middle";
+        ctx.textAlign = "left";
+        ctx.fillText(part.textContent.trim(), px, py + ph / 2);
+      }
+      ctx.restore();
     }
   }
 

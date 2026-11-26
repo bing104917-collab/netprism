@@ -393,6 +393,64 @@ export function opSummary(node) {
   return outShape ? `${op} · ${formatShapeCompact(outShape)}` : op;
 }
 
+/** Human layer name: the operator/type, never the internal module index.
+ *
+ * ``net.0.0`` is a module path, not a layer name; the tree, the 3D labels and
+ * the detail panel use the operator name (``Conv3d``) as the title and keep the
+ * module path as secondary information.
+ */
+export function opName(node) {
+  if (!node) return "";
+  const raw = String(node.op || "").trim();
+  if (!raw) return kindLabel(node.kind) || node.name || node.id || "";
+  const short =
+    raw
+      .replace(/^(?:torch\.nn\.functional|torch\.nn|torch|functional|nn|F)\s*\.\s*/i, "")
+      .trim() || raw;
+  const known = {
+    cat: "Concat",
+    concat: "Concat",
+    stack: "Stack",
+    relu: "ReLU",
+    relu6: "ReLU6",
+    gelu: "GELU",
+    silu: "SiLU",
+    sigmoid: "Sigmoid",
+    softmax: "Softmax",
+    log_softmax: "LogSoftmax",
+    tanh: "TanH",
+    einsum: "Einsum",
+    matmul: "MatMul",
+    bmm: "BMM",
+    interpolate: "Interpolate",
+    upsample: "Upsample",
+    flatten: "Flatten",
+    reshape: "Reshape",
+    view: "View",
+    permute: "Permute",
+    transpose: "Transpose",
+    mean: "Mean",
+    sum: "Sum",
+    add: "Add",
+    mul: "Mul",
+    max: "Max",
+    min: "Min",
+  };
+  const mapped = known[short.toLowerCase()];
+  if (mapped) return mapped;
+  if (/^[a-z][a-z0-9_]*$/.test(short)) {
+    return short.charAt(0).toUpperCase() + short.slice(1);
+  }
+  return short;
+}
+
+/** Params-only tail of ``opSummary`` (everything after the operator name). */
+export function opParams(node) {
+  const summary = String(opSummary(node) || "");
+  const parts = summary.split(" · ");
+  return parts.length > 1 ? parts.slice(1).join(" · ") : "";
+}
+
 export function opDetail(node) {
   if (!node) return "";
   const p = node.params || {};

@@ -34,6 +34,16 @@
 >   最新生产者 = 主路径（data），只有形状兼容的较早分支 = skip。演示数据已重新扫描，
 >   新增 `test_trace_unetmini_marks_only_the_encoder_branch_as_skip` 与 `test_unet_skip_edges_and_unet_groups`
 >   的断言；全量测试 434 passed / 1 skipped。EXE 已重建并替换桌面副本。
+>
+> - **2026-11-26 09:0x 呈现补丁（用户截图反馈）**：
+>   1. **层名**：层列表 / 详情 / 3D 标签的主标题改为算子名（`Conv3d`、`GroupNorm`、`SiLU`、`Concat`…），
+>      模块路径（`net.0.0`）降到副标题/详情 meta 里 —— 不再把内部编号当名字。
+>   2. **跳连目标位置**：接收跳连的 concat 如果位于某个 group 的末尾，会提升到父 group，画在 group
+>      盒子的**后面**（静态与 trace 都生效）。原因是只有组输出之后的张量尺寸才和 encoder 特征一致，
+>      可以 cat；之前它被画在组内/组前，跳连看起来接错了。
+>   3. **导出图片**：Web 顶栏新增「导出图片」按钮，按当前视角导出 1920px 宽 PNG（含分组标签/层标签，
+>      由 WebGL 画面 + CSS2D 标签合成）；EXE 同步重建（9.11 MB）。
+>   验证：全量 437 passed / 1 skipped；`ui_check.py` 真浏览器 `ok:true`；EXE 端树标题/导出均实测通过。
 
 新对话请先读本文件顶部的方向说明。GUI 时代那句“先检查桌面 EXE 的真实交互”已经过时；
 现在请先确认 `start_web.cmd` 能起服务、`scripts/ui_check.py` 浏览器验收通过。
